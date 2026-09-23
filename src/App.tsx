@@ -40,7 +40,7 @@ type NavItem = {
 }
 
 const navItems: NavItem[] = [
-  { id: 'dashboard', label: 'Dashboard', icon: Grid2X2, path: '/dashboard' },
+  { id: 'dashboard', label: 'Dashboard', icon: Grid2X2, path: '/' },
   { id: 'experience', label: 'Experience', icon: BriefcaseBusiness, path: '/experience' },
   { id: 'projects', label: 'Projects', icon: Code2, path: '/projects' },
   { id: 'awards', label: 'Awards & Certs', icon: Award, path: '/awards-certs' },
@@ -138,24 +138,24 @@ function App() {
   }, [mobileOpen])
 
   const goTo = (id: SectionId) => {
-    const item = navItems.find(
-      (nav) => nav.id === id,
-    )
+  const item = navItems.find(
+    (nav) => nav.id === id,
+  )
 
-    if (!item) return
+  if (!item) return
 
-    if (window.location.pathname !== item.path) {
-      window.history.pushState({}, '', item.path)
-    }
-
-    setActive(id)
-    setMobileOpen(false)
-
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth',
-    })
+  if (window.location.pathname !== item.path) {
+    window.history.pushState({}, '', item.path)
   }
+
+  setActive(id)
+  setMobileOpen(false)
+
+  window.scrollTo({
+    top: 0,
+    behavior: 'smooth',
+  })
+}
 
   return (
     <div className="app">
