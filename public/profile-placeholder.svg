@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240">
+  <rect width="240" height="240" rx="24" fill="#e7edf6"/>
+  <rect x="22" y="22" width="196" height="196" rx="18" fill="#cbd8e9"/>
+  <circle cx="120" cy="91" r="42" fill="#7186a4"/>
+  <path d="M49 202c10-47 38-69 71-69s61 22 71 69" fill="#7186a4"/>
+  <text x="120" y="232" text-anchor="middle" font-size="11" fill="#506782">YOUR PHOTO</text>
+</svg>

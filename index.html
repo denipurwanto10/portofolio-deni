@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Personal portfolio of a full-stack developer" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/images/deni.png" />
+    <title>Deni Purwanto — Portfolio</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script>
+      // Terapkan mode gelap/terang tersimpan sebelum React render
+      // supaya tema tidak "flash" ke default dulu.
+      try {
+        var savedTheme = window.localStorage.getItem('portfolio-theme');
+        var theme =
+          savedTheme === 'light' || savedTheme === 'dark'
+            ? savedTheme
+            : window.matchMedia('(prefers-color-scheme: dark)').matches
+              ? 'dark'
+              : 'light';
+        document.documentElement.setAttribute('data-theme', theme);
+      } catch (e) {}
+    </script>
+    <script>
+      // Terapkan aksen tersimpan sebelum React render
+      // supaya warna tidak "flash" ke default dulu.
+      try {
+        var saved = window.localStorage.getItem('portfolio-accent');
+        var valid = ['default', 'ocean', 'emerald', 'violet', 'orange', 'rose'];
+        if (valid.indexOf(saved) !== -1) {
+          document.documentElement.setAttribute('data-accent', saved);
+        }
+      } catch (e) {}
+    </script>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
