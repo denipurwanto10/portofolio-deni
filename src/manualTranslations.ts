@@ -130,6 +130,7 @@ const translations: Record<string, string> = {
   'Sign-in failed. Please try again.': 'Gagal masuk. Silakan coba lagi.',
   'Sign-out failed. Please try again.': 'Gagal keluar. Silakan coba lagi.',
   'Message failed to send. Check Firestore rules and try again.': 'Pesan gagal dikirim. Periksa aturan Firestore dan coba lagi.',
+  'You': 'Anda',
   'Popup blocked by your browser. Please allow popups for this site and try again.': 'Popup diblokir oleh browser. Izinkan popup untuk situs ini lalu coba lagi.',
 
   // Experience

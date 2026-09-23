@@ -1361,14 +1361,14 @@ export default function LiveChat() {
           'auth/popup-blocked'
         ) {
           setAuthError(
-            'Popup diblokir oleh browser. Izinkan popup untuk situs ini lalu coba lagi.',
+            'Popup blocked by your browser. Please allow popups for this site and try again.',
           )
 
           return
         }
 
         setAuthError(
-          'Gagal masuk. Silakan coba lagi.',
+          'Sign-in failed. Please try again.',
         )
       } finally {
         setAuthBusy(false)
@@ -1384,7 +1384,7 @@ export default function LiveChat() {
         await logout()
       } catch {
         setAuthError(
-          'Gagal keluar. Silakan coba lagi.',
+          'Sign-out failed. Please try again.',
         )
       }
     }, [])
@@ -1482,7 +1482,7 @@ export default function LiveChat() {
         setReplyTo(null)
       } catch {
         setSendError(
-          'Pesan gagal dikirim. Periksa aturan Firestore dan coba lagi.',
+          'Message failed to send. Check Firestore rules and try again.',
         )
       } finally {
         setSending(false)
@@ -1611,7 +1611,7 @@ export default function LiveChat() {
                       profile,
                       '',
                     )}`
-                  : 'Ngobrol dengan saya secara langsung'}
+                  : 'Chat with me in realtime'}
               </span>
             </div>
 
@@ -1728,7 +1728,7 @@ export default function LiveChat() {
                       <div className="chat-bubble">
                         <span className="chat-name">
                           {mine
-                            ? `${displayName} (Anda)`
+                            ? `${displayName} (You)`
                             : displayName}
                         </span>
 
@@ -1747,7 +1747,7 @@ export default function LiveChat() {
                               {message
                                 .replyTo
                                 .text ||
-                                ' (pesan dihapus)'}
+                                ' (message deleted)'}
                             </em>
                           </span>
                         )}
@@ -1778,8 +1778,8 @@ export default function LiveChat() {
                             aria-label={`Reply to ${displayName}`}
                             title={
                               user
-                                ? 'Balas'
-                                : 'Masuk untuk membalas'
+                                ? 'Reply'
+                                : 'Sign in to reply'
                             }
                           >
                             <Reply
@@ -1825,8 +1825,8 @@ export default function LiveChat() {
             <div className="chat-guest-bar">
               <p>
                 {authBusy
-                  ? 'Membuka proses masuk Google...'
-                  : 'Masuk untuk bergabung dalam percakapan.'}
+                  ? 'Opening Google sign-in...'
+                  : 'Sign in to join the conversation.'}
               </p>
 
               <button
@@ -1871,8 +1871,8 @@ export default function LiveChat() {
                 </span>
 
                 {authBusy
-                  ? 'Sedang masuk...'
-                  : 'Masuk dengan Google'}
+                  ? 'Signing in...'
+                  : 'Sign in with Google'}
               </button>
             </div>
           ) : (
@@ -1887,13 +1887,13 @@ export default function LiveChat() {
                       }
 
                       {replyTargetMissing
-                        ? ' (pesan asli tidak dimuat)'
+                        ? ' (original message not loaded)'
                         : ''}
                     </strong>
 
                     <span>
                       {replyTo.text ||
-                        ' (pesan dihapus)'}
+                        ' (message deleted)'}
                     </span>
                   </div>
 
@@ -1933,7 +1933,7 @@ export default function LiveChat() {
                   placeholder={
                     replyTo
                       ? `Reply to ${replyTo.name}...`
-                      : 'Ketik pesan...'
+                      : 'Type a message...'
                   }
                   maxLength={500}
                   aria-label="Type a message"
