@@ -680,83 +680,6 @@ const GITHUB_STATS_CACHE_KEY =
  * never shows 0 by mistake when the network and
  * the local cache both fail.
  */
-const FALLBACK_TOTAL = 170
-const FALLBACK_AS_OF = 'Sep 23, 2026'
-
-/*
- * Real calendar snapshot from the official
- * contributions data, Sep 21 2025 → Sep 23 2026.
- * Rendered only when the live calendar and the
- * local cache are both unavailable, labelled
- * with FALLBACK_AS_OF so it never pretends to
- * be fresh. Encoded as [count, level, days]
- * runs to stay compact.
- */
-const FALLBACK_CALENDAR_START = '2025-09-21'
-
-const FALLBACK_CALENDAR_RUNS: Array<
-  [count: number, level: number, days: number]
-> = [
-  [0, 0, 3], [2, 1, 1], [0, 0, 4],
-  [5, 2, 1], [0, 0, 54], [4, 1, 1],
-  [0, 0, 12], [1, 1, 1], [0, 0, 24],
-  [2, 1, 1], [0, 0, 1], [2, 1, 1],
-  [0, 0, 2], [1, 1, 1], [0, 0, 2],
-  [1, 1, 1], [0, 0, 28], [8, 2, 1],
-  [0, 0, 3], [3, 1, 1], [7, 2, 1],
-  [13, 3, 1], [8, 2, 1], [2, 1, 1],
-  [5, 2, 1], [0, 0, 10], [1, 1, 1],
-  [0, 0, 13], [2, 1, 1], [0, 0, 47],
-  [12, 3, 1], [15, 4, 1], [0, 0, 31],
-  [2, 1, 1], [2, 1, 1], [0, 0, 1],
-  [4, 1, 1], [0, 0, 57], [3, 1, 1],
-  [5, 2, 1], [3, 1, 1], [4, 1, 1],
-  [0, 0, 19], [2, 1, 1], [0, 0, 8],
-  [3, 1, 1], [0, 0, 4], [1, 1, 1],
-  [0, 0, 3], [3, 1, 1], [1, 1, 1],
-  [2, 1, 1], [2, 1, 1], [0, 0, 1],
-  [2, 1, 1], [8, 2, 1], [0, 0, 1],
-  [1, 1, 1], [18, 4, 1], [10, 3, 1],
-  [0, 0, 2],
-]
-
-function buildFallbackContributions(): GithubContribution[] {
-  const [year, month, day] =
-    FALLBACK_CALENDAR_START.split('-').map(
-      Number,
-    )
-
-  const cursor = new Date(
-    Date.UTC(year, month - 1, day),
-  )
-
-  const contributions: GithubContribution[] =
-    []
-
-  FALLBACK_CALENDAR_RUNS.forEach(
-    ([count, level, days]) => {
-      for (let i = 0; i < days; i++) {
-        contributions.push({
-          date: cursor
-            .toISOString()
-            .slice(0, 10),
-          count,
-          level:
-            level as GithubContribution['level'],
-        })
-
-        cursor.setUTCDate(
-          cursor.getUTCDate() + 1,
-        )
-      }
-    },
-  )
-
-  return contributions
-}
-
-const FALLBACK_CONTRIBUTIONS =
-  buildFallbackContributions()
 
 type GithubStats = {
   total: number | null
@@ -892,7 +815,7 @@ function loadCachedGithubStats():
       asOf:
         typeof parsed.asOf === 'string'
           ? parsed.asOf
-          : FALLBACK_AS_OF,
+          : new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
     }
   } catch {
     return null
@@ -1043,82 +966,28 @@ async function fetchGithubContributions(): Promise<{
   contributions: GithubContribution[]
   streakContributions: GithubContribution[]
 }> {
-  try {
-    // Keep the visible calendar as the last-year calendar, but calculate
-    // the longest streak from the full contribution history, matching
-    // Streak Stats' default behavior (account history, not just one year).
-    const lastYear = await fetchContributionYear('last')
+  // Request only the last-year dataset. The previous implementation made
+  // one request for every year since 2008, which triggered HTTP 429 rate
+  // limits and was unnecessary for the visible contribution calendar.
+  const lastYear = await fetchContributionYear('last')
 
-    const currentYear = new Date().getUTCFullYear()
-    const years = Array.from(
-      { length: currentYear - 2008 + 1 },
-      (_, index) => String(2008 + index),
-    )
-
-    const historical = await Promise.allSettled(
-      years.map((year) => fetchContributionYear(year)),
-    )
-
-    const allContributions = historical.flatMap((result) =>
-      result.status === 'fulfilled' ? result.value.contributions : [],
-    )
-
-    const uniqueByDate = new Map<string, GithubContribution>()
-    for (const item of allContributions) {
-      uniqueByDate.set(item.date, item)
-    }
-
-    // Include the current last-year response as the freshest copy for
-    // overlapping dates. This also handles APIs that return a partial year.
-    for (const item of lastYear.contributions) {
-      uniqueByDate.set(item.date, item)
-    }
-
-    const streakContributions = [...uniqueByDate.values()].sort(
-      (a, b) => a.date.localeCompare(b.date),
-    )
-
-    if (lastYear.contributions.length) {
-      const total =
-        typeof lastYear.total === 'number'
-          ? lastYear.total
-          : lastYear.contributions.reduce(
-              (sum, item) => sum + item.count,
-              0,
-            )
-
-      return {
-        total,
-        contributions: lastYear.contributions,
-        streakContributions,
-      }
-    }
-  } catch {
-    // Fall through to the official calendar proxy below.
+  if (!lastYear.contributions.length) {
+    throw new Error('GitHub returned no contribution data')
   }
 
-  const target = encodeURIComponent(
-    `https://github.com/users/${GITHUB_USERNAME}/contributions`,
-  )
-
-  const proxyResponse = await fetch(
-    `https://api.allorigins.win/raw?url=${target}`,
-  )
-
-  if (!proxyResponse.ok) {
-    throw new Error('Failed to fetch GitHub contributions')
-  }
-
-  const html = await proxyResponse.text()
-  const parsed = parseGithubContributionsPage(html)
-
-  if (!parsed.contributions.length) {
-    throw new Error('Invalid GitHub contribution response')
-  }
+  const total =
+    typeof lastYear.total === 'number'
+      ? lastYear.total
+      : lastYear.contributions.reduce(
+          (sum, item) => sum + item.count,
+          0,
+        )
 
   return {
-    ...parsed,
-    streakContributions: parsed.contributions,
+    total,
+    contributions: lastYear.contributions,
+    // Calculate streaks only from real data returned by GitHub.
+    streakContributions: lastYear.contributions,
   }
 }
 
@@ -1198,23 +1067,8 @@ function GithubContributions() {
             fresh.streakContributions,
           )
 
-        // Match the exact Streak Stats service used by the reference URL.
-        // Fall back to the local GitHub contribution calculation if the
-        // service is temporarily unavailable.
-        let freshStreak = calculatedStreak
-        try {
-          const exactStreak =
-            await fetchExactStreakStats()
-
-          if (exactStreak) {
-            freshStreak = exactStreak
-          }
-        } catch (streakError) {
-          console.warn(
-            'Streak Stats unavailable; using local GitHub calculation.',
-            streakError,
-          )
-        }
+        // Use only the locally calculated streak from real GitHub data.
+        const freshStreak = calculatedStreak
 
         setContributions(
           fresh.contributions,
@@ -1275,58 +1129,31 @@ function GithubContributions() {
    * longest streak from the same daily calendar —
    * so they always match github.com/denipurwanto10.
    */
-  const displayTotal =
-    total !== null && total > 0
-      ? total
-      : FALLBACK_TOTAL
+  const displayTotal = total ?? 0
 
   const displayStreak =
-    longestStreak !== null
-      ? longestStreak
-      : calculateLongestStreak(
-          contributions.length > 0
-            ? contributions
-            : FALLBACK_CONTRIBUTIONS,
-        )
+    longestStreak ?? { length: 0, start: null, end: null }
 
   const streakRange =
     displayStreak.start && displayStreak.end
       ? `${formatGithubDate(displayStreak.start)} – ${formatGithubDate(displayStreak.end)}`
       : null
 
-  const showFallbackAsOf =
-    !(total !== null && total > 0) &&
-    !cacheLabel
-
-  const asOfLabel =
-    cacheLabel ??
-    (showFallbackAsOf
-      ? FALLBACK_AS_OF
-      : null)
-
-  const showAsOf =
-    isStale || showFallbackAsOf
+  const asOfLabel = cacheLabel
+  const showAsOf = isStale && Boolean(asOfLabel)
 
   /*
    * The graph renders from live data, cache, or the
    * bundled snapshot — in that order — so it is
    * never empty just because one source failed.
    */
-  const graphContributions =
-    contributions.length > 0
-      ? contributions
-      : FALLBACK_CONTRIBUTIONS
-
-  const usingFallbackGraph =
-    contributions.length === 0
+  const graphContributions = contributions
+  const usingFallbackGraph = contributions.length === 0
 
   const calendarFailed =
     calendarError && usingFallbackGraph
 
-  const graphAsOf =
-    usingFallbackGraph && !cacheLabel
-      ? FALLBACK_AS_OF
-      : (cacheLabel ?? null)
+  const graphAsOf = cacheLabel ?? null
 
   const weeks =
     buildContributionWeeks(
