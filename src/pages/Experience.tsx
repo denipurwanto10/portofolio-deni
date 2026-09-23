@@ -70,7 +70,7 @@ function ExperienceDetails({
         onClick={() => setOpen((value) => !value)}
         aria-expanded={open}
       >
-        {open ? 'Sembunyikan Detail' : 'Lihat Detail Pencapaian'}
+        {open ? 'Hide Achievement Details' : 'View Achievement Details'}
         <ChevronUp className={open ? '' : 'is-closed'} size={18} />
       </button>
 
@@ -99,7 +99,7 @@ function Experience() {
         <SectionTitle
           icon={<BriefcaseBusiness />}
           title="Experience"
-          subtitle="Perjalanan karir, organisasi, dan peran kepemimpinan."
+          subtitle="Career journey, organizations, and leadership roles."
         />
 
         <div className="experience-list">

@@ -50,7 +50,7 @@ export const projects: Project[] = [
     category: 'Desktop & AI',
   },
   {
-    title: 'Portal UMKM Kabupaten Bandung',
+    title: 'Bandung Regency MSME Portal',
     description:
       'An MSME census app with an interactive map across 31 districts — catalog with filters, MSME details, Owner/Admin dashboards, verification, PDF export, and JWT login with Admin/Owner RBAC.',
     tags: ['React', 'Node.js', 'Express', 'MySQL', 'Leaflet', 'JWT'],
@@ -69,7 +69,7 @@ export const projects: Project[] = [
     category: 'Frontend',
   },
   {
-    title: 'Gudang.in — Inventaris & Aset Kantor',
+    title: 'Gudang.in — Office Inventory & Assets',
     description:
       'A Laravel inventory system — multi-warehouse, automatic in/out/transfer stock flow, loan requests with approval flow, barcode/QR codes with camera scanning, maintenance, notifications, and Excel reports.',
     tags: ['Laravel 11', 'MySQL', 'Blade', 'Tailwind', 'Alpine.js', 'Chart.js'],
@@ -78,7 +78,7 @@ export const projects: Project[] = [
     category: 'Backend',
   },
   {
-    title: 'Wisma Reservasi — Hotel Management',
+    title: 'Wisma Reservasi — Hotel Management System',
     description:
       'A professional PMS-style hotel management app — 5 roles, booking calendar, housekeeping, multi-payment with automatic invoices, promos, loyalty points, guest reviews, and an installable PWA.',
     tags: ['Next.js', 'MySQL', 'PWA', 'Role-Based Access'],
@@ -87,7 +87,7 @@ export const projects: Project[] = [
     category: 'Full-Stack',
   },
   {
-    title: 'Pasarku — E-Commerce Multi Penjual',
+    title: 'Pasarku — Multi-Vendor E-Commerce',
     description:
       'A multi-seller Laravel marketplace — buyers (catalog, search/filter, cart, checkout, order history) and sellers (store dashboard, product CRUD with images, order status management).',
     tags: ['Laravel 11', 'MySQL', 'Tailwind CSS'],
@@ -96,7 +96,7 @@ export const projects: Project[] = [
     category: 'Backend',
   },
   {
-    title: 'Absensi App',
+    title: 'Attendance App',
     description:
       'A web-based employee attendance app — login and logout, dashboard, user and department management, clock-in and clock-out, attendance history, and reports.',
     tags: ['Laravel', 'PHP', 'MySQL', 'Bootstrap'],

@@ -267,7 +267,7 @@ function Awards() {
                     <span>CERTS</span>
                     <i />
                     <CalendarDays size={14} />
-                    June 2026
+                    <span className="award-date">June 2026</span>
                   </div>
 
                   <h3>

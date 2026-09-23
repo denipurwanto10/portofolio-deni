@@ -3689,6 +3689,35 @@ a {
 }
 
 @media (max-width: 480px) {
+  .now-card {
+    padding: 16px;
+  }
+
+  .now-header {
+    gap: 6px;
+  }
+
+  .now-title {
+    gap: 6px;
+  }
+
+  .now-title strong {
+    font-size: 19px;
+  }
+
+  .now-title span {
+    font-size: 10px;
+  }
+
+  .now-date {
+    font-size: 9px;
+    gap: 6px;
+  }
+
+  .now-content {
+    font-size: 12.5px;
+  }
+
   .experience-card {
     padding: 14px;
   }
@@ -3904,22 +3933,41 @@ a {
 }
 
 .award-meta {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 7px;
+  height: 18px;
+  min-height: 18px;
   color: var(--text-secondary);
   font-size: 13px;
+  line-height: 18px;
+  vertical-align: middle;
 }
 
 .award-meta span {
+  display: inline-flex;
+  align-items: center;
+  height: 18px;
   color: var(--text-secondary);
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.09em;
+  line-height: 18px;
+}
+
+.award-meta .award-date {
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: normal;
+  line-height: 18px;
+  white-space: nowrap;
 }
 
 .award-meta i {
+  display: block;
+  flex: 0 0 4px;
   width: 4px;
   height: 4px;
   border-radius: 50%;
@@ -3927,6 +3975,10 @@ a {
 }
 
 .award-meta svg {
+  display: block;
+  flex: 0 0 auto;
+  width: 14px;
+  height: 14px;
   color: var(--text-secondary);
 }
 
@@ -5219,9 +5271,36 @@ a {
     max-width: 100%;
   }
 
+  .now-title {
+    min-width: 0;
+    flex: 1 1 auto;
+    flex-wrap: nowrap;
+    align-items: baseline;
+    gap: 7px;
+  }
+
+  .now-title strong {
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+
+  .now-title span {
+    flex: 0 1 auto;
+    min-width: 0;
+    white-space: nowrap;
+  }
+
+  .now-date {
+    flex: 0 0 auto;
+    max-width: none;
+    white-space: nowrap;
+  }
+
   .now-content {
-    overflow-wrap: anywhere;
-    word-break: break-word;
+    max-width: 100%;
+    overflow-wrap: normal;
+    word-break: normal;
+    white-space: normal;
   }
 
   .time-main {
@@ -7119,4 +7198,183 @@ html[data-theme-transition] *::after {
     transform;
   transition-duration: 300ms;
   transition-timing-function: ease;
+}
+
+/* =========================
+   LANGUAGE TOGGLE
+   Segmented control "ID | EN" di dalam kartu
+   profil sidebar (bukan tombol mengambang lagi).
+========================= */
+
+.lang-toggle {
+  display: inline-flex;
+  margin: 12px auto 0;
+  padding: 3px;
+  border: 1px solid var(--border-soft);
+  border-radius: 999px;
+  background: var(--bg-page);
+  gap: 2px;
+}
+
+.lang-toggle-btn {
+  min-width: 44px;
+  padding: 5px 12px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1.2;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+.lang-toggle-btn:hover {
+  color: var(--text-primary);
+}
+
+.lang-toggle-btn.active {
+  background: var(--accent);
+  color: var(--accent-contrast);
+}
+
+/* =========================
+   GOOGLE TRANSLATE — perbaikan tampilan
+   Widget bawaan Google (toolbar atas, tooltip highlight
+   kuning, iframe combo box) disembunyikan total karena
+   bahasa dikendalikan lewat .lang-toggle di atas. Tanpa ini,
+   tampilan versi Bahasa Indonesia jadi tidak rapi/tidak
+   responsive (ada bar putih di atas, kotak sorotan, dsb).
+========================= */
+
+.goog-te-banner-frame,
+.goog-te-gadget-icon,
+.goog-te-gadget,
+.goog-te-gadget-simple,
+#google_translate_element,
+iframe.skiptranslate,
+iframe.goog-te-banner-frame,
+iframe.goog-te-menu-frame,
+#goog-gt-tt,
+.goog-tooltip,
+.goog-tooltip:hover,
+.goog-te-balloon-frame,
+.goog-te-ftab,
+.goog-te-ftab-float,
+.goog-te-spinner-pos,
+.goog-te-spinner-animation,
+[id^=":"] {
+  display: none !important;
+  visibility: hidden !important;
+  width: 0 !important;
+  height: 0 !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* Ikon "loading" bulat yang sempat muncul beberapa saat saat Google
+   Translate mulai bekerja (biasanya nempel fixed di pojok kiri atas
+   viewport, menimpa avatar/sidebar) juga masuk kategori ini — Google
+   menempelkannya langsung sebagai child <body>, bukan di dalam
+   #google_translate_element, sehingga harus ditarget terpisah. */
+body > .skiptranslate,
+body > iframe[src*="translate.google"],
+body > div[style*="z-index: 2147483647"] {
+  display: none !important;
+  visibility: hidden !important;
+}
+
+.goog-text-highlight {
+  background: none !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+/* Google menyuntikkan style ini langsung ke elemen <body> untuk
+   memberi ruang toolbar atas — kita paksa balik ke 0 supaya layout
+   (termasuk sidebar & tombol chat yang position:fixed) tidak geser
+   atau menyisakan jarak putih di mobile. */
+html body {
+  top: 0 !important;
+  position: static !important;
+  min-height: 100dvh !important;
+}
+
+/* Google membungkus teks yang diterjemahkan dengan <font>. Elemen
+   ini inline secara default, tapi dipaksa agar tidak pernah membuat
+   label/tombol pendek jadi meluber saat versi Indonesia lebih
+   panjang dari bahasa aslinya. */
+font {
+  overflow-wrap: anywhere;
+}
+
+/* Label navigasi & judul profil: boleh membungkus ke baris baru
+   alih-alih meluber keluar sidebar saat diterjemahkan (mis. "Full
+   Stack Developer" -> "Pengembang Tumpukan Penuh"). */
+.nav-item span,
+.profile h2,
+.profile p {
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+/* =========================
+   ERROR BOUNDARY (fallback)
+========================= */
+
+.error-boundary {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: var(--bg-page);
+  color: var(--text-primary);
+}
+
+.error-boundary-card {
+  max-width: 360px;
+  text-align: center;
+  padding: 28px 22px;
+  border: 1px solid var(--border-soft);
+  border-radius: 16px;
+  background: var(--bg-surface);
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+}
+
+.error-boundary-card h2 {
+  margin: 0 0 8px;
+  font-size: 17px;
+}
+
+.error-boundary-card p {
+  margin: 0 0 18px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.error-boundary-card button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 0;
+  border-radius: 10px;
+  padding: 10px 18px;
+  background: var(--accent);
+  color: var(--accent-contrast);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+
+/* Desktop dashboard: hide the "What's this?" helper text. */
+@media (min-width: 769px) {
+  .now-whats-this {
+    display: none !important;
+  }
 }

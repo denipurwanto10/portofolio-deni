@@ -84,7 +84,7 @@ function ThemeToggle() {
       role="switch"
       aria-checked={isDark}
       aria-label={
-        isDark ? 'Switch to light mode' : 'Switch to dark mode'
+        isDark ? 'Beralih ke mode terang' : 'Beralih ke mode gelap'
       }
       title={isDark ? 'Light mode' : 'Dark mode'}
       onClick={() => {

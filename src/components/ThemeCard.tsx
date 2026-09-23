@@ -203,8 +203,8 @@ function ThemePicker() {
         aria-expanded={open}
         aria-label={
           open
-            ? 'Close theme picker'
-            : 'Open theme picker'
+            ? 'Tutup pemilih tema'
+            : 'Buka pemilih tema'
         }
         title="Theme"
       >

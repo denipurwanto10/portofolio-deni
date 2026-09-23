@@ -21,6 +21,8 @@ import Blog from './pages/Blog'
 import Contact from './pages/Contact'
 import LiveChat from './components/LiveChat'
 import ThemeToggle from './components/ThemeToggle'
+import LanguageToggle from './components/LanguageToggle'
+import { useManualTranslation } from './manualTranslations'
 
 type SectionId =
   | 'dashboard'
@@ -55,6 +57,7 @@ const pathToSection: Record<string, SectionId> = Object.fromEntries(
 )
 
 function App() {
+  useManualTranslation()
   const [active, setActive] = useState<SectionId>(() => {
     if (typeof window === 'undefined') {
       return 'dashboard'
@@ -208,9 +211,13 @@ function App() {
             <span className="status-dot" />
           </div>
 
-          <h2>Deni Purwanto</h2>
+          <h2 className="notranslate" translate="no">
+            Deni Purwanto
+          </h2>
 
           <p>Full Stack Developer</p>
+
+          <LanguageToggle />
         </div>
 
         <div className="menu-label">
@@ -252,7 +259,9 @@ function App() {
             DESIGNED & BUILT BY
           </strong>
 
-          <span>Deni Purwanto</span>
+          <span className="notranslate" translate="no">
+            Deni Purwanto
+          </span>
 
           <small>
             © 2026 All Rights Reserved.
@@ -293,7 +302,7 @@ function App() {
             type="button"
             className="mobile-header-menu"
             onClick={() => setMobileOpen((value) => !value)}
-            aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
+            aria-label={mobileOpen ? 'Tutup menu' : 'Buka menu'}
             aria-expanded={mobileOpen}
           >
             {mobileOpen ? <X size={20} strokeWidth={2.2} /> : (

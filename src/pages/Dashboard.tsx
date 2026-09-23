@@ -652,7 +652,7 @@ function NowCard() {
         <div className="now-title">
           <strong>Now</strong>
 
-          <span>what's this?</span>
+          <span className="now-whats-this">What's this?</span>
         </div>
 
         <div className="now-date">
@@ -1263,7 +1263,7 @@ function GithubContributions() {
             <h2>
               {loading
                 ? 'GitHub contributions'
-                : `${displayTotal} contributions`}
+                : `${animatedTotal.toLocaleString('en-US')} contributions`}
             </h2>
 
             <a
@@ -1398,7 +1398,7 @@ function GithubContributions() {
               <span className="legend-box level-3" />
               <span className="legend-box level-4" />
 
-              <span>More</span>
+              <span>Lebih banyak</span>
             </div>
           </div>
         </>
