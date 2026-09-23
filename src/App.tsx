@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { ElementType } from 'react'
 import {
   Award,
@@ -80,6 +80,21 @@ function App() {
     window.scrollTo(0, 0)
   }, [])
 
+  // Konten halaman diganti seketika (key={active}), jadi scroll ke atas
+  // juga harus seketika dan sebelum paint. Sebelumnya memakai smooth
+  // scroll, sehingga halaman baru muncul di posisi lama lalu "meluncur"
+  // ke atas bersamaan dengan animasi fade-in — terasa patah-patah.
+  const firstRender = useRef(true)
+
+  useLayoutEffect(() => {
+    if (firstRender.current) {
+      firstRender.current = false
+      return
+    }
+
+    window.scrollTo(0, 0)
+  }, [active])
+
 
   useEffect(() => {
     const onPopState = () => {
@@ -151,10 +166,14 @@ function App() {
   setActive(id)
   setMobileOpen(false)
 
-  window.scrollTo({
-    top: 0,
-    behavior: 'smooth',
-  })
+  // Pindah halaman: scroll ke atas ditangani useLayoutEffect di atas.
+  // Klik menu halaman yang sedang aktif: smooth scroll ke atas.
+  if (id === active) {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    })
+  }
 }
 
   return (

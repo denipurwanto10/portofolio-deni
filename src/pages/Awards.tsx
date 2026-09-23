@@ -15,6 +15,10 @@ import {
 import { createPortal } from 'react-dom'
 import SectionTitle from '../components/SectionTitle'
 
+// Harus sama dengan durasi animasi keluar modal di styles.css
+// (--modal-exit), supaya modal tidak terpotong saat ditutup.
+const MODAL_EXIT_MS = 200
+
 type AwardItem = {
   image: string
   title: string
@@ -99,7 +103,7 @@ function Awards() {
         setSelectedIndex(null)
         setLeaving(false)
       },
-      220,
+      MODAL_EXIT_MS,
     )
   }, [selectedIndex, leaving])
 
@@ -492,7 +496,11 @@ function Awards() {
       {selectedAward &&
         createPortal(
           <div
-            className="award-modal"
+            className={
+              leaving
+                ? 'award-modal is-leaving'
+                : 'award-modal'
+            }
             onClick={closeModal}
             role="dialog"
             aria-modal="true"

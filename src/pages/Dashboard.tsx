@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import {
   Github,
@@ -13,6 +13,10 @@ import {
   useCountUp,
   useInView,
 } from '../hooks/useMotion'
+
+// Harus sama dengan durasi animasi keluar modal di styles.css
+// (--modal-exit), supaya modal tidak terpotong saat ditutup.
+const MODAL_EXIT_MS = 200
 
 type GithubContribution = {
   date: string
@@ -307,7 +311,7 @@ function Dashboard() {
     resumeCloseTimer.current = window.setTimeout(() => {
       setResumeOpen(false)
       setResumeLeaving(false)
-    }, 220)
+    }, MODAL_EXIT_MS)
   }, [resumeOpen, resumeLeaving])
 
   // Kunci scroll body + tutup dengan Escape selama modal resume
@@ -451,7 +455,11 @@ function Dashboard() {
     {resumeOpen &&
   createPortal(
     <div
-      className="resume-modal"
+      className={
+        resumeLeaving
+          ? 'resume-modal is-leaving'
+          : 'resume-modal'
+      }
       onClick={closeResume}
       role="dialog"
       aria-modal="true"
@@ -991,6 +999,60 @@ async function fetchGithubContributions(): Promise<{
   }
 }
 
+/*
+ * Kalender kontribusi dipisah sebagai komponen memo: ±370 sel ini
+ * tidak perlu dirender ulang saat angka count-up berubah tiap frame.
+ */
+const ContributionCalendar = memo(function ContributionCalendar({
+  weeks,
+  monthLabels,
+}: {
+  weeks: ContributionWeek[]
+  monthLabels: MonthLabel[]
+}) {
+  return (
+    <div className="github-calendar-wrapper">
+      <div className="github-months">
+        {monthLabels.map(
+          (month, index) => (
+            <span
+              key={`${month.label}-${index}`}
+              style={{
+                gridColumnStart:
+                  month.column,
+              }}
+            >
+              {month.label}
+            </span>
+          ),
+        )}
+      </div>
+
+      <div className="github-calendar">
+        {weeks.map(
+          (week, weekIndex) => (
+            <div
+              className="github-week"
+              key={weekIndex}
+              style={{ ['--week-index' as string]: weekIndex }}
+            >
+              {week.map((day) => (
+                <div
+                  key={day.date}
+                  className={`github-day level-${day.level}`}
+                  title={`${day.count} contributions on ${formatGithubDate(
+                    day.date,
+                  )}`}
+                />
+              ))}
+            </div>
+          ),
+        )}
+      </div>
+    </div>
+  )
+})
+
 function GithubContributions() {
   const [contributions, setContributions] =
     useState<GithubContribution[]>([])
@@ -1155,13 +1217,17 @@ function GithubContributions() {
 
   const graphAsOf = cacheLabel ?? null
 
-  const weeks =
-    buildContributionWeeks(
-      graphContributions,
-    )
+  // Dihitung sekali per data — count-up me-render ulang komponen ini
+  // setiap frame, jadi hasil ini tidak boleh dihitung ulang tiap render.
+  const weeks = useMemo(
+    () => buildContributionWeeks(graphContributions),
+    [graphContributions],
+  )
 
-  const monthLabels =
-    buildMonthLabels(weeks)
+  const monthLabels = useMemo(
+    () => buildMonthLabels(weeks),
+    [weeks],
+  )
 
   const { ref: cardRef, inView: cardInView } =
     useInView<HTMLElement>(0.25)
@@ -1300,45 +1366,10 @@ function GithubContributions() {
         </div>
       ) : (
         <>
-          <div className="github-calendar-wrapper">
-            <div className="github-months">
-              {monthLabels.map(
-                (month, index) => (
-                  <span
-                    key={`${month.label}-${index}`}
-                    style={{
-                      gridColumnStart:
-                        month.column,
-                    }}
-                  >
-                    {month.label}
-                  </span>
-                ),
-              )}
-            </div>
-
-            <div className="github-calendar">
-              {weeks.map(
-                (week, weekIndex) => (
-                  <div
-                    className="github-week"
-                    key={weekIndex}
-                    style={{ ['--week-index' as string]: weekIndex }}
-                  >
-                    {week.map((day) => (
-                      <div
-                        key={day.date}
-                        className={`github-day level-${day.level}`}
-                        title={`${day.count} contributions on ${formatGithubDate(
-                          day.date,
-                        )}`}
-                      />
-                    ))}
-                  </div>
-                ),
-              )}
-            </div>
-          </div>
+          <ContributionCalendar
+            weeks={weeks}
+            monthLabels={monthLabels}
+          />
 
           <div className="github-card-footer">
             <a

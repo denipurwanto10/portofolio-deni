@@ -715,9 +715,40 @@ function formatDateTime(
   }
 }
 
+// Harus sama dengan durasi animasi keluar panel di styles.css.
+const CHAT_EXIT_MS = 180
+
 export default function LiveChat() {
   const [open, setOpen] =
     useState(false)
+
+  const [closing, setClosing] =
+    useState(false)
+
+  const closeTimer =
+    useRef<number | undefined>(undefined)
+
+  // Tutup panel dengan animasi keluar (bukan langsung hilang).
+  const closeChat = useCallback(() => {
+    setClosing(true)
+
+    window.clearTimeout(closeTimer.current)
+
+    closeTimer.current = window.setTimeout(() => {
+      setOpen(false)
+      setClosing(false)
+    }, CHAT_EXIT_MS)
+  }, [])
+
+  useEffect(
+    () => () => window.clearTimeout(closeTimer.current),
+    [],
+  )
+
+  // Scroll pertama kali (riwayat pesan dimuat) langsung ke bawah;
+  // smooth hanya untuk pesan baru — menggulir dari atas ke bawah
+  // di seluruh riwayat terasa lambat dan patah-patah.
+  const initialScrollDone = useRef(false)
 
   const [user, setUser] =
     useState<User | null>(
@@ -1253,13 +1284,26 @@ export default function LiveChat() {
     }
 
     bottomRef.current?.scrollIntoView({
-      behavior: 'smooth',
+      behavior: initialScrollDone.current
+        ? 'smooth'
+        : 'auto',
       block: 'end',
     })
+
+    if (messages.length > 0) {
+      initialScrollDone.current = true
+    }
   }, [
     messages.length,
     open,
   ])
+
+  // Reset saat panel ditutup: buka berikutnya juga langsung ke bawah.
+  useEffect(() => {
+    if (!open) {
+      initialScrollDone.current = false
+    }
+  }, [open])
 
   /**
    * LOGIN
@@ -1525,9 +1569,11 @@ export default function LiveChat() {
             ? 'chat-button chat-button-hidden'
             : 'chat-button'
         }
-        onClick={() =>
+        onClick={() => {
+          window.clearTimeout(closeTimer.current)
+          setClosing(false)
           setOpen(true)
-        }
+        }}
         aria-label="Open live chat"
         aria-hidden={open}
         tabIndex={
@@ -1541,7 +1587,11 @@ export default function LiveChat() {
 
       {open && (
         <section
-          className="chat-panel"
+          className={
+            closing
+              ? 'chat-panel is-closing'
+              : 'chat-panel'
+          }
           role="dialog"
           aria-modal="false"
           aria-label="Live chat"
@@ -1584,9 +1634,7 @@ export default function LiveChat() {
             <button
               type="button"
               className="chat-icon-button"
-              onClick={() =>
-                setOpen(false)
-              }
+              onClick={closeChat}
               aria-label="Close live chat"
             >
               <X size={19} />

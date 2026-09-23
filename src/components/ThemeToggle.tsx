@@ -40,6 +40,25 @@ export function applyTheme(theme: ThemeMode) {
 }
 
 /*
+ * Saat tema berganti, semua elemen (bukan hanya yang terdaftar di
+ * aturan transisi global) ikut berubah warna dengan halus. Atribut
+ * dipasang sebentar saja supaya tidak mengganggu transisi hover dll.
+ */
+let themeTransitionTimer: number | undefined
+
+export function withThemeTransition() {
+  const root = document.documentElement
+
+  root.setAttribute('data-theme-transition', '')
+
+  window.clearTimeout(themeTransitionTimer)
+
+  themeTransitionTimer = window.setTimeout(() => {
+    root.removeAttribute('data-theme-transition')
+  }, 450)
+}
+
+/*
  * Saklar mode gelap/terang. Nilai diterapkan langsung ke
  * <html data-theme="..."> (lihat variabel warna di styles.css)
  * dan disimpan ke localStorage supaya tetap konsisten saat
@@ -68,11 +87,13 @@ function ThemeToggle() {
         isDark ? 'Switch to light mode' : 'Switch to dark mode'
       }
       title={isDark ? 'Light mode' : 'Dark mode'}
-      onClick={() =>
+      onClick={() => {
+        withThemeTransition()
+
         setTheme((current) =>
           current === 'dark' ? 'light' : 'dark',
         )
-      }
+      }}
     >
       <span className="theme-toggle-icon">
         {isDark ? <Moon size={14} /> : <Sun size={14} />}
