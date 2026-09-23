@@ -65,8 +65,8 @@ function App() {
       'dashboard'
 
     if (!pathToSection[window.location.pathname]) {
-      window.history.replaceState({}, '', '/dashboard')
-    }
+  window.history.replaceState({}, '', '/')
+}
 
     return section
   })
