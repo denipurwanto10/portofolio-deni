@@ -7529,3 +7529,30 @@ body::-webkit-scrollbar-corner,
 .project-filters::-webkit-scrollbar-corner {
   background: transparent;
 }
+
+/* =========================================================
+   MOBILE — sembunyikan scrollbar visual
+   Tetap bisa scroll dengan gesture/touch/swipe.
+========================================================= */
+@media (max-width: 767px) {
+  html,
+  body,
+  .sidebar,
+  .nav,
+  .chat-messages,
+  .project-filters {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  html::-webkit-scrollbar,
+  body::-webkit-scrollbar,
+  .sidebar::-webkit-scrollbar,
+  .nav::-webkit-scrollbar,
+  .chat-messages::-webkit-scrollbar,
+  .project-filters::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+}
