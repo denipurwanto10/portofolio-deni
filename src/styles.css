@@ -345,6 +345,28 @@ a {
   color: var(--accent);
 }
 
+/* Ikon miring + membesar saat hover ala referensi —
+   hanya ikon yang beranimasi (pegas), warna ikut tema. */
+.nav-item svg {
+  flex: none;
+  transform-origin: center;
+  transition: transform 0.38s var(--ease-spring);
+}
+
+.nav-item:hover svg {
+  transform: rotate(-12deg) scale(1.18);
+}
+
+/* Menu aktif: ikon tetap tegak — miring hanya untuk hover. */
+.nav-item.active svg,
+.nav-item.active:hover svg {
+  transform: none;
+}
+
+.nav-item:active svg {
+  transform: rotate(0deg) scale(0.96);
+}
+
 .nav-item.active {
   background: var(--accent-soft);
   color: var(--accent);
@@ -2700,6 +2722,7 @@ a {
   gap: 2px;
 }
 
+/* Kotak kontribusi — statis, tanpa animasi pop. */
 .github-day {
   width: 100%;
   aspect-ratio: 1;
