@@ -8,6 +8,7 @@ import {
 import {
   LogOut,
   MessageCircle,
+  MessageSquare,
   Reply,
   SendHorizonal,
   X,
@@ -1921,38 +1922,48 @@ export default function LiveChat() {
                   void handleSend()
                 }}
               >
-                <input
-                  ref={inputRef}
-                  type="text"
-                  value={draft}
-                  onChange={(event) =>
-                    setDraft(
-                      event.target.value,
-                    )
-                  }
-                  placeholder={
-                    replyTo
-                      ? `Reply to ${replyTo.name}...`
-                      : 'Type a message...'
-                  }
-                  maxLength={500}
-                  aria-label="Type a message"
-                />
-
-                <button
-                  type="submit"
-                  className="chat-send"
-                  disabled={
-                    !draft.trim() ||
-                    sending
-                  }
-                  aria-label="Send message"
-                  title="Send message"
-                >
-                  <SendHorizonal
-                    size={18}
+                <div className="chat-composer-field">
+                  <MessageSquare
+                    className="chat-composer-icon"
+                    size={21}
+                    strokeWidth={1.7}
+                    aria-hidden="true"
                   />
-                </button>
+
+                  <input
+                    ref={inputRef}
+                    type="text"
+                    value={draft}
+                    onChange={(event) =>
+                      setDraft(
+                        event.target.value,
+                      )
+                    }
+                    placeholder={
+                      replyTo
+                        ? `Reply to ${replyTo.name}...`
+                        : 'Type a message...'
+                    }
+                    maxLength={500}
+                    aria-label="Type a message"
+                  />
+
+                  <button
+                    type="submit"
+                    className="chat-send"
+                    disabled={
+                      !draft.trim() ||
+                      sending
+                    }
+                    aria-label="Send message"
+                    title="Send message"
+                  >
+                    <SendHorizonal
+                      size={19}
+                      strokeWidth={1.9}
+                    />
+                  </button>
+                </div>
               </form>
             </>
           )}
