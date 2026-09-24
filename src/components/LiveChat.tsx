@@ -823,6 +823,14 @@ const PROJECT_ALIASES: Record<string, string[]> = {
   Pasarku: ['pasarku', 'marketplace', 'e-commerce', 'ecommerce'],
   Attendance: ['attendance', 'absensi'],
   MandiriNews: ['mandirinews', 'mandiri news', 'berita'],
+  'Portfolio V2': ['portfolio v2', 'portfolio 2', 'portofolio v2', 'web portfolio'],
+  Visualisasi: ['visualisasi pipa', 'pipa sumur', 'sumur bor', 'borewell', 'pipa'],
+  Deteksi: ['deteksi diabetes', 'diabetes', 'machine learning', 'ml diabetes', 'logistic regression'],
+  PPDB: ['ppdb', 'penerimaan siswa', 'flutter ppdb'],
+  'GIS Penduduk': ['gis penduduk', 'gispenduduk', 'penduduk', 'data warga'],
+  Petclinic: ['petclinic', 'pet clinic', 'klinik hewan', 'hewan'],
+  Catshop: ['catshop', 'cat shop', 'toko kucing', 'kucing'],
+  Menu: ['menu restoran', 'menurestoran', 'restoran', 'restaurant'],
 }
 
 function findProjectByName(input: string) {
@@ -909,6 +917,22 @@ const PROJECT_SUMMARIES_ID: Record<string, string> = {
     'aplikasi absensi karyawan — clock-in/out, kelola user & departemen, sampai laporan.',
   MandiriNews:
     'aplikasi berita Android — artikel dari REST API, ada kategori teknologi, bisnis, olahraga. Proyek Mandiri x Rakamin.',
+  'Portfolio V2':
+    'portfolio pribadi yang modern dan interaktif — showcase proyek, timeline pengalaman, animasi, sampai elemen 3D.',
+  Visualisasi:
+    'visualisasi konstruksi sumur bor — pipa, saringan, open hole, dan muka air tanah di kanvas proporsional, plus dokumentasi foto.',
+  Deteksi:
+    'prediksi diabetes pakai machine learning (Logistic Regression) — input data medis, output positif/negatif.',
+  PPDB:
+    'aplikasi PPDB mobile pakai Flutter — auth, dashboard admin/siswa, kelola data siswa dan nilai, sampai seleksi otomatis.',
+  'GIS Penduduk':
+    'sistem info penduduk berbasis peta — peta interaktif Leaflet.js, CRUD warga, filter RT/RW, sampai statistik.',
+  Petclinic:
+    'sistem manajemen klinik hewan — data hewan, dokter, pemilik, jadwal kunjungan, dan pencarian cepat.',
+  Catshop:
+    'toko online produk kucing — katalog, keranjang, checkout, dan kelola produk.',
+  Menu:
+    'aplikasi desktop Java buat kelola menu restoran — login, CRUD kategori dan menu, database MySQL via JDBC.',
 }
 
 function projectAliasKey(title: string): string | null {
@@ -2161,6 +2185,93 @@ function buildAssistantReply(
   }
 
   // Kategori proyek: mobile / frontend / backend / AI / fullstack
+  // + kategori baru: flutter, ML, GIS, Java
+  if (
+    includesAnyKeyword(input, [
+      'flutter',
+      'dart',
+    ]) &&
+    !findProjectByName(input)
+  ) {
+    const matched = projects.filter((item) =>
+      item.tags.some((tag) =>
+        sameTech(tag, 'Flutter'),
+      ),
+    )
+
+    if (matched.length) {
+      return formatProjectListReply(
+        matched,
+        'Flutter-nya:',
+        'Sebut namanya buat detail.',
+      )
+    }
+  }
+
+  if (
+    includesAnyKeyword(input, [
+      'machine learning',
+      'ml ',
+      ' scikit',
+      'sklearn',
+      'prediksi',
+    ]) &&
+    !findProjectByName(input)
+  ) {
+    const matched = projects.filter((item) =>
+      item.title.startsWith('Deteksi'),
+    )
+
+    if (matched.length) {
+      return formatProjectReply(matched[0].title)
+    }
+  }
+
+  if (
+    includesAnyKeyword(input, [
+      'gis',
+      'geospasial',
+      'peta penduduk',
+      'data warga',
+    ]) &&
+    !findProjectByName(input)
+  ) {
+    const matched = projects.filter(
+      (item) =>
+        item.title.startsWith('GIS') ||
+        item.title.startsWith('Bandung'),
+    )
+
+    if (matched.length) {
+      return formatProjectListReply(
+        matched,
+        'GIS-nya:',
+        'Sebut namanya buat detail.',
+      )
+    }
+  }
+
+  if (
+    includesAnyKeyword(input, [
+      'java ',
+      'aplikasi java',
+      'desktop java',
+      'swing',
+      'jdbc',
+    ]) &&
+    !findProjectByName(input)
+  ) {
+    const matched = projects.filter((item) =>
+      item.tags.some(
+        (tag) => tag.toLowerCase() === 'java',
+      ),
+    )
+
+    if (matched.length) {
+      return formatProjectReply(matched[0].title)
+    }
+  }
+
   if (
     includesAnyKeyword(input, [
       'mobile',

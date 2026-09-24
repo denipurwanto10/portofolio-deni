@@ -113,6 +113,79 @@ export const projects: Project[] = [
     language: 'Kotlin',
     category: 'Mobile',
   },
+  {
+    title: 'Portfolio V2',
+    description:
+      'A modern interactive developer portfolio — responsive project showcase, experience timeline, skills overview, animations (Framer Motion, GSAP), 3D elements (Three.js), and a contact section.',
+    tags: ['React', 'TypeScript', 'Vite', 'Tailwind CSS', 'Three.js'],
+    link: 'https://github.com/denipurwanto10/Portfolio-V2',
+    language: 'TypeScript',
+    category: 'Frontend',
+  },
+  {
+    title: 'Visualisasi Pipa Sumur Bor',
+    description:
+      'An interactive web app for visualizing borewell construction — pipes, screens, open hole, and groundwater level on a proportional canvas, plus technical data forms and photo documentation.',
+    tags: ['JavaScript', 'HTML', 'CSS', 'Canvas API'],
+    link: 'https://github.com/denipurwanto10/visualisasi_pipa',
+    demo: 'https://visualisasi-pipa.vercel.app',
+    language: 'JavaScript',
+    category: 'Web App',
+  },
+  {
+    title: 'Deteksi Diabetes ML',
+    description:
+      'A simple machine learning model for diabetes prediction — Logistic Regression on medical parameters (glucose, blood pressure, BMI, age) with positive/negative prediction output.',
+    tags: ['Python', 'scikit-learn', 'Pandas', 'NumPy', 'Jupyter'],
+    link: 'https://github.com/denipurwanto10/Tugas-ML-Deteksi-Diabetes',
+    language: 'Python',
+    category: 'Desktop & AI',
+  },
+  {
+    title: 'PPDB Flutter',
+    description:
+      'A Flutter mobile app for new student admissions (PPDB) — auth, role-based dashboards, student data management with search/filter, grade input, and automatic selection.',
+    tags: ['Flutter', 'Dart', 'Firebase'],
+    link: 'https://github.com/denipurwanto10/PPDB-Flutter',
+    language: 'Dart',
+    category: 'Mobile',
+  },
+  {
+    title: 'GIS Penduduk',
+    description:
+      'A web-based geospatial population information system — interactive Leaflet.js maps, resident CRUD, dynamic filters (RT/RW, gender, status), statistics, and a MySQL database.',
+    tags: ['PHP', 'MySQL', 'Leaflet.js', 'JavaScript'],
+    link: 'https://github.com/denipurwanto10/GisPenduduk',
+    language: 'PHP',
+    category: 'Full-Stack',
+  },
+  {
+    title: 'PetClinic',
+    description:
+      'A web-based veterinary clinic management app — pet, doctor, and owner data management, visit scheduling, fast search, and a responsive Bootstrap interface.',
+    tags: ['PHP', 'MySQL', 'Bootstrap', 'JavaScript'],
+    link: 'https://github.com/denipurwanto10/Petclinic',
+    language: 'PHP',
+    category: 'Backend',
+  },
+  {
+    title: 'Catshop',
+    description:
+      'A PHP-based online shop web app for cat products — catalog, cart, checkout, and product management with a MySQL database.',
+    tags: ['PHP', 'MySQL', 'HTML', 'CSS'],
+    link: 'https://github.com/denipurwanto10/Catshop',
+    language: 'PHP',
+    category: 'Backend',
+  },
+  {
+    title: 'Menu Restoran',
+    description:
+      'A Java desktop app for restaurant menu management — secure login/registration, category and menu CRUD, and MySQL integration via JDBC with a Swing interface.',
+    tags: ['Java', 'Swing', 'MySQL', 'JDBC'],
+    link: 'https://github.com/denipurwanto10/MenuRestoran',
+    language: 'Java',
+    category: 'Desktop & AI',
+  },
 ]
 
 export const experiences: ExperienceItem[] = [
