@@ -4024,7 +4024,10 @@ a {
   padding: 18px;
 }
 
-.award-card-content > div:first-child {
+/* Aturan lama untuk kartu generik. .award-meta punya aturan sendiri
+   (di bawah), jadi dikecualikan supaya align-items: center-nya tidak
+   tertimpa (penyebab titik pemisah & ikon terlihat naik). */
+.award-card-content > div:first-child:not(.award-meta) {
   display: flex;
   align-items: flex-start;
   gap: 12px;
@@ -4191,7 +4194,7 @@ a {
   display: inline-flex;
   align-items: center;
   flex-wrap: nowrap;
-  gap: 7px;
+  gap: 12px;
   height: 18px;
   min-height: 18px;
   color: var(--text-secondary);
