@@ -1789,7 +1789,14 @@ function buildAssistantReply(
       'bank mandiri',
     ])
   ) {
-    return 'Di Mandiri x Rakamin (Nov–Des 2025) Deni jadi Mobile Dev — bikin aplikasi berita Android (MandiriNewsApps). Ketik "mandirinews" buat lihat detailnya.'
+    // Kalau nyebut nama proyek spesifik ("mandirinews",
+    // "umkm", "formatra") → langsung ke detail proyek,
+    // JANGAN ke jawaban pengalaman kerja.
+    const directProject = findProjectByName(input)
+
+    
+
+    return 'Di Mandiri x Rakamin (Nov–Des 2025) Deni jadi Mobile Dev — bikin aplikasi berita Android (MandiriNewsApps).'
   }
 
   if (
@@ -1801,6 +1808,12 @@ function buildAssistantReply(
       'groundwater',
     ])
   ) {
+    const directProject = findProjectByName(input)
+
+    if (directProject) {
+      return formatProjectReply(directProject.title)
+    }
+
     return 'Di PATGL/ESDM (Des 2025 — Jun 2026) Deni jadi Full Stack Dev — bikin app lab dan peta sumur bor pakai Leaflet.js.'
   }
 
@@ -1816,6 +1829,12 @@ function buildAssistantReply(
       'umkm',
     ])
   ) {
+    const directProject = findProjectByName(input)
+
+    if (directProject) {
+      return formatProjectReply(directProject.title)
+    }
+
     return 'Di Disdagperin (Jan–Jun 2025) Deni jadi Full Stack Dev — bikin sistem UMKM plus peta interaktif. Ketik "umkm" buat lihat proyeknya.'
   }
 
@@ -2041,7 +2060,6 @@ function buildAssistantReply(
 
     return formatProjectReply(
       namedProject.title,
-      `Mau bahas "${shortName}" lebih dalam? Tanya aja misal "teknologinya?" / "demonya?"`,
     )
   }
 
