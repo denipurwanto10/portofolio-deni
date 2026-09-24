@@ -735,7 +735,7 @@ type AssistantMessage = {
 const ASSISTANT_WELCOME: AssistantMessage = {
   id: 'welcome',
   from: 'bot',
-  text: 'Halo, saya asisten virtual Deni 👋 Silakan tanya seputar proyek, pengalaman, teknologi yang dikuasai, atau cara menghubungi Deni.',
+  text: 'Halo, saya Asisten Virtual Deni 👋 Silakan tanya seputar proyek, pengalaman, teknologi yang dikuasai, atau cara menghubungi Deni.',
 }
 
 const ASSISTANT_QUICK_REPLIES = [
@@ -884,11 +884,739 @@ function findTechInInput(input: string): string | undefined {
   )
 }
 
-function buildAssistantReply(rawInput: string): string {
-  const input = rawInput.trim().toLowerCase()
+/**
+ * Ringkasan tiap proyek — singkat, 1 kalimat, gaya santai.
+ * Kunci = kunci PROJECT_ALIASES (awalan judul di data.ts).
+ */
+const PROJECT_SUMMARIES_ID: Record<string, string> = {
+  Formatra:
+    'toolkit dokumen serbaguna — convert, merge, split, sampai edit PDF/Word/Excel langsung di browser.',
+  Disaster:
+    'monitoring bencana Indonesia realtime — gempa BMKG, gunung MAGMA, sampai peringatan tsunami, lengkap sama peta interaktif.',
+  'PC Control':
+    'kontrol PC pakai gestur tangan, perintah suara, sampai bot Telegram. Mouse, keyboard, screenshot — bisa semua.',
+  Bandung:
+    'pendataan UMKM 31 kecamatan — ada peta interaktif, katalog, dashboard admin, sampai ekspor PDF.',
+  Placement:
+    'tes penempatan online — isi biodata, jawab 15 soal, langsung dapat skor + rekomendasi program.',
+  Gudang:
+    'sistem inventaris kantor — multi-gudang, stok otomatis, barcode/QR, sampai laporan Excel.',
+  Wisma:
+    'sistem manajemen hotel — kalender booking, housekeeping, pembayaran + invoice otomatis, sampai PWA.',
+  Pasarku:
+    'marketplace multi-penjual — ada katalog, keranjang, checkout, plus dashboard toko buat seller.',
+  Attendance:
+    'aplikasi absensi karyawan — clock-in/out, kelola user & departemen, sampai laporan.',
+  MandiriNews:
+    'aplikasi berita Android — artikel dari REST API, ada kategori teknologi, bisnis, olahraga. Proyek Mandiri x Rakamin.',
+}
+
+function projectAliasKey(title: string): string | null {
+  return (
+    Object.keys(PROJECT_ALIASES).find((key) =>
+      title.startsWith(key),
+    ) ?? null
+  )
+}
+
+function projectSummaryId(title: string): string | null {
+  const key = projectAliasKey(title)
+  return key
+    ? (PROJECT_SUMMARIES_ID[key] ?? null)
+    : null
+}
+
+/**
+ * Format 1 proyek: judul + ringkasan + link klik +
+ * "selengkapnya di halaman Proyek ya". Singkat.
+ */
+function formatProjectReply(
+  title: string,
+  extra?: string,
+): string {
+  const project = projects.find(
+    (item) => item.title === title,
+  )
+
+  if (!project) {
+    return extra ?? title
+  }
+
+  const summary = projectSummaryId(
+    project.title,
+  )
+
+  const lines = [
+    `${project.title} — ${summary ?? project.category}.`,
+    project.demo ?? project.link,
+    'Selengkapnya di halaman Proyek ya.',
+  ]
+
+  if (extra) {
+    lines.push(extra)
+  }
+
+  return lines.join('\n')
+}
+
+/**
+ * Daftar proyek: tiap item judul + link, maks 3 item.
+ */
+function formatProjectListReply(
+  items: { title: string; link: string }[],
+  opener: string,
+  invite: string,
+): string {
+  const lines = [
+    opener,
+    ...items
+      .slice(0, 3)
+      .map(
+        (item) =>
+          `• ${item.title}\n  ${item.link}`,
+      ),
+  ]
+
+  if (items.length > 3) {
+    lines.push(
+      `...dan ${items.length - 3} lainnya.`,
+    )
+  }
+
+  lines.push(invite)
+  return lines.join('\n')
+}
+
+function normalizeAssistantInput(
+  raw: string,
+): string {
+  let s = raw.trim().toLowerCase()
+
+  const reps: Array<[RegExp, string]> = [
+    [/\bdmn\b|\bdmna\b|\bdimn\b/g, 'dimana'],
+    [/\bgmn\b|\bgimana\b/g, 'bagaimana'],
+    [/\bkpn\b/g, 'kapan'],
+    [/\bbrp\b/g, 'berapa'],
+    [/\byg\b/g, 'yang'],
+    [/\bdgn\b|\bdng\b/g, 'dengan'],
+    [/\butk\b/g, 'untuk'],
+    [/\borg\b/g, 'orang'],
+    [/\btrs\b|\btrus\b/g, 'terus'],
+    [/\bkrn\b/g, 'karena'],
+    [/\bskrg\b/g, 'sekarang'],
+    [/\budh\b|\buda\b/g, 'sudah'],
+    [/\bblm\b/g, 'belum'],
+    [
+      /\bnggak\b|\bngga\b|\bgak\b|\bga\b/g,
+      'tidak',
+    ],
+    [/\bprojek\b/g, 'proyek'],
+    [/\bskil\b/g, 'skill'],
+    [/\bkontac\b/g, 'kontak'],
+    [/\bemial\b/g, 'email'],
+    [/\blinkdin\b|\blinked\b/g, 'linkedin'],
+    [/\bgithb\b|\bgitub\b/g, 'github'],
+    [/\binstgram\b/g, 'instagram'],
+    [/\bexperiance\b/g, 'experience'],
+    [/\bteknology\b/g, 'teknologi'],
+    [/\bunversitas\b/g, 'universitas'],
+    [
+      /\bpngalaman\b|\bpenglaman\b/g,
+      'pengalaman',
+    ],
+    [/\bsertifkat\b/g, 'sertifikat'],
+  ]
+
+  for (const [
+    pattern,
+    replacement,
+  ] of reps) {
+    s = s.replace(pattern, replacement)
+  }
+
+  return s.replace(/\s+/g, ' ')
+}
+
+/**
+ * Topik pembicaraan terakhir — dipakai untuk menjawab
+ * pertanyaan susulan yang singkat ("dimana?", "kapan?",
+ * "jelaskan", "teknologinya apa?").
+ */
+type AssistantTopic =
+  | 'education'
+  | 'experience'
+  | 'projects'
+  | 'skills'
+  | 'awards'
+  | 'contact'
+  | 'location'
+  | 'cv'
+
+type AssistantContext = {
+  topic: AssistantTopic | null
+  projectTitle: string | null
+  tech: string | null
+}
+
+function detectAssistantTopic(
+  input: string,
+): AssistantTopic | null {
+  if (
+    includesAnyKeyword(input, [
+      'kuliah',
+      'kampus',
+      'universitas',
+      'jurusan',
+      'prodi',
+      'pendidikan',
+      'sekolah',
+      'unla',
+      'aslab',
+      'praktikum',
+      'laboratorium',
+      'instruktur',
+      'study',
+      'college',
+      'major',
+      'graduate',
+      'lulusan',
+    ])
+  ) {
+    return 'education'
+  }
+
+  if (
+    includesAnyKeyword(input, [
+      'pengalaman',
+      'kerja',
+      'magang',
+      'kantor',
+      'perusahaan',
+      'karir',
+      'karier',
+      'jabatan',
+      'esdm',
+      'mandiri',
+      'rakamin',
+      'disdag',
+      'pemkab',
+      'patgl',
+      'job',
+      'career',
+      'worked',
+      'works',
+      'intern',
+    ])
+  ) {
+    return 'experience'
+  }
+
+  if (
+    includesAnyKeyword(input, [
+      'proyek',
+      'project',
+      'aplikasi',
+      'website',
+      'karya',
+      'portfolio',
+      'portofolio',
+      'demo',
+    ])
+  ) {
+    return 'projects'
+  }
+
+  if (
+    includesAnyKeyword(input, [
+      'skill',
+      'keahlian',
+      'kemampuan',
+      'teknologi',
+      'tech',
+      'framework',
+      'database',
+      'frontend',
+      'backend',
+      'dikuasai',
+    ])
+  ) {
+    return 'skills'
+  }
+
+  if (
+    includesAnyKeyword(input, [
+      'penghargaan',
+      'sertifikat',
+      'prestasi',
+      'juara',
+      'lomba',
+      'award',
+      'achievement',
+    ])
+  ) {
+    return 'awards'
+  }
+
+  if (
+    includesAnyKeyword(input, [
+      'kontak',
+      'email',
+      'hubungi',
+      'linkedin',
+      'github',
+      'instagram',
+      'whatsapp',
+      'contact',
+    ])
+  ) {
+    return 'contact'
+  }
+
+  if (
+    includesAnyKeyword(input, [
+      'cv',
+      'resume',
+      'riwayat hidup',
+    ])
+  ) {
+    return 'cv'
+  }
+
+  if (
+    includesAnyKeyword(input, [
+      'lokasi',
+      'domisili',
+      'tinggal',
+      'dimana',
+      'di mana',
+      'kota',
+      'bandung',
+      'location',
+      'based',
+      'live',
+      'where',
+    ])
+  ) {
+    return 'location'
+  }
+
+  return null
+}
+
+/**
+ * Membaca konteks dari riwayat percakapan (maks. 8 pesan
+ * terakhir): topik terakhir, proyek terakhir, dan teknologi
+ * terakhir yang dibahas.
+ */
+function inferAssistantContext(
+  history: AssistantMessage[],
+): AssistantContext {
+  const ctx: AssistantContext = {
+    topic: null,
+    projectTitle: null,
+    tech: null,
+  }
+
+  const recent = history.slice(-8)
+
+  for (
+    let i = recent.length - 1;
+    i >= 0;
+    i--
+  ) {
+    const msg = recent[i]
+
+    if (!msg) {
+      continue
+    }
+
+    const text = msg.text
+      .trim()
+      .toLowerCase()
+
+    if (!text) {
+      continue
+    }
+
+    if (!ctx.projectTitle) {
+      const hit =
+        projects.find((item) =>
+          text.includes(
+            item.title.toLowerCase(),
+          ),
+        ) ?? findProjectByName(text)
+
+      if (hit) {
+        ctx.projectTitle = hit.title
+      }
+    }
+
+    if (!ctx.tech && !ctx.projectTitle) {
+      const hit = findTechInInput(text)
+
+      if (hit) {
+        ctx.tech = hit
+      }
+    }
+
+    // Topik hanya dibaca dari pesan USER — jawaban bot
+    // menyebut banyak kata kunci (mis. "Bandung") yang
+    // bisa mengacaukan konteks pertanyaan susulan.
+    if (!ctx.topic && msg.from === 'user') {
+      const topic =
+        detectAssistantTopic(text)
+
+      if (topic) {
+        ctx.topic = topic
+      }
+    }
+
+    if (
+      ctx.topic &&
+      (ctx.projectTitle || ctx.tech)
+    ) {
+      break
+    }
+  }
+
+  return ctx
+}
+
+/**
+ * Pertanyaan susulan yang pendek dan tidak menyebut entitas
+ * ("dimana?", "kapan?", "jelaskan") — dijawab dari konteks.
+ */
+function isBareFollowUp(
+  input: string,
+): boolean {
+  const cleaned = input.replace(
+    /[^a-z0-9\s]/g,
+    ' ',
+  )
+
+  const words = cleaned
+    .split(' ')
+    .filter(Boolean)
+
+  if (words.length > 4) {
+    return false
+  }
+
+  // Kata berimbuhan "-nya" ("teknologinya", "demonya",
+  // "kantornya") merujuk ke subjek sebelumnya, bukan
+  // entitas baru — kecualikan dari tes entitas.
+  const entityTestInput = words
+    .filter(
+      (word) =>
+        !(
+          word.length > 5 &&
+          word.endsWith('nya')
+        ),
+    )
+    .join(' ')
+
+  const hasEntity = includesAnyKeyword(
+    entityTestInput,
+    [
+      'deni',
+      'kuliah',
+      'kampus',
+      'kerja',
+      'magang',
+      'proyek',
+      'project',
+      'pengalaman',
+      'kontak',
+      'email',
+      'cv',
+      'resume',
+      'teknologi',
+      'skill',
+      'penghargaan',
+      'sertifikat',
+      'lokasi',
+      'bandung',
+      'github',
+      'linkedin',
+      'instagram',
+      'blog',
+      'komunitas',
+      'gaji',
+      'freelance',
+      'hobi',
+      'umur',
+      'nama',
+      'kabar',
+      'halo',
+      'hai',
+      'hello',
+      'bantuan',
+      'help',
+      'tentang',
+      'profil',
+      'karya',
+      'aplikasi',
+      'website',
+      'jasa',
+      'lomba',
+    ],
+  )
+
+  if (hasEntity) {
+    return false
+  }
+
+  return includesAnyKeyword(input, [
+    'dimana',
+    'di mana',
+    'kapan',
+    'siapa',
+    'berapa',
+    'apa',
+    'bagaimana',
+    'kenapa',
+    'yang',
+    'itu',
+    'tersebut',
+    'detail',
+    'deskripsi',
+    'teknologi',
+    'stack',
+    'demo',
+    'link',
+    'fitur',
+    'jelaskan',
+    'jelasin',
+    'contoh',
+    'terus',
+    'lalu',
+    'apakah',
+    'maksudnya',
+    'mana',
+  ])
+}
+
+/**
+ * Menjawab pertanyaan susulan berdasarkan topik atau proyek
+ * terakhir yang dibahas.
+ */
+function answerFromContext(
+  input: string,
+  ctx: AssistantContext,
+): string | null {
+  // Susulan soal proyek tertentu
+  // ("teknologinya?", "demonya?", "deskripsinya?").
+  if (ctx.projectTitle) {
+    const project = projects.find(
+      (item) =>
+        item.title === ctx.projectTitle,
+    )
+
+    if (project) {
+      if (
+        includesAnyKeyword(input, [
+          'teknologi',
+          'tech',
+          'dibuat dengan',
+          'pakai apa',
+          'pake apa',
+          'stack',
+          'bahasa',
+        ])
+      ) {
+        return `Teknologinya: ${project.tags.slice(0, 4).join(', ')}.`
+      }
+
+      if (
+        includesAnyKeyword(input, [
+          'demo',
+          'coba',
+          'link',
+          'buka',
+          'lihat',
+        ])
+      ) {
+        if (project.demo) {
+          return `Nih link demonya, bisa langsung dicoba: ${project.demo}`
+        }
+
+        return `Belum ada demo publiknya, tapi kodenya bisa dilihat di sini: ${project.link}`
+      }
+
+      if (
+        includesAnyKeyword(input, [
+          'github',
+          'repo',
+          'source',
+          'kode',
+        ])
+      ) {
+        return `${project.link}\nSelengkapnya di halaman Proyek ya.`
+      }
+
+      if (
+        includesAnyKeyword(input, [
+          'apa',
+          'detail',
+          'jelaskan',
+          'jelasin',
+          'ceritakan',
+          'cerita',
+          'tentang',
+          'deskripsi',
+          'itu',
+          'tersebut',
+          'yang',
+          'mana',
+          'maksudnya',
+        ])
+      ) {
+        const summary = projectSummaryId(
+          project.title,
+        )
+
+        return summary
+          ? `${project.title} — ${summary}\n${project.link}`
+          : `${project.title}. Cek halaman Proyek ya.`
+      }
+    }
+  }
+
+  if (
+    includesAnyKeyword(input, [
+      'dimana',
+      'di mana',
+      'mana',
+    ])
+  ) {
+    if (ctx.topic === 'education') {
+      return 'Deni kuliah di UNLA, Bandung — jurusan Teknik Informatika.'
+    }
+
+    if (ctx.topic === 'experience') {
+      return 'Deni pernah di PATGL, Mandiri x Rakamin, Disdagperin, dan UNLA.'
+    }
+
+    if (
+      ctx.topic === 'location' ||
+      !ctx.topic
+    ) {
+      return 'Deni tinggal di Bandung, Jawa Barat (WIB).'
+    }
+  }
+
+  if (
+    includesAnyKeyword(input, ['kapan'])
+  ) {
+    if (ctx.topic === 'education') {
+      return 'Deni jadi aslab tahun 2022–2024, dan dapat penghargaan mahasiswa berprestasi Mei 2024.'
+    }
+
+    if (ctx.topic === 'experience') {
+      return 'Deni di UNLA 2022–2024, Disdagperin awal 2025, Mandiri akhir 2025, lalu PATGL Des 2025 — Jun 2026.'
+    }
+  }
+
+  if (
+    includesAnyKeyword(input, ['siapa'])
+  ) {
+    if (ctx.topic === 'education') {
+      return 'Deni kuliah sebagai mahasiswa Informatika UNLA, sambil jadi aslab juga.'
+    }
+
+    return 'Yang kita bahas Deni Purwanto — Full Stack Developer dari Bandung.'
+  }
+
+  if (
+    includesAnyKeyword(input, ['berapa'])
+  ) {
+    if (ctx.topic === 'projects') {
+      return `Total ada ${projects.length} proyek di portfolio ini.`
+    }
+
+    if (ctx.topic === 'experience') {
+      return 'Pengalaman Deni 2+ tahun di web dan sistem geospasial.'
+    }
+  }
+
+  if (
+    includesAnyKeyword(input, [
+      'detail',
+      'jelaskan',
+      'jelasin',
+      'contoh',
+      'ceritakan',
+      'cerita',
+      'maksudnya',
+      'terus',
+      'lalu',
+      'apakah',
+      'itu',
+      'tersebut',
+    ])
+  ) {
+    switch (ctx.topic) {
+      case 'education':
+        return 'Deni kuliah Informatika di UNLA — jadi aslab 2022–2024, dapat penghargaan Mei 2024.'
+      case 'experience':
+        return `Pengalaman terakhir Deni:\n${experiences
+          .slice(0, 3)
+          .map(
+            (item) =>
+              `• ${item.company} (${localizeYear(item.year)})`,
+          )
+          .join(
+            '\n',
+          )}`
+      case 'projects':
+        return formatProjectListReply(
+          projects,
+          'Misal nih:',
+          'Sebut namanya buat detail.',
+        )
+      case 'skills':
+        return `Teknologi andalan Deni: ${stack
+          .slice(0, 6)
+          .join(', ')}.`
+      case 'awards':
+        return `${ASSISTANT_AWARDS.slice(0, 3).join('\n')}`
+      case 'contact':
+        return 'Deni bisa dihubungi via email denipurwanto800@gmail.com atau LinkedIn deniiprwnt.'
+      case 'location':
+        return 'Deni tinggal di Bandung, Jawa Barat (WIB).'
+      case 'cv':
+        return 'CV Deni ada di Beranda, klik tombol "Resume".'
+      default:
+        return null
+    }
+  }
+
+  return null
+}
+
+function buildAssistantReply(
+  rawInput: string,
+  history: AssistantMessage[] = [],
+): string {
+  const input = normalizeAssistantInput(rawInput)
 
   if (!input) {
-    return 'Maaf, saya belum menangkap maksudnya. Coba tanyakan tentang proyek, pengalaman, keahlian, atau kontak.'
+    return 'Hmm, pesannya kosong 😅 Coba tanya misal "kuliah di mana?" atau "kerja di mana?"'
+  }
+
+  const ctx = inferAssistantContext(history)
+
+  // Pertanyaan susulan yang pendek ("dimana?", "kapan?",
+  // "jelaskan") — jawab dari konteks pembicaraan terakhir.
+  if (isBareFollowUp(input)) {
+    const contextual = answerFromContext(
+      input,
+      ctx,
+    )
+
+    if (contextual) {
+      return contextual
+    }
   }
 
   // Bantuan / daftar topik
@@ -901,14 +1629,37 @@ function buildAssistantReply(rawInput: string): string {
       'fitur',
       'bisa apa',
       'topik',
+      'list',
     ])
   ) {
-    return 'Saya bisa menjawab seputar:\n• Tentang Deni\n• Proyek (bisa sebut nama proyek atau teknologi, mis. "proyek React")\n• Pengalaman & pendidikan\n• Keahlian\n• Penghargaan & sertifikat\n• Lokasi & status ketersediaan\n• Kontak, media sosial, dan CV'
+    return 'Aku bisa jawab soal Deni: kuliah, kerja, proyek, skill, kontak, sampai CV. Coba tanya "kuliah di mana?"'
   }
 
-  // Tentang Deni
+  // Kabar
   if (
     includesAnyKeyword(input, [
+      'apa kabar',
+      'apakah kabar',
+      'gimana kabar',
+      'bagaimana kabar',
+      'how are you',
+    ])
+  ) {
+    return 'Kabar aku baik 😊 Mau tanya apa soal Deni? Bisa soal kuliah, kerja, atau proyeknya.'
+  }
+
+  // Nama / biodata singkat
+  if (
+    includesAnyKeyword(input, [
+      'nama lengkap',
+      'nama panjang',
+      'namanya siapa',
+      'nama kamu siapa',
+      'nama beliau',
+      'umur',
+      'usia',
+      'tanggal lahir',
+      'biodata',
       'tentang deni',
       'tentang kamu',
       'siapa deni',
@@ -917,13 +1668,16 @@ function buildAssistantReply(rawInput: string): string {
       'perkenalan',
       'kenalan',
       'about',
+      'who is deni',
     ])
   ) {
-    return 'Deni Purwanto adalah seorang Full Stack Developer yang berbasis di Bandung, Jawa Barat. Ia berlatar Teknik Informatika, berpengalaman membangun aplikasi web dan mobile, dan saat ini terbuka untuk posisi full-time.\n\nTanyakan lebih lanjut soal proyek, pengalaman, atau keahliannya.'
+    return 'Deni itu Full Stack Developer dari Bandung. Lulusan Informatika UNLA, 2+ tahun bikin aplikasi web dan GIS.'
   }
 
-  // Pendidikan
-  if (
+  // Pendidikan — termasuk "Deni kuliah di mana?"
+  // Dicek LEBIH DULU dari lokasi/pengalaman supaya kata
+  // "dimana" + "kuliah" tidak nyasar ke jawaban lokasi.
+  const educationHit =
     includesAnyKeyword(input, [
       'pendidikan',
       'kuliah',
@@ -934,9 +1688,59 @@ function buildAssistantReply(rawInput: string): string {
       'lulusan',
       'education',
       'sekolah',
-    ])
-  ) {
-    return 'Deni menempuh pendidikan di Program Studi Teknik Informatika, Universitas Langlangbuana (UNLA). Selama kuliah ia menjadi asisten laboratorium dan instruktur pengajar (2022–2024), serta meraih penghargaan mahasiswa berprestasi akademik.'
+      'unla',
+      'langlangbuana',
+      'aslab',
+      'asisten lab',
+      'praktikum',
+      'study',
+      'student',
+      'college',
+      'major',
+    ]) ||
+    (includesAnyKeyword(input, [
+      'dimana',
+      'di mana',
+      'mana',
+    ]) &&
+      includesAnyKeyword(input, [
+        'belajar',
+        'menempuh',
+        'sekolah',
+        'kuliah',
+        'kampus',
+        'unla',
+      ]))
+
+  if (educationHit) {
+    // "mengajar / instruktur / dosen" + kuliah = peran
+    // asisten lab, bukan info kampus umum.
+    if (
+      includesAnyKeyword(input, [
+        'mengajar',
+        'instruktur',
+        'dosen',
+        'asisten lab',
+        'aslab',
+        'laboratorium',
+        'praktikum',
+      ])
+    ) {
+      return 'Pas kuliah Deni jadi aslab & instruktur (2022–2024) — bimbing 50+ mahasiswa praktikum Algoritma, Database, sama Web.'
+    }
+
+    if (
+      includesAnyKeyword(input, [
+        'gelar',
+        'sarjana',
+        'lulus kapan',
+        'kapan lulus',
+      ])
+    ) {
+      return 'Deni kuliah Teknik Informatika UNLA, aslab 2022–2024. Tahun lulusnya nggak ditulis di sini — tapi pengalamannya udah 2+ tahun.'
+    }
+
+    return 'Deni kuliah Informatika di UNLA, Bandung. Selama kuliah dia jadi aslab dan instruktur (2022–2024).'
   }
 
   // Penghargaan & sertifikat
@@ -953,14 +1757,123 @@ function buildAssistantReply(rawInput: string): string {
       'achievement',
       'certificate',
       'cert',
+      'piagam',
+      'hartik',
     ])
   ) {
-    return `Penghargaan & pencapaian Deni:\n${ASSISTANT_AWARDS.map(
-      (item) => `• ${item}`,
-    ).join('\n')}\n\nLihat bukti dan detailnya di halaman Penghargaan & Sertifikat.`
+    // Sebut 3 aja biar ringkas, sisanya di halaman Awards.
+    return `Penghargaannya Deni:\n${ASSISTANT_AWARDS.slice(
+      0,
+      3,
+    )
+      .map(
+        (item) => `• ${item}`,
+      )
+      .join(
+        '\n',
+      )}\n\nSisanya cek di halaman Penghargaan ya. Ada yang mau ditanyain lagi?`
   }
 
-  // Lokasi
+  // Pengalaman di tempat tertentu — dicek dulu sebelum
+  // cabang umum, supaya "pengalaman di Mandiri" dapat
+  // jawaban spesifik, bukan daftar umum.
+  const workplaceHit = (
+    needles: string[],
+  ) =>
+    includesAnyKeyword(input, needles)
+
+  if (
+    workplaceHit([
+      'mandiri',
+      'rakamin',
+      'bank mandiri',
+    ])
+  ) {
+    return 'Di Mandiri x Rakamin (Nov–Des 2025) Deni jadi Mobile Dev — bikin aplikasi berita Android (MandiriNewsApps). Ketik "mandirinews" buat lihat detailnya.'
+  }
+
+  if (
+    workplaceHit([
+      'esdm',
+      'patgl',
+      'air tanah',
+      'geologi',
+      'groundwater',
+    ])
+  ) {
+    return 'Di PATGL/ESDM (Des 2025 — Jun 2026) Deni jadi Full Stack Dev — bikin app lab dan peta sumur bor pakai Leaflet.js.'
+  }
+
+  if (
+    workplaceHit([
+      'disdag',
+      'disperindag',
+      'perdagangan',
+      'perindustrian',
+      'pemkab',
+      'kabupaten bandung',
+      'dinas',
+      'umkm',
+    ])
+  ) {
+    return 'Di Disdagperin (Jan–Jun 2025) Deni jadi Full Stack Dev — bikin sistem UMKM plus peta interaktif. Ketik "umkm" buat lihat proyeknya.'
+  }
+
+  if (
+    workplaceHit([
+      'aslab',
+      'asisten lab',
+      'laboratorium',
+      'mengajar',
+      'instruktur',
+      'guru',
+    ])
+  ) {
+    return 'Di UNLA (2022–2024) Deni jadi aslab — bimbing 50+ mahasiswa praktikum, susun modul, sampai ngurus lab. Kuliahnya juga di UNLA, Teknik Informatika.'
+  }
+
+  // English: pendidikan & pengalaman & lokasi — dicek sebelum
+  // cabang Indonesia supaya "where did deni study" tidak
+  // jatuh ke jawaban generik.
+  if (
+    includesAnyKeyword(input, [
+      'where did deni study',
+      'where does deni study',
+      'deni study',
+      'deni university',
+      'deni college',
+      'deni education',
+    ])
+  ) {
+    return 'Deni kuliah Teknik Informatika di UNLA, Bandung — sempat jadi aslab juga (2022–2024).'
+  }
+
+  if (
+    includesAnyKeyword(input, [
+      'where does deni work',
+      'where did deni work',
+      'deni work',
+      'deni job',
+      'deni experience',
+    ])
+  ) {
+    return 'Deni pernah di PATGL/ESDM, Mandiri x Rakamin, Disdagperin Kab. Bandung, sama UNLA. Tanya aja misal "pengalaman di Mandiri".'
+  }
+
+  if (
+    includesAnyKeyword(input, [
+      'where is deni',
+      'where does deni live',
+      'deni location',
+      'deni based',
+    ])
+  ) {
+    return 'Deni di Bandung, Jawa Barat (WIB).'
+  }
+
+  // Lokasi — termasuk "Deni di mana?" / "tinggal di mana?"
+  // Dicek SETELAH pendidikan & pengalaman supaya kata
+  // "dimana" + "kuliah"/"kerja" tidak nyasar ke sini.
   if (
     includesAnyKeyword(input, [
       'lokasi',
@@ -975,10 +1888,10 @@ function buildAssistantReply(rawInput: string): string {
       'location',
     ])
   ) {
-    return 'Deni berbasis di Bandung, Jawa Barat (zona waktu WIB, UTC+7).'
+    return 'Deni di Bandung, Jawa Barat (WIB). Mau ngobrol langsung? Ketik "kontak".'
   }
 
-  // Ketersediaan / rekrutmen / kolaborasi
+  // Ketersediaan / rekrutmen / kolaborasi / freelance / gaji
   if (
     includesAnyKeyword(input, [
       'lowongan',
@@ -996,21 +1909,98 @@ function buildAssistantReply(rawInput: string): string {
       'kerja sama',
       'kerjasama',
       'tawaran',
+      'freelance',
+      'part-time',
+      'part time',
+      'jasa',
+      'dibayar',
+      'gaji',
+      'salary',
+      'rate',
     ])
   ) {
-    return 'Deni saat ini terbuka untuk posisi full-time dan kolaborasi. Silakan hubungi lewat email denipurwanto800@gmail.com atau LinkedIn (deniiprwnt).'
+    if (
+      includesAnyKeyword(input, [
+        'gaji',
+        'salary',
+        'rate',
+        'dibayar',
+      ])
+    ) {
+      return 'Rate/gaji nggak ditulis di sini — langsung tanya Deni aja via email denipurwanto800@gmail.com.'
+    }
+
+    return 'Deni open buat full-time, freelance, dan kolaborasi web dev. Hubungi via email denipurwanto800@gmail.com.'
   }
 
-  // CV
+  // Layanan / bisa bikin apa
+  if (
+    includesAnyKeyword(input, [
+      'bisa bikin',
+      'bisa buat',
+      'bisa membuat',
+      'layanan',
+      'service',
+      'jasa apa',
+      'keunggulan',
+      'kelebihan',
+      'spesialis',
+      'fokus',
+    ])
+  ) {
+    return 'Deni bisa bikin web full-stack, sistem inventaris, dashboard/peta, REST API, dan aplikasi Android.'
+  }
+
+  // Pengalaman kerja saat ini / "Deni kerja di mana?"
+
+  // CV — termasuk "minta CV" / "download CV"
   if (
     includesAnyKeyword(input, [
       'cv',
       'resume',
       'riwayat hidup',
       'curriculum',
+      'download',
+      'unduh',
+    ]) &&
+    includesAnyKeyword(input, [
+      'cv',
+      'resume',
+      'riwayat hidup',
+      'curriculum',
+      'deni',
+      'kamu',
+      'download',
+      'unduh',
+      'minta',
+      'lihat',
+      'buka',
     ])
   ) {
-    return 'Kamu bisa melihat dan mengunduh CV Deni lewat halaman Beranda (tombol "Download CV").'
+    return 'CV Deni ada di Beranda, klik tombol "Resume" — bisa preview dan download PDF.'
+  }
+
+  // Media sosial spesifik
+  const socialHit = (
+    needles: string[],
+  ) =>
+    includesAnyKeyword(input, needles)
+
+  if (socialHit(['whatsapp', 'wa', 'nomor hp', 'nomor telepon', 'telepon', 'nomor'])) {
+    return 'No WA-nya nggak ditulis di sini. Email aja ke denipurwanto800@gmail.com, nanti dilanjut di sana.'
+  }
+
+  if (socialHit(['linkedin'])) {
+    return 'LinkedIn-nya: https://www.linkedin.com/in/deniiprwnt/'
+  }
+
+  if (
+    socialHit([
+      'instagram',
+      'ig',
+    ])
+  ) {
+    return 'IG-nya: https://www.instagram.com/deniiprwnt/'
   }
 
   // Kontak & media sosial
@@ -1031,21 +2021,59 @@ function buildAssistantReply(rawInput: string): string {
       'sosial media',
     ])
   ) {
-    return 'Kamu bisa menghubungi Deni lewat:\n• Email: denipurwanto800@gmail.com\n• LinkedIn: deniiprwnt\n• GitHub: denipurwanto10\n• Instagram: @deniiprwnt\n\nInfo lengkapnya ada di halaman Kontak.'
+    return 'Bisa dihubungi via:\nEmail: denipurwanto800@gmail.com\nLinkedIn: https://www.linkedin.com/in/deniiprwnt/\nGitHub: https://github.com/denipurwanto10'
   }
 
-  // Proyek tertentu (lewat nama)
+  // Proyek tertentu (lewat nama) — interaktif + link klik
   const namedProject = findProjectByName(input)
   if (namedProject) {
-    const lines = [
-      `${namedProject.title} (${namedProject.category})`,
-      `Teknologi: ${namedProject.tags.join(', ')}`,
-      `GitHub: ${namedProject.link}`,
-    ]
-    if (namedProject.demo) {
-      lines.push(`Demo: ${namedProject.demo}`)
+    const shortName = namedProject.title
+      .split('—')[0]
+      .trim()
+
+    return formatProjectReply(
+      namedProject.title,
+      `Mau bahas "${shortName}" lebih dalam? Tanya aja misal "teknologinya?" / "demonya?"`,
+    )
+  }
+
+  // "Proyek <teknologi> apa saja?" — mis. "proyek Laravel",
+  // "aplikasi Python", "web React" — dijawab spesifik dulu
+  // sebelum cabang teknologi umum.
+  const techForProjects = findTechInInput(input)
+  const asksProjectList =
+    techForProjects &&
+    includesAnyKeyword(input, [
+      'proyek',
+      'project',
+      'aplikasi',
+      'website',
+      'karya',
+      'apanya',
+      'apa saja',
+      'apa aja',
+      'list',
+      'daftar',
+      'mana',
+      'yang',
+    ])
+
+  if (techForProjects && asksProjectList) {
+    const matched = projects.filter((item) =>
+      item.tags.some((tag) =>
+        sameTech(tag, techForProjects),
+      ),
+    )
+
+    if (matched.length) {
+      return formatProjectListReply(
+        matched,
+        `Nih ${techForProjects}-nya:`,
+        'Sebut namanya buat detail.',
+      )
     }
-    return `${lines.join('\n')}\n\nDeskripsi lengkapnya ada di halaman Proyek.`
+
+    return `Belum ada proyek ${techForProjects} di sini, tapi Deni bisa kok. Cek halaman Teknologi aja.`
   }
 
   // Teknologi tertentu (mis. "React", "Laravel", "Python")
@@ -1059,33 +2087,21 @@ function buildAssistantReply(rawInput: string): string {
     )
 
     if (usedInProjects.length || usedInJobs.length) {
-      const parts: string[] = []
-
       if (usedInProjects.length) {
-        parts.push(
-          `Deni memakai ${tech} di ${usedInProjects.length} proyek:\n${usedInProjects
-            .slice(0, 5)
-            .map((item) => `• ${item.title}`)
-            .join('\n')}`,
+        return formatProjectListReply(
+          usedInProjects,
+          `Nih ${tech}-nya:`,
+          'Sebut namanya buat detail.',
         )
       }
 
-      if (usedInJobs.length) {
-        parts.push(
-          `${tech} juga dipakai saat ia bekerja/magang di:\n${usedInJobs
-            .slice(0, 3)
-            .map((item) => `• ${item.company}`)
-            .join('\n')}`,
-        )
-      }
-
-      return parts.join('\n\n')
+      return `${tech} dipakai Deni waktu di ${usedInJobs[0]?.company}. Iya, dia bisa ${tech}.`
     }
 
-    return `${tech} termasuk teknologi yang dikuasai Deni. Daftar lengkapnya ada di halaman Teknologi.`
+    return `${tech}? Bisa kok. Daftar lengkapnya ada di halaman Teknologi.`
   }
 
-  // Proyek (umum)
+  // Proyek (umum) — termasuk "ada berapa proyek?"
   if (
     includesAnyKeyword(input, [
       'proyek',
@@ -1096,21 +2112,93 @@ function buildAssistantReply(rawInput: string): string {
       'aplikasi',
       'website',
       'web app',
+      'berapa proyek',
+      'jumlah proyek',
+      'total proyek',
     ])
   ) {
-    const top = projects
-      .slice(0, 3)
-      .map(
-        (item) =>
-          `• ${item.title} — ${item.tags.slice(0, 3).join(', ')}`,
-      )
-      .join('\n')
+    if (
+      includesAnyKeyword(input, [
+        'berapa',
+        'jumlah',
+        'total',
+      ])
+    ) {
+      return `Total ada ${projects.length} proyek di portfolio ini.`
+    }
 
-    return `Beberapa proyek terbaru Deni:\n${top}\n\nSelengkapnya ada di halaman Proyek. Kamu juga bisa menyebut nama proyek atau teknologi tertentu, mis. "Formatra" atau "proyek Laravel".`
+    return formatProjectListReply(
+      projects,
+      'Nih yang terbaru:',
+      `Total ${projects.length} — detail di halaman Proyek.`,
+    )
   }
 
-  // Pengalaman
+  // Kategori proyek: mobile / frontend / backend / AI / fullstack
   if (
+    includesAnyKeyword(input, [
+      'mobile',
+      'android',
+      'kotlin',
+      'ios',
+    ]) &&
+    !findTechInInput(input)
+  ) {
+    const matched = projects.filter(
+      (item) => item.category === 'Mobile',
+    )
+
+    return matched.length
+      ? formatProjectListReply(
+          matched,
+          'Mobile-nya:',
+          'Sebut namanya buat detail.',
+        )
+      : 'Ada, MandiriNewsApps — aplikasi berita Android (Kotlin).'
+  }
+
+  if (
+    includesAnyKeyword(input, [
+      'fullstack',
+      'full-stack',
+      'full stack',
+    ])
+  ) {
+    const matched = projects.filter(
+      (item) => item.category === 'Full-Stack',
+    )
+
+    return formatProjectListReply(
+      matched,
+      'Full-stack-nya:',
+      'Sebut namanya buat detail.',
+    )
+  }
+
+  if (
+    includesAnyKeyword(input, [
+      ' ai',
+      'kecerdasan buatan',
+      'machine learning',
+      'gesture',
+      'voice',
+      'suara',
+    ])
+  ) {
+    const pcControl = projects.find((item) =>
+      item.title.startsWith('PC Control'),
+    )
+
+    return pcControl
+      ? formatProjectReply(pcControl.title)
+      : 'Ada, PC Control. Kontrol PC pakai gestur + suara + bot Telegram.'
+  }
+
+  // Pengalaman — termasuk "Deni kerja di mana?"
+  // (catatan: pengalaman di Mandiri / ESDM / Disdag / Aslab
+  // sudah ditangani spesifik di atas, jadi cabang ini aman
+  // untuk pertanyaan umum)
+  const experienceHit =
     includesAnyKeyword(input, [
       'pengalaman',
       'experience',
@@ -1122,21 +2210,54 @@ function buildAssistantReply(rawInput: string): string {
       'jabatan',
       'posisi',
       'work',
-    ])
-  ) {
-    const top = experiences
-      .slice(0, 3)
-      .map(
-        (item) =>
-          `• ${item.role} — ${item.company} (${localizeYear(item.year)})`,
-      )
-      .join('\n')
+      'kantor',
+      'perusahaan',
+      'bekerja',
+    ]) ||
+    (includesAnyKeyword(input, [
+      'dimana',
+      'di mana',
+      'mana',
+    ]) &&
+      includesAnyKeyword(input, [
+        'kerja',
+        'magang',
+        'kantor',
+        'perusahaan',
+        'deni',
+        'sekarang',
+        'dulu',
+        'pernah',
+      ]))
 
-    return `Pengalaman terbaru Deni:\n${top}\n\nDetail lengkapnya ada di halaman Pengalaman.`
+  if (experienceHit) {
+    if (
+      includesAnyKeyword(input, [
+        'sekarang',
+        'saat ini',
+        'terakhir',
+        'terbaru',
+        'current',
+      ])
+    ) {
+      const last = experiences[0]
+
+      return last
+        ? `Terakhir di ${last.company} sebagai ${last.role}.`
+        : 'Cek halaman Pengalaman ya.'
+    }
+
+    return `Deni pernah di:\n${experiences
+      .map(
+        (item) => `• ${item.company}`,
+      )
+      .join(
+        '\n',
+      )}`
   }
 
-  // Keahlian (umum)
-  if (
+  // Keahlian (umum) — termasuk "Deni bisa X?"
+  const skillHit =
     includesAnyKeyword(input, [
       'keahlian',
       'skill',
@@ -1151,11 +2272,110 @@ function buildAssistantReply(rawInput: string): string {
       'database',
       'tools',
       'bahasa pemrograman',
+      'bisa apa',
+      'menguasai',
+      'jago',
+    ]) ||
+    (includesAnyKeyword(input, [
+      'bisa',
+      'paham',
+      'ngerti',
+      'mengerti',
+    ]) &&
+      !findTechInInput(input))
+
+  if (skillHit) {
+    return `Teknologi andalan Deni: ${stack
+      .slice(0, 6)
+      .join(', ')}.`
+  }
+
+  // Navigasi halaman portfolio
+  if (
+    includesAnyKeyword(input, [
+      'halaman',
+      'navigasi',
+      'menu web',
+      'bagian',
+      'section',
+      'tab',
+      'fitur web',
+      'isi web',
+      'isi portfolio',
     ])
   ) {
-    return `Deni banyak bekerja dengan ${stack
-      .slice(0, 10)
-      .join(', ')}, dan masih banyak lagi. Daftar lengkapnya ada di halaman Teknologi.`
+    return 'Ada Beranda, Pengalaman, Proyek, Penghargaan, Teknologi, Kontak. Klik aja di sidebar.'
+  }
+
+  if (
+    includesAnyKeyword(input, [
+      'blog',
+      'artikel',
+      'tulisan',
+      'catatan',
+    ])
+  ) {
+    return 'Blog-nya masih coming soon. Tanya soal proyek / pengalaman aja dulu.'
+  }
+
+  if (
+    includesAnyKeyword(input, [
+      'komunitas',
+      'organisasi',
+      'community',
+      'leadership',
+    ])
+  ) {
+    return 'Deni aktif di komunitas & suka sharing ilmu. Detailnya di halaman Komunitas.'
+  }
+
+  if (
+    includesAnyKeyword(input, [
+      'github deni',
+      'akun github',
+      'repo',
+      'repositori',
+      'open source',
+    ])
+  ) {
+    return 'GitHub Deni: https://github.com/denipurwanto10'
+  }
+
+  // Hobi / fakta ringan
+  if (
+    includesAnyKeyword(input, [
+      'hobi',
+      'hobby',
+      'kesukaan',
+      'suka apa',
+      'minat',
+      'fakta unik',
+      'fakta menarik',
+    ])
+  ) {
+    return 'Deni suka peta/geospasial, eksperimen AI, dan desain UI/UX. Pernah juara 2 lomba UI/UX 2023 😄'
+  }
+
+  // Bahasa / English
+  if (
+    includesAnyKeyword(input, [
+      'bahasa inggris',
+      'english',
+      'speak english',
+    ])
+  ) {
+    return 'Bisa kok, tanya aja pakai Inggris. Misal "where did Deni study?"'
+  }
+
+  if (
+    includesAnyKeyword(input, [
+      'who is deni',
+      'what projects',
+      'deni projects',
+      'what can you do',
+    ])
+  ) {
+    return 'Deni — Full Stack Developer dari Bandung. Lulusan Informatika UNLA, 2+ tahun bikin web & GIS. Open full-time.'
   }
 
   // Identitas bot
@@ -1170,7 +2390,7 @@ function buildAssistantReply(rawInput: string): string {
       'kamu ai',
     ])
   ) {
-    return 'Saya asisten virtual untuk portofolio Deni Purwanto, seorang Full Stack Developer. Tanyakan saja soal proyek, pengalaman, atau cara menghubunginya.'
+    return 'Aku asisten virtual untuk portfolio Deni. Tanya aja soal kuliah, kerja, atau proyeknya.'
   }
 
   // Terima kasih
@@ -1184,7 +2404,7 @@ function buildAssistantReply(rawInput: string): string {
       'thx',
     ])
   ) {
-    return 'Sama-sama! Silakan tanya lagi kalau ada yang ingin diketahui tentang portofolio ini 🙌'
+    return 'Sama-sama! Tanya lagi aja kalau butuh 🙌'
   }
 
   // Pamit
@@ -1198,7 +2418,7 @@ function buildAssistantReply(rawInput: string): string {
       'pamit',
     ])
   ) {
-    return 'Sampai jumpa! Kalau ada yang ingin ditanyakan lagi, saya di sini 👋'
+    return 'Dadah! Aku di sini kalau butuh 👋'
   }
 
   // Sapaan
@@ -1214,10 +2434,10 @@ function buildAssistantReply(rawInput: string): string {
       'permisi',
     ])
   ) {
-    return 'Halo juga 👋 Tanyakan apa saja tentang proyek, pengalaman kerja, teknologi, atau cara menghubungi Deni.'
+    return 'Halo juga 👋 Mau tanya apa soal Deni?'
   }
 
-  return "Maaf, saya belum paham maksudnya. Coba tanyakan tentang 'proyek', 'pengalaman', 'keahlian', 'penghargaan', atau 'kontak' — atau ketik 'bantuan' untuk melihat daftar topik. Kamu juga bisa pindah ke Global Chat untuk ngobrol langsung dengan Deni."
+  return "Aku kurang nangkep 😅 Coba tanya 'kuliah di mana?', 'proyek laravel?', atau ketik 'bantuan'."
 }
 
 /** Ubah URL di dalam jawaban bot menjadi tautan yang bisa diklik. */
@@ -1305,14 +2525,22 @@ export default function LiveChat() {
         return
       }
 
-      setAssistantMessages((prev) => [
-        ...prev,
+      // Riwayat untuk konteks: semua pesan sejauh ini
+      // + pesan user yang baru, supaya pertanyaan susulan
+      // ("dimana?", "teknologinya?") tahu topik terakhir.
+      const userMsg: AssistantMessage =
         {
           id: `u-${Date.now()}`,
           from: 'user',
           text,
-        },
-      ])
+        }
+
+      const historyForReply = [
+        ...assistantMessages,
+        userMsg,
+      ]
+
+      setAssistantMessages(historyForReply)
 
       setAssistantDraft('')
       setAssistantTyping(true)
@@ -1326,7 +2554,10 @@ export default function LiveChat() {
             {
               id: `b-${Date.now()}`,
               from: 'bot',
-              text: buildAssistantReply(text),
+              text: buildAssistantReply(
+                text,
+                historyForReply,
+              ),
             },
           ])
           setAssistantTyping(false)
@@ -1334,7 +2565,7 @@ export default function LiveChat() {
         500,
       )
     },
-    [assistantDraft],
+    [assistantDraft, assistantMessages],
   )
 
   const clearAssistantConversation = useCallback(() => {
