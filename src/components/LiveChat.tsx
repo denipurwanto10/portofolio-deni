@@ -799,7 +799,7 @@ type AssistantMessage = {
 const ASSISTANT_WELCOME: AssistantMessage = {
   id: 'welcome',
   from: 'bot',
-  text: 'Halo, saya Asisten Virtual Deni 👋 Silakan tanya seputar proyek, pengalaman, teknologi yang dikuasai, atau cara menghubungi Deni.',
+  text: 'Halo, Saya Asisten Virtual Deni 👋 Silakan tanya seputar portfolio atau cara menghubungi Deni.',
 }
 
 const ASSISTANT_QUICK_REPLIES = [
