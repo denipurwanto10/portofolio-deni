@@ -1,4 +1,4 @@
-# Fariz Portfolio — Vite + React + TypeScript
+# Deni Portfolio — Vite + React + TypeScript
 
 Template portfolio dashboard dengan layout sidebar, statistik, dotted background, sections, dan responsive mobile.
 
