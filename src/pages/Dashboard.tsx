@@ -1466,9 +1466,7 @@ function GithubContributions() {
             </a>
 
             <div className="github-legend">
-              <span>
-               Less
-              </span>
+              <span>Less</span>
 
               <span className="legend-box level-0" />
               <span className="legend-box level-1" />
@@ -1476,7 +1474,7 @@ function GithubContributions() {
               <span className="legend-box level-3" />
               <span className="legend-box level-4" />
 
-              <span>Lebih banyak</span>
+              <span>More</span>
             </div>
           </div>
         </>

@@ -78,6 +78,7 @@ const translations: Record<string, string> = {
   "What's this?": 'Apa ini?',
   "what's this?": 'apa ini?',
   Total: 'Total',
+  Less: 'Lebih sedikit',
   More: 'Lebih banyak',
   Updated: 'Diperbarui',
   'As of': 'Per',
