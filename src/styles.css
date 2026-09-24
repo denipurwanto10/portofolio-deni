@@ -233,43 +233,10 @@ a {
 ========================= */
 
 /*
-   CARD HOVER BORDER
-   Kartu utama pada setiap halaman dan sidebar memakai border yang
-   mengikuti tema: hitam pada light mode, putih pada dark mode.
-   Hanya border yang berubah saat hover — ukuran, posisi, dan shadow
-   tidak ikut bergerak.
+   CARD UTAMA
+   Card/panel utama dan sidebar tidak memiliki efek hover.
+   Efek hover hanya digunakan pada card konten bagian dalam.
 */
-.sidebar,
-.now-card,
-.time-card,
-.hero-card,
-.github-card,
-.panel,
-.projects-panel,
-.techstack-panel,
-.contact-panel,
-.blog-panel,
-.community-panel,
-.experience-panel,
-.awards-panel {
-  transition: border-color 0.2s ease;
-}
-
-.sidebar:hover,
-.now-card:hover,
-.time-card:hover,
-.hero-card:hover,
-.github-card:hover,
-.panel:hover,
-.projects-panel:hover,
-.techstack-panel:hover,
-.contact-panel:hover,
-.blog-panel:hover,
-.community-panel:hover,
-.experience-panel:hover,
-.awards-panel:hover {
-  border-color: var(--card-hover-border);
-}
 
 .sidebar {
   position: fixed;
@@ -3542,6 +3509,11 @@ a {
   border-radius: 13px;
   overflow: hidden;
 }
+
+.experience-card:hover {
+  border-color: var(--card-hover-border);
+}
+
 
 .experience-image-wrap {
   width: 96px;
