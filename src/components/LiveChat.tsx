@@ -12,6 +12,7 @@ import {
   MessageSquare,
   Reply,
   SendHorizonal,
+  Smile,
   Trash2,
   Users,
   X,
@@ -19,6 +20,7 @@ import {
 import {
   addDoc,
   collection,
+  deleteField,
   doc,
   getDoc,
   limit,
@@ -55,6 +57,68 @@ type ChatMessage = {
   photoURL: string | null
   createdAt: Timestamp | null
   replyTo: ChatReplyTo | null
+  reactions: Record<string, string[]>
+}
+
+/**
+ * Emoji reaksi ala WhatsApp yang tersedia.
+ */
+const REACTION_EMOJIS = [
+  '❤️',
+  '👍',
+  '😂',
+  '😮',
+  '😢',
+  '🙏',
+] as const
+
+type ReactionEmoji =
+  (typeof REACTION_EMOJIS)[number]
+
+/**
+ * Normalisasi field `reactions` dari Firestore menjadi
+ * Record<emoji, uid[]> yang aman — data liar diabaikan
+ * supaya 1 dokumen rusak tidak merusak seluruh list.
+ */
+function parseReactions(
+  raw: unknown,
+): Record<string, string[]> {
+  if (
+    !raw ||
+    typeof raw !== 'object' ||
+    Array.isArray(raw)
+  ) {
+    return {}
+  }
+
+  const out: Record<string, string[]> =
+    {}
+
+  for (const [
+    key,
+    value,
+  ] of Object.entries(
+    raw as Record<string, unknown>,
+  )) {
+    if (
+      typeof key !== 'string' ||
+      !Array.isArray(value)
+    ) {
+      continue
+    }
+
+    const uids = value.filter(
+      (item): item is string =>
+        typeof item === 'string' &&
+        item.length > 0,
+    )
+
+    if (uids.length > 0) {
+      out[key] = uids
+    }
+  }
+
+  return out
 }
 
 const MESSAGES_QUERY = query(
@@ -3221,6 +3285,10 @@ export default function LiveChat() {
                               : undefined,
                         }
                       : null,
+
+                  reactions: parseReactions(
+                    data.reactions,
+                  ),
                 }
               },
             )
@@ -3461,6 +3529,159 @@ export default function LiveChat() {
       user,
     ])
 
+  /**
+   * REACTION ala WhatsApp — 1 akun = 1 emoji per pesan.
+   *
+   * Dipakai DUA arah (hasilnya sama):
+   * - dari popup emoji (tombol 😊 di samping Reply), dan
+   * - langsung dari pil reaksi yang nempel di bubble.
+   *
+   * - Belum login -> minta login dulu (seperti Reply).
+   * - Ketuk emoji yang sama (dari popup ATAU dari pil) ->
+   *   hapus field-nya sekalian (deleteField), jadi tidak
+   *   ada sisa array kosong di Firestore.
+   * - Ketuk emoji lain -> pindah: field emoji lama yang
+   *   jadi kosong ikut dihapus, uid ditambah ke emoji baru.
+   */
+  const toggleReaction =
+    useCallback(
+      async (
+        message: ChatMessage,
+        emoji: ReactionEmoji,
+      ) => {
+        if (!user) {
+          void handleLogin()
+          return
+        }
+
+        const current =
+          message.reactions[emoji] ?? []
+        const mine =
+          current.includes(user.uid)
+
+        const updates: Record<
+          string,
+          string[] | ReturnType<typeof deleteField>
+        > = {}
+
+        if (mine) {
+          // Batal: kalau sisanya kosong, hapus field-nya
+          // sekalian supaya tidak ada array kosong.
+          const rest = current.filter(
+            (uid) => uid !== user.uid,
+          )
+
+          updates[`reactions.${emoji}`] =
+            rest.length > 0
+              ? rest
+              : deleteField()
+        } else {
+          // Pindah: bersihkan uid-ku dari emoji lain
+          // (field yang jadi kosong ikut dihapus),
+          // lalu tambah ke emoji yang diketuk.
+          for (const [
+            key,
+            uids,
+          ] of Object.entries(
+            message.reactions,
+          )) {
+            if (
+              key !== emoji &&
+              uids.includes(user.uid)
+            ) {
+              const rest = uids.filter(
+                (uid) =>
+                  uid !== user.uid,
+              )
+
+              updates[`reactions.${key}`] =
+                rest.length > 0
+                  ? rest
+                  : deleteField()
+            }
+          }
+
+          updates[`reactions.${emoji}`] = [
+            ...current,
+            user.uid,
+          ]
+        }
+
+        try {
+          await updateDoc(
+            doc(
+              db,
+              'messages',
+              message.id,
+            ),
+            updates,
+          )
+        } catch {
+          setSendError(
+            'Reaction failed to send. Check Firestore rules and try again.',
+          )
+        }
+      },
+      [handleLogin, user],
+    )
+
+  /**
+   * ID pesan yang popup emojinya sedang terbuka.
+   * Cukup 1 dalam 1 waktu — ala WhatsApp.
+   */
+  const [reactionFor, setReactionFor] =
+    useState<string | null>(null)
+
+  /**
+   * Tutup popup reaksi saat:
+   * - tekan Escape (laptop), atau
+   * - ketuk di luar popup (khusus HP/sentuh — di laptop
+   *   hover sudah cukup, tapi klik-di-luar tetap ditangani
+   *   supaya popup tidak nyangkut).
+   */
+  useEffect(() => {
+    if (reactionFor === null) {
+      return
+    }
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setReactionFor(null)
+      }
+    }
+
+    const onPointerDown = (event: PointerEvent) => {
+      const target = event.target as HTMLElement | null
+
+      if (
+        target?.closest?.('.chat-react-wrap')
+      ) {
+        return
+      }
+
+      setReactionFor(null)
+    }
+
+    document.addEventListener(
+      'keydown',
+      onKeyDown,
+    )
+    document.addEventListener(
+      'pointerdown',
+      onPointerDown,
+    )
+
+    return () => {
+      document.removeEventListener(
+        'keydown',
+        onKeyDown,
+      )
+      document.removeEventListener(
+        'pointerdown',
+        onPointerDown,
+      )
+    }
+  }, [reactionFor])
   /**
    * REPLY
    */
@@ -3935,7 +4156,179 @@ export default function LiveChat() {
                             />
                             Reply
                           </button>
+
+                          <div className="chat-react-wrap">
+                            <button
+                              type="button"
+                              className="chat-react-button"
+                              onClick={() =>
+                                setReactionFor(
+                                  (prev) =>
+                                    prev ===
+                                    message.id
+                                      ? null
+                                      : message.id,
+                                )
+                              }
+                              aria-label={`React to ${displayName}'s message`}
+                              aria-expanded={
+                                reactionFor ===
+                                message.id
+                              }
+                              title={
+                                user
+                                  ? 'React'
+                                  : 'Sign in to react'
+                              }
+                            >
+                              <Smile
+                                size={13}
+                              />
+                            </button>
+
+                            {reactionFor ===
+                              message.id && (
+                              <div
+                                className="chat-react-popup"
+                                role="menu"
+                                aria-label="Choose a reaction"
+                              >
+                                {REACTION_EMOJIS.map(
+                                  (emoji) => {
+                                    const reacted =
+                                      !!user &&
+                                      (
+                                        message
+                                          .reactions[
+                                          emoji
+                                        ] ??
+                                        []
+                                      ).includes(
+                                        user.uid,
+                                      )
+
+                                    return (
+                                      <button
+                                        key={
+                                          emoji
+                                        }
+                                        type="button"
+                                        className={
+                                          reacted
+                                            ? 'chat-react-emoji is-active'
+                                            : 'chat-react-emoji'
+                                        }
+                                        onClick={() => {
+                                          void toggleReaction(
+                                            message,
+                                            emoji,
+                                          )
+                                          setReactionFor(
+                                            null,
+                                          )
+                                        }}
+                                        role="menuitem"
+                                        aria-label={`React with ${emoji}`}
+                                        title={
+                                          user
+                                            ? `React ${emoji}`
+                                            : 'Sign in to react'
+                                        }
+                                      >
+                                        {
+                                          emoji
+                                        }
+                                      </button>
+                                    )
+                                  },
+                                )}
+                              </div>
+                            )}
+                          </div>
                         </span>
+
+                        {Object.entries(
+                          message.reactions,
+                        ).filter(
+                          ([, uids]) =>
+                            uids.length > 0,
+                        ).length > 0 && (
+                          <div className="chat-reactions">
+                            {Object.entries(
+                              message.reactions,
+                            )
+                              .filter(
+                                ([, uids]) =>
+                                  uids.length >
+                                  0,
+                              )
+                              .map(
+                                ([
+                                  emoji,
+                                  uids,
+                                ]) => {
+                                  const reacted =
+                                    !!user &&
+                                    uids.includes(
+                                      user.uid,
+                                    )
+
+                                  return (
+                                    <button
+                                      key={
+                                        emoji
+                                      }
+                                      type="button"
+                                      className={
+                                        reacted
+                                          ? 'chat-reaction is-mine'
+                                          : 'chat-reaction'
+                                      }
+                                      onClick={() => {
+                                        if (
+                                          !REACTION_EMOJIS.includes(
+                                            emoji as ReactionEmoji,
+                                          )
+                                        ) {
+                                          return
+                                        }
+
+                                        void toggleReaction(
+                                          message,
+                                          emoji as ReactionEmoji,
+                                        )
+                                      }}
+                                      title={
+                                        user
+                                          ? reacted
+                                            ? `Cancel ${emoji} reaction`
+                                            : `React ${emoji}`
+                                          : 'Sign in to react'
+                                      }
+                                      aria-label={
+                                        reacted
+                                          ? `Cancel your ${emoji} reaction (${uids.length} ${uids.length === 1 ? 'person' : 'people'})`
+                                          : `${emoji} by ${uids.length} ${uids.length === 1 ? 'person' : 'people'} — tap to react`
+                                      }
+                                    >
+                                      <span
+                                        aria-hidden="true"
+                                      >
+                                        {
+                                          emoji
+                                        }
+                                      </span>
+                                      <span className="chat-reaction-count">
+                                        {
+                                          uids.length
+                                        }
+                                      </span>
+                                    </button>
+                                  )
+                                },
+                              )}
+                          </div>
+                        )}
                       </div>
 
                       {mine &&
