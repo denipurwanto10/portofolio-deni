@@ -14,7 +14,10 @@ import './CustomCursor.css'
  *    ke segala arah lalu jatuh oleh gravitasi) + riak di permukaan.
  *
  * Catatan:
- *  - Hanya aktif di perangkat dengan mouse (hover + pointer: fine).
+ *  - Panah cursor hanya untuk perangkat dengan mouse (hover + pointer: fine).
+ *  - Efek cipratan air berlaku di SEMUA perangkat. Di layar sentuh
+ *    (HP/tablet) efeknya muncul saat TAP — bukan saat menggeser
+ *    layar/scroll — dan sedikit lebih besar agar tidak tertutup jari.
  *  - Cursor bawaan baru disembunyikan setelah mouse bergerak
  *    (class `cc-active`), jadi aman kalau JS gagal jalan.
  *  - Respect `prefers-reduced-motion`: tanpa efek air.
@@ -57,6 +60,13 @@ const FLIGHT_STEPS = 10
 /** Batas elemen efek di DOM supaya klik beruntun tidak menumpuk. */
 const MAX_FX = 64
 
+/** Tap di layar sentuh: geser maksimal (px) & lama sentuhan maksimal (ms). */
+const TAP_MAX_MOVE = 12
+const TAP_MAX_TIME = 600
+
+/** Efek di layar sentuh dibuat sedikit lebih besar (jari menutupi titik tap). */
+const TOUCH_SCALE = 1.5
+
 type CursorState = 'default' | 'hover' | 'text' | 'disabled' | 'hidden'
 
 function detectState(target: Element | null): CursorState {
@@ -69,8 +79,8 @@ function detectState(target: Element | null): CursorState {
 }
 
 function CustomCursor() {
-  // Hanya untuk perangkat dengan mouse/trackpad.
-  const [enabled] = useState(
+  // Panah cursor hanya untuk perangkat dengan mouse/trackpad.
+  const [finePointer] = useState(
     () =>
       typeof window !== 'undefined' &&
       typeof window.matchMedia === 'function' &&
@@ -82,12 +92,10 @@ function CustomCursor() {
   const fxRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    if (!enabled) return
-
     const root = rootRef.current
-    const cursor = cursorRef.current
+    const cursor = cursorRef.current // null di layar sentuh (tanpa panah)
     const fx = fxRef.current
-    if (!root || !cursor || !fx) return
+    if (!root || !fx) return
 
     const html = document.documentElement
     const reduceMotion = window.matchMedia(
@@ -103,7 +111,7 @@ function CustomCursor() {
     }
 
     const onMove = (event: PointerEvent) => {
-      if (event.pointerType === 'touch') return
+      if (!cursor || event.pointerType === 'touch') return
 
       cursor.style.transform = `translate3d(${event.clientX}px, ${event.clientY}px, 0)`
 
@@ -120,7 +128,7 @@ function CustomCursor() {
     }
 
     /** Cipratan air di titik klik. */
-    const splash = (x: number, y: number) => {
+    const splash = (x: number, y: number, scale = 1) => {
       if (reduceMotion) return
 
       while (fx.childElementCount > MAX_FX) {
@@ -143,7 +151,8 @@ function CustomCursor() {
       }
 
       // Percikan pusat (titik benturan)
-      const impact = spawn('cc-impact', 16)
+      const gravity = GRAVITY * scale
+      const impact = spawn('cc-impact', 16 * scale)
       cleanup(
         impact,
         impact.animate(
@@ -157,7 +166,7 @@ function CustomCursor() {
 
       // Riak di permukaan air
       RIPPLES.forEach(({ delay, duration, size }) => {
-        const ripple = spawn('cc-ripple', size)
+        const ripple = spawn('cc-ripple', size * scale)
         cleanup(
           ripple,
           ripple.animate(
@@ -185,7 +194,7 @@ function CustomCursor() {
 
       // Tetesan air: gerak parabola (lontar lalu jatuh oleh gravitasi)
       for (let i = 0; i < DROPLETS; i += 1) {
-        const width = 2.5 + Math.random() * 3
+        const width = (2.5 + Math.random() * 3) * scale
         const droplet = spawn('cc-droplet', width)
         droplet.style.height = `${width * 1.7}px`
 
@@ -195,7 +204,7 @@ function CustomCursor() {
           -Math.PI / 2 +
           ((i / DROPLETS) * 2 - 1) * Math.PI * 0.95 +
           (Math.random() - 0.5) * 0.35
-        const speed = 85 + Math.random() * 115
+        const speed = (85 + Math.random() * 115) * scale
         const vx = Math.cos(angle) * speed
         const vy = Math.sin(angle) * speed
         const flight = 0.55 + Math.random() * 0.3
@@ -205,9 +214,9 @@ function CustomCursor() {
           const progress = step / FLIGHT_STEPS
           const t = flight * progress
           const px = vx * t
-          const py = vy * t + 0.5 * GRAVITY * t * t
+          const py = vy * t + 0.5 * gravity * t * t
           // Ujung tetesan selalu mengarah ke arah gerak
-          const heading = Math.atan2(vy + GRAVITY * t, vx)
+          const heading = Math.atan2(vy + gravity * t, vx)
           const rotate = (heading * 180) / Math.PI - 90
           frames.push({
             transform: `translate(calc(-50% + ${px}px), calc(-50% + ${py}px)) rotate(${rotate}deg) scale(${1 - progress * 0.55})`,
@@ -226,13 +235,52 @@ function CustomCursor() {
       }
     }
 
+    // Tap di layar sentuh: efek muncul saat jari DIANGKAT, dan hanya kalau
+    // sentuhannya pendek & tidak bergeser. Saat menggeser layar (scroll),
+    // browser mengirim pointercancel sehingga efek tidak muncul.
+    let tap: { id: number; x: number; y: number; time: number } | null = null
+
     const onDown = (event: PointerEvent) => {
-      if (event.pointerType === 'touch' || event.button !== 0) return
+      if (event.pointerType === 'touch') {
+        tap = event.isPrimary
+          ? {
+              id: event.pointerId,
+              x: event.clientX,
+              y: event.clientY,
+              time: performance.now(),
+            }
+          : null // multi-touch (mis. pinch) bukan tap
+        return
+      }
+
+      if (event.button !== 0) return
       root.dataset.pressed = 'true'
       splash(event.clientX, event.clientY)
     }
 
-    const onUp = () => {
+    const onUp = (event: PointerEvent) => {
+      if (event.pointerType === 'touch') {
+        if (tap && tap.id === event.pointerId) {
+          const moved = Math.hypot(event.clientX - tap.x, event.clientY - tap.y)
+          const held = performance.now() - tap.time
+
+          if (moved <= TAP_MAX_MOVE && held <= TAP_MAX_TIME) {
+            splash(event.clientX, event.clientY, TOUCH_SCALE)
+          }
+        }
+        tap = null
+        return
+      }
+
+      root.dataset.pressed = 'false'
+    }
+
+    const onCancel = (event: PointerEvent) => {
+      if (event.pointerType === 'touch') {
+        tap = null
+        return
+      }
+
       root.dataset.pressed = 'false'
     }
 
@@ -254,7 +302,7 @@ function CustomCursor() {
     window.addEventListener('pointermove', onMove, { passive: true })
     window.addEventListener('pointerdown', onDown, { passive: true })
     window.addEventListener('pointerup', onUp, { passive: true })
-    window.addEventListener('pointercancel', onUp, { passive: true })
+    window.addEventListener('pointercancel', onCancel, { passive: true })
     document.addEventListener('mouseout', onOut)
     window.addEventListener('blur', onHide)
 
@@ -262,19 +310,20 @@ function CustomCursor() {
       window.removeEventListener('pointermove', onMove)
       window.removeEventListener('pointerdown', onDown)
       window.removeEventListener('pointerup', onUp)
-      window.removeEventListener('pointercancel', onUp)
+      window.removeEventListener('pointercancel', onCancel)
       document.removeEventListener('mouseout', onOut)
       window.removeEventListener('blur', onHide)
       html.classList.remove('cc-active')
       fx.replaceChildren()
     }
-  }, [enabled])
+  }, [finePointer])
 
-  if (!enabled) return null
+  if (typeof window === 'undefined') return null
 
   return (
     <div className="cc-root" ref={rootRef} aria-hidden="true">
       <div className="cc-fx" ref={fxRef} />
+      {finePointer && (
       <div className="cc-cursor" ref={cursorRef}>
         {/* Panah navigasi: ujung (0,0) = titik klik */}
         <svg
@@ -334,6 +383,7 @@ function CustomCursor() {
           />
         </svg>
       </div>
+      )}
     </div>
   )
 }

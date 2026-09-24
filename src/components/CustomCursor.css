@@ -40,15 +40,15 @@ html.cc-active iframe {
   z-index: 2147483646;
   pointer-events: none;
   overflow: hidden;
-  opacity: 0;
-  transition: opacity 0.15s ease;
 }
 
-.cc-root[data-visible='true'] {
+/* Panah baru terlihat setelah mouse bergerak (efek cipratan tidak
+   ikut disembunyikan, supaya tetap jalan di layar sentuh). */
+.cc-root[data-visible='true'] .cc-cursor {
   opacity: 1;
 }
 
-.cc-root[data-state='hidden'] {
+.cc-root[data-state='hidden'] .cc-cursor {
   opacity: 0;
 }
 
@@ -60,6 +60,8 @@ html.cc-active iframe {
   left: 0;
   width: 0;
   height: 0;
+  opacity: 0;
+  transition: opacity 0.15s ease;
   will-change: transform;
 }
 
