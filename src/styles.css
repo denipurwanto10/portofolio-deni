@@ -7582,6 +7582,32 @@ body::-webkit-scrollbar-corner,
 }
 
 /* =========================================================
+   COPY PROTECTION — konten portfolio tidak dapat dipilih/di-drag
+   Field form tetap dapat digunakan seperti biasa.
+========================================================= */
+.app,
+.app * {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.app input,
+.app textarea,
+.app select,
+.app [contenteditable="true"] {
+  -webkit-user-select: text;
+  user-select: text;
+  -webkit-touch-callout: default;
+}
+
+.app img,
+.app svg {
+  -webkit-user-drag: none;
+  user-drag: none;
+}
+
+/* =========================================================
    MOBILE — sembunyikan scrollbar visual
    Tetap bisa scroll dengan gesture/touch/swipe.
 ========================================================= */

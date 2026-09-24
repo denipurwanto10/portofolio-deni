@@ -119,6 +119,63 @@ function App() {
     }
   }, [])
 
+  // Lindungi konten portfolio dari aksi copy/drag/context-menu.
+  // Field input/textarea/contenteditable tetap dibiarkan normal agar
+  // pengguna masih bisa mengetik dan mengedit pesan di Live Chat.
+  useEffect(() => {
+    const isEditableTarget = (target: EventTarget | null) => {
+      const element = target as HTMLElement | null
+      if (!element) return false
+
+      return Boolean(
+        element.closest(
+          'input, textarea, select, [contenteditable="true"]',
+        ),
+      )
+    }
+
+    const blockContextMenu = (event: MouseEvent) => {
+      if (!isEditableTarget(event.target)) {
+        event.preventDefault()
+      }
+    }
+
+    const blockCopy = (event: ClipboardEvent) => {
+      if (!isEditableTarget(event.target)) {
+        event.preventDefault()
+      }
+    }
+
+    const blockDrag = (event: DragEvent) => {
+      if (!isEditableTarget(event.target)) {
+        event.preventDefault()
+      }
+    }
+
+    const blockCopyShortcut = (event: KeyboardEvent) => {
+      if (isEditableTarget(event.target)) return
+
+      const key = event.key.toLowerCase()
+      if ((event.ctrlKey || event.metaKey) && (key === 'c' || key === 'x')) {
+        event.preventDefault()
+      }
+    }
+
+    document.addEventListener('contextmenu', blockContextMenu)
+    document.addEventListener('copy', blockCopy)
+    document.addEventListener('cut', blockCopy)
+    document.addEventListener('dragstart', blockDrag)
+    document.addEventListener('keydown', blockCopyShortcut)
+
+    return () => {
+      document.removeEventListener('contextmenu', blockContextMenu)
+      document.removeEventListener('copy', blockCopy)
+      document.removeEventListener('cut', blockCopy)
+      document.removeEventListener('dragstart', blockDrag)
+      document.removeEventListener('keydown', blockCopyShortcut)
+    }
+  }, [])
+
   // BUG FIX (mobile): kunci scroll body + tutup dengan Escape
   // selama drawer sidebar terbuka, supaya konten belakang
   // tidak ikut kegeser saat menu digeser/di-scroll.
