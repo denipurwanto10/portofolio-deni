@@ -26,4 +26,3 @@ npm run preview
 - Tambahkan file CV dengan nama `public/cv.pdf`.
 - Ganti link Instagram, GitHub, project, dan kontak sesuai data kamu.
 
-Catatan: Ini adalah implementasi ulang berdasarkan referensi tampilan, bukan source code asli website referensi.
