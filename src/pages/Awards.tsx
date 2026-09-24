@@ -36,6 +36,13 @@ const awardItems: AwardItem[] = [
     label: 'View University Graduate Internship Program image',
   },
   {
+    image: '/awards/pbi.jpg',
+    title: 'Certificate of Competency',
+    subtitle: 'Project Based Internship • December 2025',
+    alt: 'Certificate of Competency – Project Based Internship',
+    label: 'View Project Based Internship Certificate image',
+  },
+  {
     image: '/awards/piagam.webp',
     title: 'Best Performing Student in Academic Achievement',
     subtitle: 'UNLA Anniversary • May 2024',
@@ -290,13 +297,57 @@ function Awards() {
                 </div>
               </article>
 
+<article
+  className="award-card reveal"
+  style={{ ['--reveal-index' as string]: 1 }}
+>
+  <div className="award-image-wrap">
+    <button
+      type="button"
+      className="award-image"
+      onClick={() => openImage(1)}
+      aria-label="View Project Based Internship Certificate image"
+    >
+      <img
+        src="/awards/pbi.jpg"
+        alt="Certificate of Competency – Project Based Internship"
+      />
+    </button>
+
+    <span className="award-badge">
+      <Trophy size={21} />
+    </span>
+  </div>
+
+  <div className="award-card-content">
+    <div className="award-meta">
+      <span>CERTS</span>
+      <i />
+      <CalendarDays size={14} />
+      <span className="award-date">December 2025</span>
+    </div>
+
+    <h3>Certificate of Competency</h3>
+
+    <p>
+      Project Based Internship
+    </p>
+
+    <div className="award-divider" />
+
+    <div className="award-organizer">
+      <span>ORGANIZER</span>
+      <strong>Bank Mandiri • Rakamin Academy</strong>
+    </div>
+  </div>
+</article>
               {/* Achievement 2 */}
-              <article className="award-card reveal" style={{ ['--reveal-index' as string]: 1 }}>
+              <article className="award-card reveal" style={{ ['--reveal-index' as string]: 2 }}>
                 <div className="award-image-wrap">
                   <button
                     type="button"
                     className="award-image"
-                    onClick={() => openImage(1)}
+                    onClick={() => openImage(2)}
                     aria-label="View Best Performing Student in Academic Achievement image"
                   >
                     <img
@@ -339,12 +390,12 @@ function Awards() {
               </article>
 
               {/* Achievement 3 */}
-              <article className="award-card reveal" style={{ ['--reveal-index' as string]: 2 }}>
+              <article className="award-card reveal" style={{ ['--reveal-index' as string]: 3 }}>
                 <div className="award-image-wrap">
                   <button
                     type="button"
                     className="award-image"
-                    onClick={() => openImage(2)}
+                    onClick={() => openImage(3)}
                     aria-label="View Hartik Competition 2023 image"
                   >
                     <img
@@ -387,12 +438,12 @@ function Awards() {
               </article>
 
               {/* Achievement 4 */}
-              <article className="award-card reveal" style={{ ['--reveal-index' as string]: 3 }}>
+              <article className="award-card reveal" style={{ ['--reveal-index' as string]: 4 }}>
                 <div className="award-image-wrap">
                   <button
                     type="button"
                     className="award-image"
-                    onClick={() => openImage(3)}
+                    onClick={() => openImage(4)}
                     aria-label="View July 2024 Laboratory Assistant and Teaching Instructor image"
                   >
                     <img
@@ -435,12 +486,12 @@ function Awards() {
               </article>
 
               {/* Achievement 5 */}
-              <article className="award-card reveal" style={{ ['--reveal-index' as string]: 4 }}>
+              <article className="award-card reveal" style={{ ['--reveal-index' as string]: 5 }}>
                 <div className="award-image-wrap">
                   <button
                     type="button"
                     className="award-image"
-                    onClick={() => openImage(4)}
+                    onClick={() => openImage(5)}
                     aria-label="View July 2023 Laboratory Assistant and Teaching Instructor image"
                   >
                     <img

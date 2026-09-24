@@ -278,6 +278,14 @@ const translations: Record<string, string> = {
   // Award labels
   'Center for Groundwater and Environmental Geology • June 2026':
     'Pusat Air Tanah dan Geologi Lingkungan • Juni 2026',
+  'Bank Mandiri Mobile Apps Developer • Dec 2025':
+    'Pengembang Aplikasi Mobile Bank Mandiri • Des 2025',
+  'Project Based Internship • December 2025':
+    'Magang Berbasis Proyek • Desember 2025',
+  'Project Based Internship':
+    'Magang Berbasis Proyek',
+  'Bank Mandiri Mobile Apps Developer':
+    'Pengembang Aplikasi Mobile Bank Mandiri',
   'UNLA Anniversary • May 2024':
     'Dies Natalis UNLA • Mei 2024',
   'Hartik Competition 2023 • October 2023':
@@ -288,12 +296,17 @@ const translations: Record<string, string> = {
     'Program Studi Teknik Informatika • Juli 2023',
 
   'University Graduate Internship Program': 'Program Magang Lulusan Universitas',
+  'Certificate of Competency': 'Sertifikat Kompetensi',
   'Best Performing Student in Academic Achievement':
     'Mahasiswa Berprestasi Terbaik dalam Prestasi Akademik',
   'Laboratory Assistant and Teaching Instructor':
     'Asisten Laboratorium dan Pengajar',
   'View University Graduate Internship Program image':
     'Lihat gambar Program Magang Lulusan Universitas',
+  'View Bank Mandiri Mobile Apps Developer Certificate image':
+    'Lihat gambar Sertifikat Pengembang Aplikasi Mobile Bank Mandiri',
+  'View Project Based Internship Certificate image':
+    'Lihat gambar Sertifikat Magang Berbasis Proyek',
   'View Best Performing Student in Academic Achievement image':
     'Lihat gambar Mahasiswa Berprestasi Terbaik dalam Prestasi Akademik',
   'View Hartik Competition 2023 image': 'Lihat gambar Kompetisi Hartik 2023',
