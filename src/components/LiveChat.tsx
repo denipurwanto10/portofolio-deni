@@ -1991,7 +1991,7 @@ function buildAssistantReply(
   }
 
   if (socialHit(['linkedin'])) {
-    return 'LinkedIn-nya: https://www.linkedin.com/in/deniiprwnt/'
+    return 'LinkedIn Deni: https://www.linkedin.com/in/deniiprwnt/'
   }
 
   if (
@@ -2000,7 +2000,15 @@ function buildAssistantReply(
       'ig',
     ])
   ) {
-    return 'IG-nya: https://www.instagram.com/deniiprwnt/'
+    return 'Instagram Deni: https://www.instagram.com/deniiprwnt/'
+  }
+
+  if (socialHit(['github'])) {
+    return 'GitHub Deni: https://github.com/denipurwanto10'
+  }
+
+  if (socialHit(['email'])) {
+    return 'Email Deni: denipurwanto800@gmail.com'
   }
 
   // Kontak & media sosial
@@ -2021,7 +2029,7 @@ function buildAssistantReply(
       'sosial media',
     ])
   ) {
-    return 'Bisa dihubungi via:\nEmail: denipurwanto800@gmail.com\nLinkedIn: https://www.linkedin.com/in/deniiprwnt/\nGitHub: https://github.com/denipurwanto10'
+    return 'Bisa dihubungi via:\nEmail: denipurwanto800@gmail.com\nLinkedIn: https://www.linkedin.com/in/deniiprwnt/\nGitHub: https://github.com/denipurwanto10\nInstagram: https://www.instagram.com/deniiprwnt/'
   }
 
   // Proyek tertentu (lewat nama) — interaktif + link klik
