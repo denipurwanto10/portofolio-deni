@@ -1,0 +1,229 @@
+/* ==========================================================
+   Custom cursor hijau: panah navigasi modern + cipratan air
+   ========================================================== */
+
+:root {
+  --cc-color: #16a34a;
+  --cc-color-rgb: 22, 163, 74;
+  --cc-body: #05080c;
+  --cc-outline: #ffffff;
+  --cc-sliver-top: #86efac;
+  --cc-sliver-bottom: #15803d;
+  --cc-shadow: rgba(0, 0, 0, 0.35);
+}
+
+:root[data-theme='dark'] {
+  --cc-color: #4ade80;
+  --cc-color-rgb: 74, 222, 128;
+  --cc-sliver-top: #bbf7d0;
+  --cc-sliver-bottom: #16a34a;
+  --cc-shadow: rgba(0, 0, 0, 0.7);
+}
+
+/* Sembunyikan cursor bawaan HANYA setelah custom cursor aktif. */
+html.cc-active,
+html.cc-active *,
+html.cc-active *::before,
+html.cc-active *::after {
+  cursor: none !important;
+}
+
+/* Di dalam iframe (mis. preview PDF CV) cursor bawaan tetap
+   dipakai karena event mouse tidak sampai ke halaman utama. */
+html.cc-active iframe {
+  cursor: auto !important;
+}
+
+.cc-root {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483646;
+  pointer-events: none;
+  overflow: hidden;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.cc-root[data-visible='true'] {
+  opacity: 1;
+}
+
+.cc-root[data-state='hidden'] {
+  opacity: 0;
+}
+
+/* ---------- Panah ---------- */
+
+.cc-cursor {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  will-change: transform;
+}
+
+.cc-arrow,
+.cc-ibeam {
+  position: absolute;
+  overflow: visible;
+  transition:
+    transform 0.2s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.15s ease,
+    filter 0.2s ease;
+}
+
+.cc-arrow {
+  /* viewBox mulai di -4,-4 (skala 17/30) -> geser agar ujung
+     panah tepat di titik mouse. */
+  top: -2.3px;
+  left: -2.3px;
+  transform-origin: 2.3px 2.3px;
+  filter: drop-shadow(0 0 1.5px rgba(var(--cc-color-rgb), 0.95))
+    drop-shadow(0 0 4px rgba(var(--cc-color-rgb), 0.55))
+    drop-shadow(0 1px 2px var(--cc-shadow));
+}
+
+.cc-arrow-outline {
+  fill: var(--cc-outline);
+  stroke: var(--cc-outline);
+}
+
+.cc-arrow-body {
+  fill: var(--cc-body);
+  stroke: var(--cc-body);
+}
+
+.cc-arrow-sliver {
+  fill: url(#cc-sliver-grad);
+  stroke: url(#cc-sliver-grad);
+}
+
+.cc-stop-top {
+  stop-color: var(--cc-sliver-top);
+}
+
+.cc-stop-bottom {
+  stop-color: var(--cc-sliver-bottom);
+}
+
+.cc-ibeam {
+  top: -8.5px;
+  left: -4.5px;
+  opacity: 0;
+  transform: scale(0.7);
+  filter: drop-shadow(0 0 3px rgba(var(--cc-color-rgb), 0.7))
+    drop-shadow(0 1px 1px var(--cc-shadow));
+}
+
+.cc-ibeam path {
+  stroke: var(--cc-color);
+}
+
+/* ---------- State: hover (elemen interaktif) ---------- */
+
+.cc-root[data-state='hover'] .cc-arrow {
+  transform: scale(1.14) rotate(-5deg);
+  filter: drop-shadow(0 0 2px rgba(var(--cc-color-rgb), 1))
+    drop-shadow(0 0 8px rgba(var(--cc-color-rgb), 0.8))
+    drop-shadow(0 1px 2px var(--cc-shadow));
+}
+
+/* ---------- State: text (input / textarea) ---------- */
+
+.cc-root[data-state='text'] .cc-arrow {
+  opacity: 0;
+  transform: scale(0.7);
+}
+
+.cc-root[data-state='text'] .cc-ibeam {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* ---------- State: disabled ---------- */
+
+.cc-root[data-state='disabled'] .cc-arrow {
+  opacity: 0.45;
+}
+
+/* ---------- Press (mouse ditekan) ---------- */
+
+.cc-root[data-pressed='true'] .cc-arrow {
+  transform: scale(0.88);
+}
+
+.cc-root[data-pressed='true'][data-state='hover'] .cc-arrow {
+  transform: scale(1.02) rotate(-5deg);
+}
+
+/* ---------- Efek klik: cipratan air ---------- */
+
+.cc-fx {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+}
+
+/* Titik benturan: kilatan bening di pusat klik */
+.cc-impact {
+  position: fixed;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(var(--cc-color-rgb), 0.75) 45%,
+    rgba(var(--cc-color-rgb), 0) 72%
+  );
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.25);
+  pointer-events: none;
+}
+
+/* Riak di permukaan air */
+.cc-ripple {
+  position: fixed;
+  box-sizing: border-box;
+  border-radius: 50%;
+  border: 1.5px solid rgba(var(--cc-color-rgb), 0.75);
+  background: radial-gradient(
+    circle,
+    rgba(var(--cc-color-rgb), 0) 50%,
+    rgba(var(--cc-color-rgb), 0.18) 80%,
+    rgba(var(--cc-color-rgb), 0.32) 100%
+  );
+  box-shadow:
+    inset 0 0 8px rgba(var(--cc-color-rgb), 0.4),
+    0 0 8px rgba(var(--cc-color-rgb), 0.3);
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.08);
+  pointer-events: none;
+}
+
+/* Tetesan air berbentuk lonjong dengan kilau di sisi atas */
+.cc-droplet {
+  position: fixed;
+  border-radius: 50% 50% 50% 50% / 68% 68% 32% 32%;
+  background: radial-gradient(
+    ellipse at 35% 28%,
+    rgba(255, 255, 255, 0.98) 0%,
+    rgba(var(--cc-color-rgb), 0.92) 42%,
+    rgba(var(--cc-color-rgb), 0.78) 100%
+  );
+  box-shadow:
+    0 0 4px rgba(var(--cc-color-rgb), 0.6),
+    inset 0 -1px 1px rgba(0, 0, 0, 0.18);
+  opacity: 0;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cc-arrow,
+  .cc-ibeam {
+    transition-duration: 0.01ms;
+  }
+}
