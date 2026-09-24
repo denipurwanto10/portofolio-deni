@@ -7466,3 +7466,66 @@ font {
   opacity: 1;
   box-shadow: none;
 }
+
+/* =========================================================
+   MODERN SCROLLBAR
+   Bentuk pill seperti referensi, dengan warna mengikuti theme:
+   light = var(--accent), dark = var(--accent).
+========================================================= */
+html,
+body {
+  scrollbar-width: thin;
+  scrollbar-color: var(--accent) transparent;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar,
+.sidebar::-webkit-scrollbar,
+.nav::-webkit-scrollbar,
+.chat-messages::-webkit-scrollbar,
+.project-filters::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+html::-webkit-scrollbar-track,
+body::-webkit-scrollbar-track,
+.sidebar::-webkit-scrollbar-track,
+.nav::-webkit-scrollbar-track,
+.chat-messages::-webkit-scrollbar-track,
+.project-filters::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+html::-webkit-scrollbar-thumb,
+body::-webkit-scrollbar-thumb,
+.sidebar::-webkit-scrollbar-thumb,
+.nav::-webkit-scrollbar-thumb,
+.chat-messages::-webkit-scrollbar-thumb,
+.project-filters::-webkit-scrollbar-thumb {
+  min-height: 48px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--accent);
+  opacity: 0.92;
+  transition: opacity 180ms ease, background-color 180ms ease;
+}
+
+html::-webkit-scrollbar-thumb:hover,
+body::-webkit-scrollbar-thumb:hover,
+.sidebar::-webkit-scrollbar-thumb:hover,
+.nav::-webkit-scrollbar-thumb:hover,
+.chat-messages::-webkit-scrollbar-thumb:hover,
+.project-filters::-webkit-scrollbar-thumb:hover {
+  background: var(--accent);
+  opacity: 1;
+}
+
+html::-webkit-scrollbar-corner,
+body::-webkit-scrollbar-corner,
+.sidebar::-webkit-scrollbar-corner,
+.nav::-webkit-scrollbar-corner,
+.chat-messages::-webkit-scrollbar-corner,
+.project-filters::-webkit-scrollbar-corner {
+  background: transparent;
+}
