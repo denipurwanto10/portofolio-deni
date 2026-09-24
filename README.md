@@ -1,31 +1,37 @@
-Deni Purwanto — Portfolio
+# Deni Purwanto — Portfolio
 
-Personal portfolio website showcasing my experience, projects, skills, and background as a Frontend / Full-Stack Engineer.
+Personal portfolio website showcasing my experience, projects, skills, and background as a **Frontend / Full-Stack Engineer**.
 
-✦ Overview
+## ✦ Overview
 
 This portfolio is designed as a clean and modern representation of my work in web development, application development, and GIS-based applications.
 
 It highlights selected projects, technical skills, professional experience, and ways to get in touch.
 
-🚀 Features
-Responsive design for desktop and mobile
-Project showcase
-Experience and education sections
-Technical skills overview
-Modern and minimal interface
-Smooth interactions and animations
-Responsive navigation
-Contact section
-🛠️ Tech Stack
-React
-Vite
-TypeScript / JavaScript
-Tailwind CSS
-Framer Motion
-Lucide React
-Vercel
-📂 Project Structure
+## 🚀 Features
+
+* Responsive design for desktop and mobile
+* Project showcase
+* Experience and education sections
+* Technical skills overview
+* Modern and minimal interface
+* Smooth interactions and animations
+* Responsive navigation
+* Contact section
+
+## 🛠️ Tech Stack
+
+* **React**
+* **Vite**
+* **TypeScript / JavaScript**
+* **Tailwind CSS**
+* **Framer Motion**
+* **Lucide React**
+* **Vercel**
+
+## 📂 Project Structure
+
+```text
 portofolio-deni/
 ├── public/
 ├── src/
@@ -37,27 +43,37 @@ portofolio-deni/
 ├── package.json
 ├── vite.config.*
 └── README.md
-💻 Getting Started
+```
 
-Clone the repository:
+## 💻 Getting Started
 
+### Clone the repository
+
+```bash
 git clone https://github.com/denipurwanto10/portofolio-deni.git
+```
 
-Navigate to the project:
+### Navigate to the project
 
+```bash
 cd portofolio-deni
+```
 
-Install dependencies:
+### Install dependencies
 
+```bash
 npm install
+```
 
-Run the development server:
+### Run the development server
 
+```bash
 npm run dev
+```
 
 The application will be available on the local development server shown by Vite.
 
-📌 Purpose
+## 📌 Purpose
 
 This project serves as my personal portfolio and a place to present selected work and experience in software development.
 
