@@ -20,6 +20,7 @@
   --accent-soft: #f1f1f1;
   --accent-contrast: #ffffff;
   --accent-shadow: rgba(17, 17, 17, 0.16);
+  --card-hover-border: #000000;
 
   /* =========================
      THEME PALETTE (light)
@@ -64,6 +65,7 @@
   --accent-soft: #1a1a1a;
   --accent-contrast: #000000;
   --accent-shadow: rgba(0, 0, 0, 0.6);
+  --card-hover-border: #ffffff;
 
   --bg-page: #000000;
   --bg-surface: #0d0d0d;
@@ -229,6 +231,45 @@ a {
 /* =========================
    SIDEBAR
 ========================= */
+
+/*
+   CARD HOVER BORDER
+   Kartu utama pada setiap halaman dan sidebar memakai border yang
+   mengikuti tema: hitam pada light mode, putih pada dark mode.
+   Hanya border yang berubah saat hover — ukuran, posisi, dan shadow
+   tidak ikut bergerak.
+*/
+.sidebar,
+.now-card,
+.time-card,
+.hero-card,
+.github-card,
+.panel,
+.projects-panel,
+.techstack-panel,
+.contact-panel,
+.blog-panel,
+.community-panel,
+.experience-panel,
+.awards-panel {
+  transition: border-color 0.2s ease;
+}
+
+.sidebar:hover,
+.now-card:hover,
+.time-card:hover,
+.hero-card:hover,
+.github-card:hover,
+.panel:hover,
+.projects-panel:hover,
+.techstack-panel:hover,
+.contact-panel:hover,
+.blog-panel:hover,
+.community-panel:hover,
+.experience-panel:hover,
+.awards-panel:hover {
+  border-color: var(--card-hover-border);
+}
 
 .sidebar {
   position: fixed;
@@ -1168,7 +1209,7 @@ a {
 }
 
 .project-card:hover {
-  border-color: var(--border-color);
+  border-color: var(--card-hover-border);
   transform: translateY(-2px);
   box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
 }
@@ -3032,7 +3073,7 @@ a {
 }
 
 .techstack-card:hover {
-  border-color: var(--border-color);
+  border-color: var(--card-hover-border);
 }
 
 .techstack-mark {
@@ -3908,6 +3949,11 @@ a {
   border: 1px solid var(--border-color);
   border-radius: 15px;
   background: var(--bg-surface);
+  transition: border-color 0.2s ease;
+}
+
+.award-card:hover {
+  border-color: var(--card-hover-border);
 }
 
 .award-image-wrap {
@@ -4093,6 +4139,11 @@ a {
   border: 1px solid var(--border-color);
   border-radius: 15px;
   background: var(--bg-surface);
+  transition: border-color 0.2s ease;
+}
+
+.certification-card:hover {
+  border-color: var(--card-hover-border);
 }
 
 .certification-heading {
@@ -7554,5 +7605,37 @@ body::-webkit-scrollbar-corner,
     display: none;
     width: 0;
     height: 0;
+  }
+}
+
+/* =========================
+   MOBILE — disable card hover effects
+   Hover effects are desktop-only; mobile keeps the normal card border.
+========================= */
+@media (max-width: 700px) {
+  .sidebar:hover,
+  .now-card:hover,
+  .time-card:hover,
+  .hero-card:hover,
+  .github-card:hover,
+  .panel:hover,
+  .projects-panel:hover,
+  .techstack-panel:hover,
+  .contact-panel:hover,
+  .blog-panel:hover,
+  .community-panel:hover,
+  .experience-panel:hover,
+  .awards-panel:hover,
+  .project-card:hover,
+  .techstack-card:hover,
+  .experience-card:hover,
+  .award-card:hover,
+  .certification-card:hover {
+    border-color: var(--border-color);
+  }
+
+  .project-card:hover {
+    transform: none;
+    box-shadow: none;
   }
 }
