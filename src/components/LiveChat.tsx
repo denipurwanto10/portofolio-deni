@@ -739,9 +739,11 @@ const ASSISTANT_WELCOME: AssistantMessage = {
 }
 
 const ASSISTANT_QUICK_REPLIES = [
+  'Tentang Deni',
   'Proyek',
   'Pengalaman',
   'Keahlian',
+  'Penghargaan',
   'Kontak',
 ]
 
@@ -749,6 +751,8 @@ const ASSISTANT_QUICK_REPLIES = [
  * Cocokkan kata kunci di awal kata (bukan di tengah kata),
  * supaya "hi" tidak ikut terpicu oleh kata seperti "achievement".
  * Awalan tetap cocok, jadi "proyeknya" tetap terdeteksi sebagai "proyek".
+ * Kata kunci pendek (≤ 3 huruf, mis. "cv", "hi", "ig") harus
+ * cocok utuh agar tidak salah tangkap ("ig" vs "ignore").
  */
 function includesAnyKeyword(
   input: string,
@@ -759,9 +763,10 @@ function includesAnyKeyword(
       /[.*+?^${}()|[\]\\]/g,
       '\\$&',
     )
-    return new RegExp(`(^|[^a-z0-9])${escaped}`).test(
-      input,
-    )
+    const tail = word.length <= 3 ? '($|[^a-z0-9])' : ''
+    return new RegExp(
+      `(^|[^a-z0-9])${escaped}${tail}`,
+    ).test(input)
   })
 }
 
@@ -790,6 +795,95 @@ function localizeYear(value: string): string {
     .replace(/\bPresent\b/gi, 'Sekarang')
 }
 
+/**
+ * Daftar penghargaan untuk asisten (versi Bahasa Indonesia).
+ * Sumbernya sama dengan halaman Awards — kalau menambah
+ * penghargaan di sana, tambahkan juga di sini.
+ */
+const ASSISTANT_AWARDS = [
+  'Program Magang Lulusan Universitas — Pusat Air Tanah dan Geologi Lingkungan (Juni 2026)',
+  'Mahasiswa Berprestasi Akademik Terbaik — HUT UNLA (Mei 2024)',
+  'Juara 2 Lomba UI/UX Design — Hartik Competition 2023 (Oktober 2023)',
+  'Asisten Laboratorium & Instruktur Pengajar — Prodi Teknik Informatika (Juli 2023 & Juli 2024)',
+]
+
+/**
+ * Kata kunci tambahan untuk menanyakan proyek tertentu lewat
+ * namanya. Kunci = awalan judul proyek di data.ts.
+ * Nama lengkap proyek (sebelum tanda "—") otomatis ikut dicocokkan.
+ */
+const PROJECT_ALIASES: Record<string, string[]> = {
+  Formatra: ['formatra', 'konversi dokumen'],
+  Disaster: ['disaster', 'bencana', 'gempa'],
+  'PC Control': ['pc control', 'pccontrol', 'kontrol pc'],
+  Bandung: ['umkm', 'msme'],
+  Placement: ['placement', 'tes penempatan'],
+  Gudang: ['gudang', 'inventaris', 'inventory'],
+  Wisma: ['wisma', 'reservasi', 'hotel'],
+  Pasarku: ['pasarku', 'marketplace', 'e-commerce', 'ecommerce'],
+  Attendance: ['attendance', 'absensi'],
+  MandiriNews: ['mandirinews', 'mandiri news', 'berita'],
+}
+
+function findProjectByName(input: string) {
+  return projects.find((item) => {
+    const base = item.title.split('—')[0].trim().toLowerCase()
+    const aliasKey = Object.keys(PROJECT_ALIASES).find((key) =>
+      item.title.startsWith(key),
+    )
+    const words = [
+      base,
+      ...(aliasKey ? PROJECT_ALIASES[aliasKey] : []),
+    ]
+    return includesAnyKeyword(input, words)
+  })
+}
+
+/** Semua nama teknologi yang muncul di data portofolio. */
+function collectTechLabels(): string[] {
+  const all = new Set<string>()
+  projects.forEach((item) =>
+    item.tags.forEach((tag) => all.add(tag)),
+  )
+  experiences.forEach((item) =>
+    item.tags.forEach((tag) => all.add(tag)),
+  )
+  stack.forEach((tag) => all.add(tag))
+  return Array.from(all)
+}
+
+/** "Node.js" -> ["node.js", "nodejs", "node js"] */
+function techVariants(label: string): string[] {
+  const lower = label.toLowerCase()
+  return Array.from(
+    new Set([
+      lower,
+      lower.replace(/[.\s]/g, ''),
+      lower.replace(/\./g, ' '),
+    ]),
+  )
+}
+
+/** "Laravel 11" dianggap sama dengan "Laravel" (versi diabaikan). */
+function sameTech(a: string, b: string): boolean {
+  const clean = (value: string) =>
+    value.toLowerCase().replace(/\s+\d+(\.\d+)*$/, '')
+  return clean(a) === clean(b)
+}
+
+function findTechInInput(input: string): string | undefined {
+  return collectTechLabels().find((label) =>
+    techVariants(label).some((variant) =>
+      new RegExp(
+        `(^|[^a-z0-9])${variant.replace(
+          /[.*+?^${}()|[\]\\]/g,
+          '\\$&',
+        )}($|[^a-z0-9])`,
+      ).test(input),
+    ),
+  )
+}
+
 function buildAssistantReply(rawInput: string): string {
   const input = rawInput.trim().toLowerCase()
 
@@ -797,6 +891,201 @@ function buildAssistantReply(rawInput: string): string {
     return 'Maaf, saya belum menangkap maksudnya. Coba tanyakan tentang proyek, pengalaman, keahlian, atau kontak.'
   }
 
+  // Bantuan / daftar topik
+  if (
+    includesAnyKeyword(input, [
+      'bantuan',
+      'bantu',
+      'help',
+      'menu',
+      'fitur',
+      'bisa apa',
+      'topik',
+    ])
+  ) {
+    return 'Saya bisa menjawab seputar:\n• Tentang Deni\n• Proyek (bisa sebut nama proyek atau teknologi, mis. "proyek React")\n• Pengalaman & pendidikan\n• Keahlian\n• Penghargaan & sertifikat\n• Lokasi & status ketersediaan\n• Kontak, media sosial, dan CV'
+  }
+
+  // Tentang Deni
+  if (
+    includesAnyKeyword(input, [
+      'tentang deni',
+      'tentang kamu',
+      'siapa deni',
+      'profil',
+      'profile',
+      'perkenalan',
+      'kenalan',
+      'about',
+    ])
+  ) {
+    return 'Deni Purwanto adalah seorang Full Stack Developer yang berbasis di Bandung, Jawa Barat. Ia berlatar Teknik Informatika, berpengalaman membangun aplikasi web dan mobile, dan saat ini terbuka untuk posisi full-time.\n\nTanyakan lebih lanjut soal proyek, pengalaman, atau keahliannya.'
+  }
+
+  // Pendidikan
+  if (
+    includesAnyKeyword(input, [
+      'pendidikan',
+      'kuliah',
+      'kampus',
+      'universitas',
+      'jurusan',
+      'prodi',
+      'lulusan',
+      'education',
+      'sekolah',
+    ])
+  ) {
+    return 'Deni menempuh pendidikan di Program Studi Teknik Informatika, Universitas Langlangbuana (UNLA). Selama kuliah ia menjadi asisten laboratorium dan instruktur pengajar (2022–2024), serta meraih penghargaan mahasiswa berprestasi akademik.'
+  }
+
+  // Penghargaan & sertifikat
+  if (
+    includesAnyKeyword(input, [
+      'penghargaan',
+      'sertifikat',
+      'sertifikasi',
+      'award',
+      'prestasi',
+      'juara',
+      'lomba',
+      'kompetisi',
+      'achievement',
+      'certificate',
+      'cert',
+    ])
+  ) {
+    return `Penghargaan & pencapaian Deni:\n${ASSISTANT_AWARDS.map(
+      (item) => `• ${item}`,
+    ).join('\n')}\n\nLihat bukti dan detailnya di halaman Penghargaan & Sertifikat.`
+  }
+
+  // Lokasi
+  if (
+    includesAnyKeyword(input, [
+      'lokasi',
+      'domisili',
+      'tinggal',
+      'alamat',
+      'dimana',
+      'di mana',
+      'kota',
+      'zona waktu',
+      'timezone',
+      'location',
+    ])
+  ) {
+    return 'Deni berbasis di Bandung, Jawa Barat (zona waktu WIB, UTC+7).'
+  }
+
+  // Ketersediaan / rekrutmen / kolaborasi
+  if (
+    includesAnyKeyword(input, [
+      'lowongan',
+      'rekrut',
+      'hire',
+      'hiring',
+      'full-time',
+      'fulltime',
+      'full time',
+      'available',
+      'tersedia',
+      'terbuka',
+      'open to',
+      'kolaborasi',
+      'kerja sama',
+      'kerjasama',
+      'tawaran',
+    ])
+  ) {
+    return 'Deni saat ini terbuka untuk posisi full-time dan kolaborasi. Silakan hubungi lewat email denipurwanto800@gmail.com atau LinkedIn (deniiprwnt).'
+  }
+
+  // CV
+  if (
+    includesAnyKeyword(input, [
+      'cv',
+      'resume',
+      'riwayat hidup',
+      'curriculum',
+    ])
+  ) {
+    return 'Kamu bisa melihat dan mengunduh CV Deni lewat halaman Beranda (tombol "Download CV").'
+  }
+
+  // Kontak & media sosial
+  if (
+    includesAnyKeyword(input, [
+      'kontak',
+      'contact',
+      'email',
+      'hubungi',
+      'whatsapp',
+      'wa',
+      'linkedin',
+      'github',
+      'instagram',
+      'ig',
+      'sosmed',
+      'media sosial',
+      'sosial media',
+    ])
+  ) {
+    return 'Kamu bisa menghubungi Deni lewat:\n• Email: denipurwanto800@gmail.com\n• LinkedIn: deniiprwnt\n• GitHub: denipurwanto10\n• Instagram: @deniiprwnt\n\nInfo lengkapnya ada di halaman Kontak.'
+  }
+
+  // Proyek tertentu (lewat nama)
+  const namedProject = findProjectByName(input)
+  if (namedProject) {
+    const lines = [
+      `${namedProject.title} (${namedProject.category})`,
+      `Teknologi: ${namedProject.tags.join(', ')}`,
+      `GitHub: ${namedProject.link}`,
+    ]
+    if (namedProject.demo) {
+      lines.push(`Demo: ${namedProject.demo}`)
+    }
+    return `${lines.join('\n')}\n\nDeskripsi lengkapnya ada di halaman Proyek.`
+  }
+
+  // Teknologi tertentu (mis. "React", "Laravel", "Python")
+  const tech = findTechInInput(input)
+  if (tech) {
+    const usedInProjects = projects.filter((item) =>
+      item.tags.some((tag) => sameTech(tag, tech)),
+    )
+    const usedInJobs = experiences.filter((item) =>
+      item.tags.some((tag) => sameTech(tag, tech)),
+    )
+
+    if (usedInProjects.length || usedInJobs.length) {
+      const parts: string[] = []
+
+      if (usedInProjects.length) {
+        parts.push(
+          `Deni memakai ${tech} di ${usedInProjects.length} proyek:\n${usedInProjects
+            .slice(0, 5)
+            .map((item) => `• ${item.title}`)
+            .join('\n')}`,
+        )
+      }
+
+      if (usedInJobs.length) {
+        parts.push(
+          `${tech} juga dipakai saat ia bekerja/magang di:\n${usedInJobs
+            .slice(0, 3)
+            .map((item) => `• ${item.company}`)
+            .join('\n')}`,
+        )
+      }
+
+      return parts.join('\n\n')
+    }
+
+    return `${tech} termasuk teknologi yang dikuasai Deni. Daftar lengkapnya ada di halaman Teknologi.`
+  }
+
+  // Proyek (umum)
   if (
     includesAnyKeyword(input, [
       'proyek',
@@ -805,6 +1094,8 @@ function buildAssistantReply(rawInput: string): string {
       'portofolio',
       'karya',
       'aplikasi',
+      'website',
+      'web app',
     ])
   ) {
     const top = projects
@@ -815,9 +1106,10 @@ function buildAssistantReply(rawInput: string): string {
       )
       .join('\n')
 
-    return `Beberapa proyek terbaru Deni:\n${top}\n\nSelengkapnya ada di halaman Proyek.`
+    return `Beberapa proyek terbaru Deni:\n${top}\n\nSelengkapnya ada di halaman Proyek. Kamu juga bisa menyebut nama proyek atau teknologi tertentu, mis. "Formatra" atau "proyek Laravel".`
   }
 
+  // Pengalaman
   if (
     includesAnyKeyword(input, [
       'pengalaman',
@@ -827,6 +1119,8 @@ function buildAssistantReply(rawInput: string): string {
       'karier',
       'magang',
       'intern',
+      'jabatan',
+      'posisi',
       'work',
     ])
   ) {
@@ -841,14 +1135,21 @@ function buildAssistantReply(rawInput: string): string {
     return `Pengalaman terbaru Deni:\n${top}\n\nDetail lengkapnya ada di halaman Pengalaman.`
   }
 
+  // Keahlian (umum)
   if (
     includesAnyKeyword(input, [
       'keahlian',
       'skill',
       'kemampuan',
+      'keterampilan',
+      'kompetensi',
+      'dikuasai',
       'stack',
       'teknologi',
       'tech',
+      'framework',
+      'database',
+      'tools',
       'bahasa pemrograman',
     ])
   ) {
@@ -857,40 +1158,27 @@ function buildAssistantReply(rawInput: string): string {
       .join(', ')}, dan masih banyak lagi. Daftar lengkapnya ada di halaman Teknologi.`
   }
 
-  if (includesAnyKeyword(input, ['cv', 'resume', 'riwayat hidup'])) {
-    return 'Kamu bisa mengunduh CV Deni lewat tombol "Download CV" di halaman Beranda.'
-  }
-
-  if (
-    includesAnyKeyword(input, [
-      'kontak',
-      'contact',
-      'email',
-      'hubungi',
-      'whatsapp',
-      'linkedin',
-      'github',
-    ])
-  ) {
-    return 'Kamu bisa menghubungi Deni lewat email denipurwanto800@gmail.com, LinkedIn (deniiprwnt), atau GitHub (denipurwanto10). Info lengkapnya ada di halaman Kontak.'
-  }
-
+  // Identitas bot
   if (
     includesAnyKeyword(input, [
       'siapa kamu',
       'kamu siapa',
       'siapa ini',
-      'siapa deni',
+      'siapa anda',
       'who are you',
+      'kamu bot',
+      'kamu ai',
     ])
   ) {
     return 'Saya asisten virtual untuk portofolio Deni Purwanto, seorang Full Stack Developer. Tanyakan saja soal proyek, pengalaman, atau cara menghubunginya.'
   }
 
+  // Terima kasih
   if (
     includesAnyKeyword(input, [
       'terima kasih',
       'makasih',
+      'trims',
       'thanks',
       'thank you',
       'thx',
@@ -899,6 +1187,21 @@ function buildAssistantReply(rawInput: string): string {
     return 'Sama-sama! Silakan tanya lagi kalau ada yang ingin diketahui tentang portofolio ini 🙌'
   }
 
+  // Pamit
+  if (
+    includesAnyKeyword(input, [
+      'dadah',
+      'sampai jumpa',
+      'sampai ketemu',
+      'bye',
+      'selamat tinggal',
+      'pamit',
+    ])
+  ) {
+    return 'Sampai jumpa! Kalau ada yang ingin ditanyakan lagi, saya di sini 👋'
+  }
+
+  // Sapaan
   if (
     includesAnyKeyword(input, [
       'halo',
@@ -908,12 +1211,32 @@ function buildAssistantReply(rawInput: string): string {
       'hey',
       'selamat',
       'assalamualaikum',
+      'permisi',
     ])
   ) {
     return 'Halo juga 👋 Tanyakan apa saja tentang proyek, pengalaman kerja, teknologi, atau cara menghubungi Deni.'
   }
 
-  return "Maaf, saya belum paham maksudnya. Coba tanyakan tentang 'proyek', 'pengalaman', 'keahlian', atau 'kontak' — atau pindah ke Global Chat untuk ngobrol langsung dengan Deni."
+  return "Maaf, saya belum paham maksudnya. Coba tanyakan tentang 'proyek', 'pengalaman', 'keahlian', 'penghargaan', atau 'kontak' — atau ketik 'bantuan' untuk melihat daftar topik. Kamu juga bisa pindah ke Global Chat untuk ngobrol langsung dengan Deni."
+}
+
+/** Ubah URL di dalam jawaban bot menjadi tautan yang bisa diklik. */
+function renderAssistantText(text: string) {
+  return text.split(/(https?:\/\/[^\s]+)/g).map((part, index) =>
+    /^https?:\/\//.test(part) ? (
+      <a
+        key={index}
+        href={part}
+        target="_blank"
+        rel="noreferrer noopener"
+        className="assistant-link"
+      >
+        {part}
+      </a>
+    ) : (
+      part
+    ),
+  )
 }
 
 // Harus sama dengan durasi animasi keluar panel di styles.css.
@@ -2000,7 +2323,9 @@ export default function LiveChat() {
 
                     <div className="chat-bubble">
                       <p className="assistant-text">
-                        {message.text}
+                        {message.from === 'bot'
+                          ? renderAssistantText(message.text)
+                          : message.text}
                       </p>
                     </div>
                   </div>
@@ -2023,8 +2348,17 @@ export default function LiveChat() {
                 <div ref={assistantBottomRef} />
               </div>
 
-              <div className="assistant-quick-replies notranslate"
-                translate="no">
+              <div
+                className="assistant-quick-replies notranslate"
+                translate="no"
+                onWheel={(event) => {
+                  // Roda mouse (vertikal) menggeser chip ke samping di desktop.
+                  const el = event.currentTarget
+                  if (el.scrollWidth > el.clientWidth) {
+                    el.scrollLeft += event.deltaY + event.deltaX
+                  }
+                }}
+              >
                 {ASSISTANT_QUICK_REPLIES.map((label) => (
                   <button
                     key={label}

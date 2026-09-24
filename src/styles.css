@@ -8007,3 +8007,95 @@ body::-webkit-scrollbar-corner,
 [data-theme='dark'] .chat-messages::-webkit-scrollbar-thumb:hover {
   background: #3f3f46;
 }
+
+/* Tautan di dalam jawaban virtual assistant */
+.assistant-link {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  overflow-wrap: anywhere;
+  word-break: break-all;
+}
+
+.assistant-link:hover {
+  opacity: 0.75;
+}
+
+/* Quick reply asisten: satu baris, bisa digeser ke samping */
+.assistant-quick-replies {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+  flex: none;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  cursor: grab;
+}
+
+.assistant-quick-replies::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+.assistant-quick-reply {
+  flex: none;
+  white-space: nowrap;
+}
+
+/* Quick reply asisten — hover/aktif yang jelas & responsif.
+   Sebelumnya perubahan warna terlalu tipis (abu #f1f1f1 di atas putih)
+   dan efek naik 1px terpotong oleh overflow baris yang bisa digeser. */
+.assistant-quick-replies {
+  padding-top: 4px;
+}
+
+.assistant-quick-reply {
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    background-color 0.16s ease,
+    color 0.16s ease,
+    border-color 0.16s ease,
+    transform 0.16s ease,
+    box-shadow 0.16s ease;
+}
+
+@media (hover: hover) {
+  .assistant-quick-reply:hover {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--accent-contrast);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px var(--accent-shadow);
+  }
+
+  [data-theme='dark'] .assistant-quick-reply:hover {
+    background: #e4e4e7;
+    border-color: #e4e4e7;
+    color: #0a0a0b;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  }
+}
+
+/* Umpan balik saat ditekan / disentuh (HP tidak punya hover) */
+.assistant-quick-reply:active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-contrast);
+  transform: scale(0.96);
+}
+
+[data-theme='dark'] .assistant-quick-reply:active {
+  background: #e4e4e7;
+  border-color: #e4e4e7;
+  color: #0a0a0b;
+}
+
+.assistant-quick-reply:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
