@@ -854,6 +854,86 @@ function saveCachedGithubStats(
   }
 }
 
+type ContributionPayload = {
+  total: number | null
+  contributions: GithubContribution[]
+}
+
+function normalizeContributionList(
+  rawList: unknown[],
+): GithubContribution[] {
+  return rawList
+    .filter(
+      (item): item is Record<string, unknown> =>
+        !!item &&
+        typeof item === 'object' &&
+        typeof (item as { date?: unknown }).date === 'string',
+    )
+    .map((item) => {
+      const rawLevel = Number(
+        (item as { level?: unknown }).level ?? 0,
+      )
+
+      return {
+        date: (item as { date: string }).date,
+        count: Number(
+          (item as { count?: unknown }).count,
+        ) || 0,
+        level: (
+          rawLevel >= 0 && rawLevel <= 4 ? rawLevel : 0
+        ) as GithubContribution['level'],
+      }
+    })
+}
+
+/*
+ * SUMBER UTAMA: /api/github-contributions (Vercel Serverless
+ * Function di folder /api). Fungsi itu membaca kalender resmi
+ * github.com/denipurwanto10 langsung dari server, jadi angkanya
+ * selalu sama dengan yang tampil di profil GitHub (tanpa CORS
+ * dan tanpa mirror pihak ketiga yang datanya bisa tertinggal).
+ *
+ * Saat `npm run dev` (tanpa Vercel) route ini tidak ada dan
+ * mengembalikan HTML, sehingga otomatis jatuh ke sumber cadangan.
+ */
+async function fetchOfficialContributions(): Promise<ContributionPayload> {
+  const response = await fetch('/api/github-contributions', {
+    cache: 'no-store',
+  })
+
+  if (!response.ok) {
+    throw new Error(
+      `Official contributions API failed: ${response.status}`,
+    )
+  }
+
+  const contentType =
+    response.headers.get('content-type') ?? ''
+
+  if (!contentType.includes('application/json')) {
+    throw new Error(
+      'Official contributions API is not available here',
+    )
+  }
+
+  const json = (await response.json()) as {
+    total?: unknown
+    contributions?: unknown
+  }
+
+  const contributions = normalizeContributionList(
+    Array.isArray(json.contributions)
+      ? json.contributions
+      : [],
+  )
+
+  return {
+    total:
+      typeof json.total === 'number' ? json.total : null,
+    contributions,
+  }
+}
+
 /*
  * "170 contributions in the last year" from the
  * official GitHub calendar. GitHub pages cannot be
@@ -881,32 +961,11 @@ async function fetchContributionYear(
     contributions?: unknown
   }
 
-  const rawList = Array.isArray(json.contributions)
-    ? json.contributions
-    : []
-
-  const contributions: GithubContribution[] = rawList
-    .filter(
-      (item): item is Record<string, unknown> =>
-        !!item &&
-        typeof item === 'object' &&
-        typeof (item as { date?: unknown }).date === 'string',
-    )
-    .map((item) => {
-      const rawLevel = Number(
-        (item as { level?: unknown }).level ?? 0,
-      )
-
-      return {
-        date: (item as { date: string }).date,
-        count: Number(
-          (item as { count?: unknown }).count,
-        ) || 0,
-        level: (
-          rawLevel >= 0 && rawLevel <= 4 ? rawLevel : 0
-        ) as GithubContribution['level'],
-      }
-    })
+  const contributions = normalizeContributionList(
+    Array.isArray(json.contributions)
+      ? json.contributions
+      : [],
+  )
 
   return {
     total:
@@ -977,7 +1036,26 @@ async function fetchGithubContributions(): Promise<{
   // Request only the last-year dataset. The previous implementation made
   // one request for every year since 2008, which triggered HTTP 429 rate
   // limits and was unnecessary for the visible contribution calendar.
-  const lastYear = await fetchContributionYear('last')
+  //
+  // Urutan sumber: (1) kalender resmi GitHub lewat /api, lalu
+  // (2) mirror pihak ketiga sebagai cadangan. Mirror bisa tertinggal
+  // beberapa jam (mis. total 172 padahal GitHub sudah 173), jadi
+  // hanya dipakai kalau sumber resmi gagal.
+  let lastYear: ContributionPayload
+
+  try {
+    lastYear = await fetchOfficialContributions()
+
+    if (!lastYear.contributions.length) {
+      throw new Error('Official calendar returned no data')
+    }
+  } catch (error) {
+    console.warn(
+      'Official GitHub calendar unavailable, using mirror:',
+      error,
+    )
+    lastYear = await fetchContributionYear('last')
+  }
 
   if (!lastYear.contributions.length) {
     throw new Error('GitHub returned no contribution data')
