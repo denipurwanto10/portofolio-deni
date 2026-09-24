@@ -6,11 +6,14 @@ import {
   useState,
 } from 'react'
 import {
+  Bot,
   LogOut,
   MessageCircle,
   MessageSquare,
   Reply,
   SendHorizonal,
+  Trash2,
+  Users,
   X,
 } from 'lucide-react'
 import {
@@ -35,6 +38,7 @@ import {
   loginWithGoogle,
   logout,
 } from '../firebase'
+import { experiences, projects, stack } from '../data'
 
 type ChatReplyTo = {
   id: string
@@ -716,6 +720,202 @@ function formatDateTime(
   }
 }
 
+/**
+ * VIRTUAL ASSISTANT — bot ringan berbasis kata kunci.
+ * Tidak memanggil API eksternal apa pun; semua jawaban
+ * diambil dari data portfolio (data.ts) supaya selalu
+ * konsisten dan tidak butuh biaya/API key.
+ */
+type AssistantMessage = {
+  id: string
+  from: 'bot' | 'user'
+  text: string
+}
+
+const ASSISTANT_WELCOME: AssistantMessage = {
+  id: 'welcome',
+  from: 'bot',
+  text: 'Halo, saya asisten virtual Deni 👋 Silakan tanya seputar proyek, pengalaman, teknologi yang dikuasai, atau cara menghubungi Deni.',
+}
+
+const ASSISTANT_QUICK_REPLIES = [
+  'Proyek',
+  'Pengalaman',
+  'Keahlian',
+  'Kontak',
+]
+
+/**
+ * Cocokkan kata kunci di awal kata (bukan di tengah kata),
+ * supaya "hi" tidak ikut terpicu oleh kata seperti "achievement".
+ * Awalan tetap cocok, jadi "proyeknya" tetap terdeteksi sebagai "proyek".
+ */
+function includesAnyKeyword(
+  input: string,
+  words: string[],
+): boolean {
+  return words.some((word) => {
+    const escaped = word.replace(
+      /[.*+?^${}()|[\]\\]/g,
+      '\\$&',
+    )
+    return new RegExp(`(^|[^a-z0-9])${escaped}`).test(
+      input,
+    )
+  })
+}
+
+const MONTHS_ID: Record<string, string> = {
+  Jan: 'Jan',
+  Feb: 'Feb',
+  Mar: 'Mar',
+  Apr: 'Apr',
+  May: 'Mei',
+  Jun: 'Jun',
+  Jul: 'Jul',
+  Aug: 'Agu',
+  Sep: 'Sep',
+  Oct: 'Okt',
+  Nov: 'Nov',
+  Dec: 'Des',
+}
+
+/** "Dec 2025 — Jun 2026" -> "Des 2025 — Jun 2026" */
+function localizeYear(value: string): string {
+  return value
+    .replace(
+      /\b(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\b/g,
+      (m) => MONTHS_ID[m] ?? m,
+    )
+    .replace(/\bPresent\b/gi, 'Sekarang')
+}
+
+function buildAssistantReply(rawInput: string): string {
+  const input = rawInput.trim().toLowerCase()
+
+  if (!input) {
+    return 'Maaf, saya belum menangkap maksudnya. Coba tanyakan tentang proyek, pengalaman, keahlian, atau kontak.'
+  }
+
+  if (
+    includesAnyKeyword(input, [
+      'proyek',
+      'project',
+      'portfolio',
+      'portofolio',
+      'karya',
+      'aplikasi',
+    ])
+  ) {
+    const top = projects
+      .slice(0, 3)
+      .map(
+        (item) =>
+          `• ${item.title} — ${item.tags.slice(0, 3).join(', ')}`,
+      )
+      .join('\n')
+
+    return `Beberapa proyek terbaru Deni:\n${top}\n\nSelengkapnya ada di halaman Proyek.`
+  }
+
+  if (
+    includesAnyKeyword(input, [
+      'pengalaman',
+      'experience',
+      'kerja',
+      'karir',
+      'karier',
+      'magang',
+      'intern',
+      'work',
+    ])
+  ) {
+    const top = experiences
+      .slice(0, 3)
+      .map(
+        (item) =>
+          `• ${item.role} — ${item.company} (${localizeYear(item.year)})`,
+      )
+      .join('\n')
+
+    return `Pengalaman terbaru Deni:\n${top}\n\nDetail lengkapnya ada di halaman Pengalaman.`
+  }
+
+  if (
+    includesAnyKeyword(input, [
+      'keahlian',
+      'skill',
+      'kemampuan',
+      'stack',
+      'teknologi',
+      'tech',
+      'bahasa pemrograman',
+    ])
+  ) {
+    return `Deni banyak bekerja dengan ${stack
+      .slice(0, 10)
+      .join(', ')}, dan masih banyak lagi. Daftar lengkapnya ada di halaman Teknologi.`
+  }
+
+  if (includesAnyKeyword(input, ['cv', 'resume', 'riwayat hidup'])) {
+    return 'Kamu bisa mengunduh CV Deni lewat tombol "Download CV" di halaman Beranda.'
+  }
+
+  if (
+    includesAnyKeyword(input, [
+      'kontak',
+      'contact',
+      'email',
+      'hubungi',
+      'whatsapp',
+      'linkedin',
+      'github',
+    ])
+  ) {
+    return 'Kamu bisa menghubungi Deni lewat email denipurwanto800@gmail.com, LinkedIn (deniiprwnt), atau GitHub (denipurwanto10). Info lengkapnya ada di halaman Kontak.'
+  }
+
+  if (
+    includesAnyKeyword(input, [
+      'siapa kamu',
+      'kamu siapa',
+      'siapa ini',
+      'siapa deni',
+      'who are you',
+    ])
+  ) {
+    return 'Saya asisten virtual untuk portofolio Deni Purwanto, seorang Full Stack Developer. Tanyakan saja soal proyek, pengalaman, atau cara menghubunginya.'
+  }
+
+  if (
+    includesAnyKeyword(input, [
+      'terima kasih',
+      'makasih',
+      'thanks',
+      'thank you',
+      'thx',
+    ])
+  ) {
+    return 'Sama-sama! Silakan tanya lagi kalau ada yang ingin diketahui tentang portofolio ini 🙌'
+  }
+
+  if (
+    includesAnyKeyword(input, [
+      'halo',
+      'hai',
+      'hi',
+      'hello',
+      'hey',
+      'selamat',
+      'assalamualaikum',
+    ])
+  ) {
+    return 'Halo juga 👋 Tanyakan apa saja tentang proyek, pengalaman kerja, teknologi, atau cara menghubungi Deni.'
+  }
+
+  return "Maaf, saya belum paham maksudnya. Coba tanyakan tentang 'proyek', 'pengalaman', 'keahlian', atau 'kontak' — atau pindah ke Global Chat untuk ngobrol langsung dengan Deni."
+}
+
 // Harus sama dengan durasi animasi keluar panel di styles.css.
 const CHAT_EXIT_MS = 180
 
@@ -745,6 +945,80 @@ export default function LiveChat() {
     () => () => window.clearTimeout(closeTimer.current),
     [],
   )
+
+  // Tab aktif di dalam panel chat: asisten virtual (default)
+  // atau Global Chat (room realtime Firebase yang sudah ada).
+  const [activeChatTab, setActiveChatTab] = useState<
+    'assistant' | 'global'
+  >('assistant')
+
+  const [assistantMessages, setAssistantMessages] = useState<
+    AssistantMessage[]
+  >([ASSISTANT_WELCOME])
+
+  const [assistantDraft, setAssistantDraft] = useState('')
+  const [assistantTyping, setAssistantTyping] = useState(false)
+  const assistantBottomRef = useRef<HTMLDivElement | null>(null)
+  const assistantTimer = useRef<number | undefined>(undefined)
+
+  useEffect(
+    () => () => window.clearTimeout(assistantTimer.current),
+    [],
+  )
+
+  useEffect(() => {
+    assistantBottomRef.current?.scrollIntoView({
+      block: 'end',
+    })
+  }, [assistantMessages, assistantTyping])
+
+  const sendAssistantMessage = useCallback(
+    (textOverride?: string) => {
+      const text = (
+        textOverride ?? assistantDraft
+      ).trim()
+
+      if (!text) {
+        return
+      }
+
+      setAssistantMessages((prev) => [
+        ...prev,
+        {
+          id: `u-${Date.now()}`,
+          from: 'user',
+          text,
+        },
+      ])
+
+      setAssistantDraft('')
+      setAssistantTyping(true)
+
+      window.clearTimeout(assistantTimer.current)
+
+      assistantTimer.current = window.setTimeout(
+        () => {
+          setAssistantMessages((prev) => [
+            ...prev,
+            {
+              id: `b-${Date.now()}`,
+              from: 'bot',
+              text: buildAssistantReply(text),
+            },
+          ])
+          setAssistantTyping(false)
+        },
+        500,
+      )
+    },
+    [assistantDraft],
+  )
+
+  const clearAssistantConversation = useCallback(() => {
+    window.clearTimeout(assistantTimer.current)
+    setAssistantTyping(false)
+    setAssistantMessages([ASSISTANT_WELCOME])
+  }, [])
 
   // Scroll pertama kali (riwayat pesan dimuat) langsung ke bawah;
   // smooth hanya untuk pesan baru — menggulir dari atas ke bawah
@@ -1588,60 +1862,231 @@ export default function LiveChat() {
 
       {open && (
         <section
-          className={
-            closing
-              ? 'chat-panel is-closing'
-              : 'chat-panel'
-          }
+          className={[
+            'chat-panel',
+            closing ? 'is-closing' : '',
+          ]
+            .filter(Boolean)
+            .join(' ')}
           role="dialog"
           aria-modal="false"
           aria-label="Live chat"
         >
           <header className="chat-panel-header">
-            <span className="chat-status-dot" />
-
-            <div className="chat-panel-heading">
-              <strong>
-                Live Chat
-              </strong>
-
-              <span>
-                {user
-                  ? `Signed in as ${getOwnDisplayName(
-                      user,
-                      profile,
-                      '',
-                    )}`
-                  : 'Chat with me in realtime'}
+            <div className="chat-panel-top">
+              <span className="chat-panel-avatar">
+                {activeChatTab === 'assistant' ? (
+                  <Bot size={19} />
+                ) : (
+                  <Users size={19} />
+                )}
               </span>
+
+              <div className="chat-panel-heading">
+                <strong>
+                  {activeChatTab === 'assistant'
+                    ? 'Virtual Assistant'
+                    : 'Global Room'}
+                </strong>
+
+                <span className="chat-panel-status">
+                  <span className="chat-status-dot" />
+                  Online
+                </span>
+              </div>
+
+              <div className="chat-panel-actions">
+                {activeChatTab === 'assistant' ? (
+                  <button
+                    type="button"
+                    className="chat-icon-button"
+                    onClick={clearAssistantConversation}
+                    aria-label="Hapus percakapan"
+                    title="Hapus percakapan"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                ) : (
+                  <>
+                    {user && (
+                      <button
+                        type="button"
+                        className="chat-icon-button"
+                        onClick={handleLogout}
+                        aria-label="Sign out"
+                        title="Sign out"
+                      >
+                        <LogOut size={15} />
+                      </button>
+                    )}
+                  </>
+                )}
+
+                <button
+                  type="button"
+                  className="chat-icon-button"
+                  onClick={closeChat}
+                  aria-label="Close live chat"
+                >
+                  <X size={18} />
+                </button>
+              </div>
             </div>
 
-            {user && (
+            <div
+              className="chat-tabs"
+              role="tablist"
+              aria-label="Chat sections"
+            >
               <button
                 type="button"
-                className="chat-icon-button"
-                onClick={
-                  handleLogout
+                role="tab"
+                aria-selected={
+                  activeChatTab === 'assistant'
                 }
-                aria-label="Sign out"
-                title="Sign out"
+                className={
+                  activeChatTab === 'assistant'
+                    ? 'chat-tab active'
+                    : 'chat-tab'
+                }
+                onClick={() =>
+                  setActiveChatTab('assistant')
+                }
               >
-                <LogOut
-                  size={17}
-                />
+                Virtual Assistant
               </button>
-            )}
 
-            <button
-              type="button"
-              className="chat-icon-button"
-              onClick={closeChat}
-              aria-label="Close live chat"
-            >
-              <X size={19} />
-            </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={
+                  activeChatTab === 'global'
+                }
+                className={
+                  activeChatTab === 'global'
+                    ? 'chat-tab active'
+                    : 'chat-tab'
+                }
+                onClick={() =>
+                  setActiveChatTab('global')
+                }
+              >
+                Global Chat
+              </button>
+            </div>
           </header>
 
+          {activeChatTab === 'assistant' && (
+            <>
+              <div
+                className="chat-messages assistant-messages notranslate"
+                translate="no"
+                aria-live="polite"
+              >
+                {assistantMessages.map((message) => (
+                  <div
+                    key={message.id}
+                    className={
+                      message.from === 'user'
+                        ? 'chat-message mine'
+                        : 'chat-message'
+                    }
+                  >
+                    {message.from === 'bot' && (
+                      <span className="chat-avatar chat-avatar-fallback assistant-avatar">
+                        <Bot size={14} />
+                      </span>
+                    )}
+
+                    <div className="chat-bubble">
+                      <p className="assistant-text">
+                        {message.text}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+
+                {assistantTyping && (
+                  <div className="chat-message">
+                    <span className="chat-avatar chat-avatar-fallback assistant-avatar">
+                      <Bot size={14} />
+                    </span>
+
+                    <div className="chat-bubble assistant-typing">
+                      <span />
+                      <span />
+                      <span />
+                    </div>
+                  </div>
+                )}
+
+                <div ref={assistantBottomRef} />
+              </div>
+
+              <div className="assistant-quick-replies notranslate"
+                translate="no">
+                {ASSISTANT_QUICK_REPLIES.map((label) => (
+                  <button
+                    key={label}
+                    type="button"
+                    className="assistant-quick-reply"
+                    onClick={() =>
+                      sendAssistantMessage(label)
+                    }
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+
+              <form
+                className="chat-composer notranslate"
+                translate="no"
+                onSubmit={(event) => {
+                  event.preventDefault()
+                  sendAssistantMessage()
+                }}
+              >
+                <div className="chat-composer-field">
+                  <MessageSquare
+                    className="chat-composer-icon"
+                    size={21}
+                    strokeWidth={1.7}
+                    aria-hidden="true"
+                  />
+
+                  <input
+                    type="text"
+                    value={assistantDraft}
+                    onChange={(event) =>
+                      setAssistantDraft(
+                        event.target.value,
+                      )
+                    }
+                    placeholder="Tanya soal proyek, pengalaman..."
+                    maxLength={300}
+                    aria-label="Tanya asisten virtual"
+                  />
+
+                  <button
+                    type="submit"
+                    className="chat-send"
+                    disabled={!assistantDraft.trim()}
+                    aria-label="Kirim pesan"
+                    title="Kirim pesan"
+                  >
+                    <SendHorizonal
+                      size={19}
+                      strokeWidth={1.9}
+                    />
+                  </button>
+                </div>
+              </form>
+            </>
+          )}
+
+          {activeChatTab === 'global' && (
+            <>
           {(authError ||
             sendError) && (
             <p
@@ -1965,6 +2410,8 @@ export default function LiveChat() {
                   </button>
                 </div>
               </form>
+            </>
+          )}
             </>
           )}
         </section>

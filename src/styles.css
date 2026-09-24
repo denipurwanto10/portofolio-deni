@@ -1509,22 +1509,49 @@ a {
   pointer-events: none;
 }
 
+/*
+ * Header chat — warnanya ikut tema situs (var(--accent)), bukan
+ * warna tetap. Gradasi tipis dibuat dari accent itu sendiri supaya
+ * otomatis benar di light & dark mode.
+ */
 .chat-panel-header {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 14px 0;
+  background: var(--accent);
+  background: linear-gradient(
+    135deg,
+    var(--accent),
+    color-mix(in srgb, var(--accent) 80%, var(--accent-contrast) 20%)
+  );
+  color: var(--accent-contrast);
+}
+
+.chat-panel-top {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 14px 12px 14px 16px;
-  background: #000000;
-  color: #ffffff;
+}
+
+.chat-panel-avatar {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  flex: none;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--accent-contrast) 18%, transparent);
+  color: var(--accent-contrast);
 }
 
 .chat-status-dot {
-  width: 9px;
-  height: 9px;
+  width: 8px;
+  height: 8px;
   flex: none;
   border-radius: 50%;
   background: #22c55e;
-  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.22);
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.28);
   animation: pulse-soft 1.8s ease-in-out
     infinite;
 }
@@ -1534,42 +1561,94 @@ a {
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  gap: 2px;
+  padding-bottom: 12px;
 }
 
 .chat-panel-heading strong {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 700;
 }
 
-.chat-panel-heading span {
-  display: block;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  color: rgba(255, 255, 255, 0.6);
+.chat-panel-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: color-mix(in srgb, var(--accent-contrast) 72%, transparent);
   font-size: 11px;
+}
+
+.chat-panel-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: none;
+  padding-bottom: 12px;
 }
 
 .chat-icon-button {
   display: grid;
   place-items: center;
-  width: 32px;
-  height: 32px;
+  width: 30px;
+  height: 30px;
   flex: none;
   padding: 0;
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  border: 1px solid color-mix(in srgb, var(--accent-contrast) 22%, transparent);
   border-radius: 50%;
   background: transparent;
-  color: #ffffff;
+  color: var(--accent-contrast);
   transition:
     background 0.28s var(--ease-out),
     transform 0.28s var(--ease-out);
 }
 
 .chat-icon-button:hover {
-  background: rgba(255, 255, 255, 0.14);
+  background: color-mix(in srgb, var(--accent-contrast) 16%, transparent);
   transform: scale(1.06);
+}
+
+/* Tab bar: "Virtual Assistant" / "Global Chat" — tetap di
+   permukaan gradasi header, dengan garis aktif seperti referensi. */
+.chat-tabs {
+  display: flex;
+  gap: 18px;
+}
+
+.chat-tab {
+  position: relative;
+  border: 0;
+  background: transparent;
+  padding: 0 2px 10px;
+  color: color-mix(in srgb, var(--accent-contrast) 62%, transparent);
+  font-size: 12.5px;
+  font-weight: 600;
+  transition: color 0.24s var(--ease-out);
+}
+
+.chat-tab::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  border-radius: 999px;
+  background: var(--accent-contrast);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s var(--ease-out);
+}
+
+.chat-tab:hover {
+  color: var(--accent-contrast);
+}
+
+.chat-tab.active {
+  color: var(--accent-contrast);
+}
+
+.chat-tab.active::after {
+  transform: scaleX(1);
 }
 
 .chat-signin {
@@ -1769,6 +1848,69 @@ a {
   font-size: 12px;
   font-weight: 700;
   background: var(--accent);
+}
+
+/* =========================
+   VIRTUAL ASSISTANT
+========================= */
+
+.assistant-avatar {
+  color: var(--accent-contrast);
+}
+
+.assistant-text {
+  white-space: pre-line;
+}
+
+.assistant-typing {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 12px;
+}
+
+.assistant-typing span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--text-tertiary);
+  animation: pulse-soft 1s ease-in-out infinite;
+}
+
+.assistant-typing span:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.assistant-typing span:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+.assistant-quick-replies {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 0 14px 10px;
+  background: var(--bg-page);
+}
+
+.assistant-quick-reply {
+  border: 1px solid var(--border-color);
+  background: var(--bg-surface);
+  color: var(--text-strong);
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  transition:
+    border-color 0.24s var(--ease-out),
+    background 0.24s var(--ease-out),
+    transform 0.24s var(--ease-out);
+}
+
+.assistant-quick-reply:hover {
+  border-color: var(--card-hover-border);
+  background: var(--accent-soft);
+  transform: translateY(-1px);
 }
 
 .chat-bubble {
@@ -7697,4 +7839,171 @@ body::-webkit-scrollbar-corner,
     transform: none;
     box-shadow: none;
   }
+}
+
+/* =========================================================
+   LIVE CHAT — DARK MODE POLISH
+   Sebelumnya header, bubble, dan avatar memakai --accent (putih
+   murni di dark mode) sehingga panel terlihat menyilaukan dan
+   bubble bot nyaris menyatu dengan latar hitam. Blok ini
+   memberi hirarki permukaan yang jelas: panel > area pesan >
+   bubble, dengan aksen putih hanya di elemen penting.
+========================================================= */
+[data-theme='dark'] .chat-panel {
+  background: #0f0f10;
+  border-color: #2a2a2d;
+  box-shadow:
+    0 24px 60px rgba(0, 0, 0, 0.7),
+    0 0 0 1px rgba(255, 255, 255, 0.04);
+}
+
+/* Header: gelap, bukan putih. Variabel lokal membuat semua
+   turunan (tab, tombol ikon, status) otomatis terbaca terang. */
+[data-theme='dark'] .chat-panel-header {
+  --accent: #1b1b1e;
+  --accent-contrast: #f4f4f5;
+  background: linear-gradient(135deg, #1f1f23, #151517);
+  border-bottom: 1px solid #2a2a2d;
+  color: #f4f4f5;
+}
+
+[data-theme='dark'] .chat-panel-avatar {
+  background: #2a2a2e;
+  color: #f4f4f5;
+}
+
+[data-theme='dark'] .chat-panel-status {
+  color: #a1a1aa;
+}
+
+[data-theme='dark'] .chat-tab {
+  color: #a1a1aa;
+}
+
+[data-theme='dark'] .chat-tab:hover,
+[data-theme='dark'] .chat-tab.active {
+  color: #ffffff;
+}
+
+/* Area pesan sedikit lebih terang dari hitam pekat agar bubble
+   punya latar untuk kontras. */
+[data-theme='dark'] .chat-messages,
+[data-theme='dark'] .assistant-quick-replies {
+  background: #0a0a0b;
+}
+
+/* Bubble lawan bicara / bot */
+[data-theme='dark'] .chat-bubble {
+  background: #1a1a1d;
+  border-color: #2e2e33;
+  color: #ececee;
+  box-shadow: none;
+}
+
+/* Bubble milik sendiri: abu terang lembut, bukan putih menyala */
+[data-theme='dark'] .chat-message.mine .chat-bubble {
+  background: #34343a;
+  border-color: #45454c;
+  color: #f4f4f5;
+}
+
+[data-theme='dark'] .chat-name {
+  color: #c4c4cc;
+}
+
+[data-theme='dark'] .chat-message.mine .chat-name {
+  color: #ffffff;
+}
+
+[data-theme='dark'] .chat-time {
+  opacity: 0.55;
+}
+
+[data-theme='dark'] .chat-quote {
+  background: rgba(255, 255, 255, 0.06);
+  border-left-color: #71717a;
+}
+
+[data-theme='dark'] .chat-quote strong {
+  color: #e4e4e7;
+}
+
+[data-theme='dark'] .chat-message.mine .chat-quote {
+  background: rgba(255, 255, 255, 0.1);
+  border-left-color: #a1a1aa;
+}
+
+[data-theme='dark'] .chat-message.mine .chat-quote strong {
+  color: #ffffff;
+}
+
+/* Avatar (fallback & bot) */
+[data-theme='dark'] .chat-avatar-fallback {
+  background: #2e2e33;
+  color: #f4f4f5;
+  border: 1px solid #3f3f46;
+}
+
+[data-theme='dark'] .assistant-avatar {
+  background: #2e2e33;
+  color: #f4f4f5;
+}
+
+/* Quick reply: chip yang terbaca jelas di atas latar gelap */
+[data-theme='dark'] .assistant-quick-reply {
+  background: #18181b;
+  border-color: #3a3a40;
+  color: #e4e4e7;
+}
+
+[data-theme='dark'] .assistant-quick-reply:hover {
+  background: #26262b;
+  border-color: #a1a1aa;
+  color: #ffffff;
+}
+
+[data-theme='dark'] .assistant-typing span {
+  background: #a1a1aa;
+}
+
+/* Preview reply & pesan error */
+[data-theme='dark'] .chat-reply-preview {
+  background: #18181b;
+  border-top-color: #2a2a2d;
+  border-left-color: #71717a;
+}
+
+[data-theme='dark'] .chat-reply-preview-text strong {
+  color: #e4e4e7;
+}
+
+[data-theme='dark'] .chat-reply-preview-text span {
+  color: #a1a1aa;
+}
+
+/* Composer: samakan dengan permukaan panel */
+[data-theme='dark'] .chat-composer {
+  background: #0f0f10;
+  border-top-color: #2a2a2d;
+}
+
+[data-theme='dark'] .chat-composer-field {
+  background: #1a1a1d;
+  border-color: #3a3a40;
+}
+
+[data-theme='dark'] .chat-composer-field:focus-within,
+[data-theme='dark'] .chat-composer-field:has(input:not(:placeholder-shown)) {
+  background: #1a1a1d;
+  border-color: #a1a1aa;
+}
+
+/* Scrollbar di dalam chat: tipis dan tidak mencolok */
+[data-theme='dark'] .chat-messages {
+  scrollbar-color: #3f3f46 transparent;
+}
+
+[data-theme='dark'] .chat-messages::-webkit-scrollbar-thumb,
+[data-theme='dark'] .chat-messages::-webkit-scrollbar-thumb:hover {
+  background: #3f3f46;
 }
