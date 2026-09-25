@@ -18,6 +18,8 @@ import './CustomCursor.css'
  *  - Efek cipratan air berlaku di SEMUA perangkat. Di layar sentuh
  *    (HP/tablet) efeknya muncul saat TAP — bukan saat menggeser
  *    layar/scroll — dan sedikit lebih besar agar tidak tertutup jari.
+ *    Karena itu root + lapisan efek SELALU dirender; yang kondisional
+ *    hanya panahnya.
  *  - Cursor bawaan baru disembunyikan setelah mouse bergerak
  *    (class `cc-active`), jadi aman kalau JS gagal jalan.
  *  - Respect `prefers-reduced-motion`: tanpa efek air.
@@ -80,71 +82,63 @@ function detectState(target: Element | null): CursorState {
 
 function CustomCursor() {
   // Panah cursor hanya untuk perangkat dengan mouse/trackpad.
-  const [finePointer] = useState(
+  // Diikuti perubahannya (mis. mouse baru dicolok / trackpad iPad
+  // dipasang setelah halaman dibuka) — sebelumnya hanya dibaca sekali.
+  const [finePointer, setFinePointer] = useState(
     () =>
       typeof window !== 'undefined' &&
       typeof window.matchMedia === 'function' &&
       window.matchMedia('(hover: hover) and (pointer: fine)').matches,
   )
 
+  useEffect(() => {
+    if (
+      typeof window === 'undefined' ||
+      typeof window.matchMedia !== 'function'
+    ) {
+      return
+    }
+
+    const query = window.matchMedia('(hover: hover) and (pointer: fine)')
+    const onChange = (event: MediaQueryListEvent) => {
+      setFinePointer(event.matches)
+    }
+
+    if (typeof query.addEventListener === 'function') {
+      query.addEventListener('change', onChange)
+    } else {
+      // Safari lama: addListener/removeListener.
+      query.addListener(onChange)
+    }
+
+    return () => {
+      if (typeof query.removeEventListener === 'function') {
+        query.removeEventListener('change', onChange)
+      } else {
+        query.removeListener(onChange)
+      }
+    }
+  }, [])
+
   const rootRef = useRef<HTMLDivElement>(null)
   const cursorRef = useRef<HTMLDivElement>(null)
   const fxRef = useRef<HTMLDivElement>(null)
 
+  /**
+   * EFEK CIPRATAN — jalan di SEMUA perangkat (termasuk sentuh).
+   * Sengaja dipisah dari efek panah: di HP tidak ada listener
+   * pointermove sama sekali, hanya pointerdown/up/cancel yang murah.
+   * Ini memperbaiki regresi "tap tanpa cipratan" dari optimasi lalu
+   * yang me-return null untuk seluruh komponen di layar sentuh.
+   */
   useEffect(() => {
     const root = rootRef.current
-    const cursor = cursorRef.current // null di layar sentuh (tanpa panah)
     const fx = fxRef.current
     if (!root || !fx) return
 
-    const html = document.documentElement
     const reduceMotion = window.matchMedia(
       '(prefers-reduced-motion: reduce)',
     ).matches
-
-    let shown = false
-    let lastTarget: Element | null = null
-
-    // Perf: pointermove mentah (±1000 event/detik) di-coalesce via rAF —
-    // tulis DOM maksimal 1x per frame. Tanpa ini tiap gerakan menulis
-    // style.transform + closest() 2 selector panjang di main thread.
-    let pendingMove: PointerEvent | null = null
-    let moveRaf = 0
-
-    const setVisible = (value: boolean) => {
-      shown = value
-      root.dataset.visible = String(value)
-    }
-
-    const flushMove = () => {
-      moveRaf = 0
-      const event = pendingMove
-      pendingMove = null
-      if (!event) return
-
-      if (!cursor || event.pointerType === 'touch') return
-
-      cursor.style.transform = `translate3d(${event.clientX}px, ${event.clientY}px, 0)`
-
-      if (!shown) {
-        html.classList.add('cc-active')
-        setVisible(true)
-      }
-
-      const target = event.target as Element | null
-      if (target !== lastTarget) {
-        lastTarget = target
-        root.dataset.state = detectState(target)
-      }
-    }
-
-    const onMove = (event: PointerEvent) => {
-      pendingMove = event
-
-      if (moveRaf === 0) {
-        moveRaf = requestAnimationFrame(flushMove)
-      }
-    }
 
     /** Cipratan air di titik klik. */
     const splash = (x: number, y: number, scale = 1) => {
@@ -303,6 +297,85 @@ function CustomCursor() {
       root.dataset.pressed = 'false'
     }
 
+    root.dataset.pressed = 'false'
+
+    window.addEventListener('pointerdown', onDown, { passive: true })
+    window.addEventListener('pointerup', onUp, { passive: true })
+    window.addEventListener('pointercancel', onCancel, { passive: true })
+
+    return () => {
+      window.removeEventListener('pointerdown', onDown)
+      window.removeEventListener('pointerup', onUp)
+      window.removeEventListener('pointercancel', onCancel)
+      fx.replaceChildren()
+    }
+  }, [])
+
+  /**
+   * PANAH CURSOR — hanya untuk mouse/trackpad.
+   * pointermove mentah (±1000 event/detik) di-coalesce via rAF +
+   * coalesced events: tulis DOM maksimal 1x per frame dengan koordinat
+   * paling segar. Deteksi state (closest) hanya saat target berubah.
+   */
+  useEffect(() => {
+    if (!finePointer) return
+
+    const root = rootRef.current
+    const cursor = cursorRef.current
+    if (!root || !cursor) return
+
+    const html = document.documentElement
+
+    let shown = false
+    let lastTarget: Element | null = null
+    let pendingMove: PointerEvent | null = null
+    let moveRaf = 0
+
+    const setVisible = (value: boolean) => {
+      shown = value
+      root.dataset.visible = String(value)
+    }
+
+    const flushMove = () => {
+      moveRaf = 0
+      const event = pendingMove
+      pendingMove = null
+      if (!event) return
+
+      if (event.pointerType === 'touch') return
+
+      cursor.style.transform = `translate3d(${event.clientX}px, ${event.clientY}px, 0)`
+
+      if (!shown) {
+        html.classList.add('cc-active')
+        setVisible(true)
+      }
+
+      const target = event.target as Element | null
+      if (target !== lastTarget) {
+        lastTarget = target
+        root.dataset.state = detectState(target)
+      }
+    }
+
+    const onMove = (event: PointerEvent) => {
+      // Ambil titik paling segar dari batch browser bila tersedia —
+      // mengurangi ketertinggalan 1 frame di layar 120Hz.
+      if (typeof event.getCoalescedEvents === 'function') {
+        const coalesced = event.getCoalescedEvents()
+        pendingMove =
+          coalesced.length > 0
+            ? coalesced[coalesced.length - 1]
+            : event
+      } else {
+        pendingMove = event
+      }
+
+      if (moveRaf === 0) {
+        moveRaf = requestAnimationFrame(flushMove)
+      }
+    }
+
     // Mouse keluar jendela / masuk area scrollbar -> sembunyikan.
     const onOut = (event: MouseEvent) => {
       if (!event.relatedTarget) {
@@ -315,13 +388,9 @@ function CustomCursor() {
     const onHide = () => setVisible(false)
 
     root.dataset.state = 'default'
-    root.dataset.pressed = 'false'
     root.dataset.visible = 'false'
 
     window.addEventListener('pointermove', onMove, { passive: true })
-    window.addEventListener('pointerdown', onDown, { passive: true })
-    window.addEventListener('pointerup', onUp, { passive: true })
-    window.addEventListener('pointercancel', onCancel, { passive: true })
     document.addEventListener('mouseout', onOut)
     window.addEventListener('blur', onHide)
 
@@ -330,28 +399,21 @@ function CustomCursor() {
         cancelAnimationFrame(moveRaf)
       }
       window.removeEventListener('pointermove', onMove)
-      window.removeEventListener('pointerdown', onDown)
-      window.removeEventListener('pointerup', onUp)
-      window.removeEventListener('pointercancel', onCancel)
       document.removeEventListener('mouseout', onOut)
       window.removeEventListener('blur', onHide)
       html.classList.remove('cc-active')
-      fx.replaceChildren()
     }
   }, [finePointer])
 
   if (typeof window === 'undefined') return null
 
-  // Perf: perangkat sentuh (mayoritas mobile) tidak merender SAMA
-  // SEKALI — sebelumnya root + fx + 4 listener tetap dipasang walau
-  // panah tak pernah dipakai. Tampilan desktop tidak berubah.
-  if (!finePointer) {
-    return null
-  }
-
+  // Root + lapisan efek selalu dirender (cipratan tap di HP butuh wadah).
+  // Yang kondisional hanya panahnya — di sentuh tidak ada listener gerak
+  // maupun elemen panah sama sekali.
   return (
     <div className="cc-root" ref={rootRef} aria-hidden="true">
       <div className="cc-fx" ref={fxRef} />
+      {finePointer && (
       <div className="cc-cursor" ref={cursorRef}>
         {/* Panah navigasi: ujung (0,0) = titik klik */}
         <svg
@@ -411,6 +473,7 @@ function CustomCursor() {
           />
         </svg>
       </div>
+      )}
     </div>
   )
 }
