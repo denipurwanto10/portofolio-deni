@@ -49,10 +49,22 @@ const translations: Record<string, string> = {
 
   // Project titles
   'Bandung Regency MSME Portal': 'Portal UMKM Kabupaten Bandung',
+  'Formatra Convert': 'Formatra Convert',
+  'Disaster Monitoring Indonesia': 'Disaster Monitoring Indonesia',
   'Gudang.in — Office Inventory & Assets': 'Gudang.in — Inventaris & Aset Kantor',
+  'PC Control — Multimodal Desktop Controller': 'PC Control — Multimodal Desktop Controller',
+  'Placement Test Engine': 'Placement Test Engine',
   'Wisma Reservasi — Hotel Management System': 'Wisma Reservasi — Sistem Manajemen Hotel',
   'Pasarku — Multi-Vendor E-Commerce': 'Pasarku — E-Commerce Multi Penjual',
   'Attendance App': 'Aplikasi Absensi',
+  'MandiriNewsApps': 'MandiriNewsApps',
+  'Portfolio V2': 'Portfolio V2',
+  'Visualisasi Pipa Sumur Bor': 'Visualisasi Pipa Sumur Bor',
+  'PPDB Flutter': 'PPDB Flutter',
+  'GIS Penduduk': 'GIS Penduduk',
+  'PetClinic': 'PetClinic',
+  'Catshop': 'Catshop',
+  'Menu Restoran': 'Menu Restoran',
 
   // Localized dates
   'Dec 2025 — Jun 2026': 'Des 2025 — Jun 2026',
