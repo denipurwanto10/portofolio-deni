@@ -1653,9 +1653,6 @@ a {
    CHAT
 ========================= */
 
-/* Tombol chat modern secukupnya: gradasi aksen diagonal + kilau
-   kaca di atas + bayangan berlapis. Tetap bulat 52px, tetap
-   mengikuti --accent / --accent-contrast / --accent-shadow. */
 .chat-button {
   position: fixed;
   right: 25px;
@@ -1666,40 +1663,17 @@ a {
   display: grid;
   place-items: center;
   border: 0;
-  background:
-    radial-gradient(
-      circle at 30% 22%,
-      rgba(255, 255, 255, 0.35) 0%,
-      rgba(255, 255, 255, 0) 48%
-    ),
-    linear-gradient(
-      140deg,
-      var(--accent) 0%,
-      color-mix(in srgb, var(--accent) 72%, #000000) 100%
-    );
+  background: var(--accent);
   color: var(--accent-contrast);
-  box-shadow:
-    0 10px 22px var(--accent-shadow),
-    inset 0 1px 1px rgba(255, 255, 255, 0.3),
-    inset 0 -2px 5px rgba(0, 0, 0, 0.16);
+  box-shadow: 0 10px 22px var(--accent-shadow);
   z-index: 35;
-  cursor: pointer;
   transition:
     transform 0.32s var(--ease-out),
-    opacity 0.32s var(--ease-out),
-    box-shadow 0.32s var(--ease-out);
+    opacity 0.32s var(--ease-out);
 }
 
 .chat-button:hover {
-  transform: scale(1.08) translateY(-1px);
-  box-shadow:
-    0 14px 28px var(--accent-shadow),
-    inset 0 1px 1px rgba(255, 255, 255, 0.3),
-    inset 0 -2px 5px rgba(0, 0, 0, 0.16);
-}
-
-.chat-button:active {
-  transform: scale(0.94);
+  transform: scale(1.07);
 }
 
 .chat-button-hidden {
