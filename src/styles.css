@@ -3410,17 +3410,23 @@ a {
   }
 
   .github-card-header {
-    flex-direction: column;
+    flex-direction: row;
     align-items: flex-start;
-    gap: 14px;
+    gap: 12px;
   }
 
   .github-stats {
-    gap: 20px;
+    width: auto;
+    flex: none;
+    gap: 16px;
+  }
+
+  .github-stats > div {
+    min-width: 0;
   }
 
   .github-stats strong {
-    font-size: 24px;
+    font-size: 22px;
   }
 
   .github-calendar-wrapper {
@@ -5748,9 +5754,36 @@ a {
     overflow-wrap: break-word;
   }
 
+  /* Judul "N contributions" boleh menyusut agar Total &
+     Streak tetap muat di sampingnya di layar sempit. */
+  .github-profile-info {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  /* Total & Streak tetap di samping (kanan) info profil,
+     tidak jatuh ke bawah kalender di mobile. */
+  .github-card-header {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+
   .github-stats {
-    width: 100%;
+    width: auto;
+    flex: none;
     gap: 16px;
+  }
+
+  .github-stats > div {
+    min-width: 0;
+  }
+
+  .github-stats strong {
+    font-size: 22px;
+  }
+
+  .github-stats span {
+    font-size: 11px;
   }
 
   .experience-card h3,
@@ -6328,11 +6361,31 @@ a {
     word-break: break-word;
   }
 
+  /* Total & Streak tetap di samping (kanan) info profil,
+     tidak jatuh ke bawah kalender di mobile. */
+  .github-card-header {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+
   .github-stats {
-    width: 100%;
+    width: auto;
     min-width: 0;
-    flex-wrap: wrap;
-    gap: 14px 22px;
+    flex: none;
+    flex-wrap: nowrap;
+    gap: 14px 20px;
+  }
+
+  .github-stats > div {
+    min-width: 0;
+  }
+
+  .github-stats strong {
+    font-size: 22px;
+  }
+
+  .github-stats span {
+    font-size: 11px;
   }
 
   .github-calendar-wrapper {
