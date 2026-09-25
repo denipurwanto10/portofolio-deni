@@ -3008,30 +3008,32 @@ a {
 }
 
 [data-theme='dark'] .github-tip {
-  background: #f1f5f9;
-  color: #0f172a;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+  background: #1e293b;
+  color: #f8fafc;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.6);
 }
 
 [data-theme='dark'] .github-tip strong {
-  color: #0f172a;
+  color: #ffffff;
 }
 
 [data-theme='dark'] .github-tip-sep {
-  color: rgba(15, 23, 42, 0.35);
+  color: rgba(148, 163, 184, 0.7);
 }
 
 [data-theme='dark'] .github-tip span:last-child {
-  color: rgba(15, 23, 42, 0.68);
+  color: #e2e8f0;
+  font-weight: 600;
 }
 
 [data-theme='dark'] .github-tip::after {
-  border-top-color: #f1f5f9;
+  border-top-color: #1e293b;
 }
 
 [data-theme='dark'] .github-tip.is-below::after {
   border-top-color: transparent;
-  border-bottom-color: #f1f5f9;
+  border-bottom-color: #1e293b;
 }
 
 @keyframes github-tip-in {
