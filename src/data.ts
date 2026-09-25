@@ -126,7 +126,7 @@ export const projects: Project[] = [
     title: 'Visualisasi Pipa Sumur Bor',
     description:
       'An interactive web app for visualizing borewell construction — pipes, screens, open hole, and groundwater level on a proportional canvas, plus technical data forms and photo documentation.',
-    tags: ['Vite', 'React'],
+    tags: ['Vite', 'React', 'Tailwind CSS'],
     link: 'https://github.com/denipurwanto10/visualisasi_pipa',
     demo: 'https://visualisasi-pipa.vercel.app',
     language: 'JavaScript',
