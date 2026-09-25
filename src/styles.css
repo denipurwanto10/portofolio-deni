@@ -1,12 +1,26 @@
-/* Font Inter dimuat via <link> di index.html (preconnect + display=swap)
-   supaya tidak render-blocking berantai seperti @import. */
+/* Font Plus Jakarta Sans dimuat via <link> di index.html
+   (preconnect + display=swap) supaya tidak render-blocking
+   berantai seperti @import. Fallback Inter → system-ui menjaga
+   tampilan tetap rapi bila font gagal dimuat. */
 
 /* =========================
    ROOT
 ========================= */
 
 :root {
-  font-family: Inter, system-ui, sans-serif;
+  font-family:
+    'Plus Jakarta Sans',
+    Inter,
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    sans-serif;
+  /* Poles rendering: huruf lebih tajam & rapat natural khas
+     Jakarta Sans tanpa mengubah ukuran/spasi layout. */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-optical-sizing: auto;
   color: var(--text-primary);
   background: var(--bg-page);
   font-synthesis: none;
