@@ -549,11 +549,15 @@ a {
   border: 1px solid var(--border-soft);
   border-radius: 10px;
   background: transparent;
+  /* Jarak aman ke footer saat sidebar di-scroll (layar pendek):
+     footer tidak lagi menempel tepat di bawah dots warna. */
+  margin-bottom: 12px;
 }
 
 .accent-swatches {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
 }
 
@@ -624,6 +628,10 @@ a {
 
 .sidebar-footer {
   margin-top: auto;
+  /* Saat isi sidebar lebih tinggi dari layar (mobile landscape /
+     layar pendek), footer ikut ke-scroll — tapi tetap ada jarak
+     minimum dari menu warna di atasnya, tidak menabrak. */
+  margin-bottom: 0;
   border-top: 1px solid var(--border-soft);
   padding: 18px 10px 20px;
   display: flex;
@@ -631,6 +639,7 @@ a {
   text-align: center;
   gap: 5px;
   color: var(--text-secondary);
+  flex: none;
 }
 
 .sidebar-footer strong {
@@ -6806,6 +6815,14 @@ a {
     margin: 5px 8px 0;
     padding: 8px;
     font-size: 10px;
+  }
+
+  /* Sejajarkan dengan theme-toggle di atasnya + beri napas
+     ke footer di bawahnya supaya tidak terlihat menabrak. */
+  .accent-picker {
+    width: calc(100% - 16px);
+    margin: 6px 8px 14px;
+    padding: 8px;
   }
 
   .sidebar-footer {
