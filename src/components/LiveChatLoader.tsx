@@ -57,7 +57,7 @@ function LiveChatLoader() {
           aria-label="Open live chat"
         >
           {/* Ikon chat gaya baru — styling tombol tetap seperti semula. */}
-          <MessageSquareText size={24} />
+          <MessageSquareText size={29} />
         </button>
       )}
 

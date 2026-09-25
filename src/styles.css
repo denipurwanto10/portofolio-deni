@@ -6573,8 +6573,10 @@ a {
   .chat-button {
     right: 14px;
     bottom: calc(14px + env(safe-area-inset-bottom));
-    width: 48px;
-    height: 48px;
+    /* Mobile: tombol lebih besar & mudah disentuh (±60px target
+       sentuh). Desktop tetap 52px seperti semula. */
+    width: 60px;
+    height: 60px;
   }
 
   .chat-panel {
