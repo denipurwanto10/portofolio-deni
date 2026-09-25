@@ -182,104 +182,6 @@ function buildMonthLabels(
   return labels
 }
 
-/*
- * Parse the official GitHub contributions calendar
- * (https://github.com/users/denipurwanto10/contributions —
- * the same source rendered on github.com/denipurwanto10)
- * into a daily list plus the "N contributions in the last year" total.
- */
-function parseGithubContributionsPage(html: string): {
-  total: number | null
-  contributions: GithubContribution[]
-} {
-  const parser = new DOMParser()
-
-  const doc = parser.parseFromString(
-    html,
-    'text/html',
-  )
-
-  let total: number | null = null
-
-  const headingText =
-    doc.querySelector('h2')?.textContent ?? ''
-
-  const totalMatch = headingText.match(
-    /([\d,]+)\s+contributions?\s+in\s+the\s+last\s+year/i,
-  )
-
-  if (totalMatch?.[1]) {
-    total = Number(
-      totalMatch[1].replace(/,/g, ''),
-    )
-  }
-
-  const contributions: GithubContribution[] =
-    []
-
-  doc
-    .querySelectorAll('[data-date]')
-    .forEach((el) => {
-      const date = el.getAttribute('data-date')
-
-      if (!date) {
-        return
-      }
-
-      const text =
-        el.querySelector('tool-tip, title')
-          ?.textContent ??
-        el.textContent ??
-        ''
-
-      let count = 0
-
-      const countMatch = text.match(
-        /([\d,]+)\s+contributions?\s+on/i,
-      )
-
-      if (countMatch?.[1]) {
-        count = Number(
-          countMatch[1].replace(/,/g, ''),
-        )
-      } else if (
-        !/no\s+contributions/i.test(text)
-      ) {
-        const level = Number(
-          el.getAttribute('data-level') ??
-            '0',
-        )
-
-        count = level > 0 ? 1 : 0
-      }
-
-      const rawLevel = Number(
-        el.getAttribute('data-level') ??
-          '0',
-      )
-
-      const level = (
-        rawLevel >= 0 && rawLevel <= 4
-          ? rawLevel
-          : 0
-      ) as GithubContribution['level']
-
-      contributions.push({
-        date,
-        count,
-        level,
-      })
-    })
-
-  contributions.sort(
-    (a, b) =>
-      parseGithubDate(a.date).getTime() -
-      parseGithubDate(b.date).getTime(),
-  )
-
-  return { total, contributions }
-}
-
 function Dashboard() {
   const [resumeOpen, setResumeOpen] = useState(false)
   const [resumeLeaving, setResumeLeaving] = useState(false)
@@ -316,6 +218,9 @@ function Dashboard() {
 
   // Kunci scroll body + tutup dengan Escape selama modal resume
   // terbuka, sama seperti modal di halaman Awards & Certs.
+  // A5: dependensi HANYA [resumeOpen] — sebelumnya closeResume ikut
+  // jadi dep sehingga cleanup (buka kunci + scrollTo) jalan terlalu
+  // dini saat animasi tutup dimulai (resumeLeaving=true).
   useEffect(() => {
     if (!resumeOpen) {
       return
@@ -351,7 +256,8 @@ function Dashboard() {
       window.scrollTo(0, scrollY)
       document.removeEventListener('keydown', handleKeyDown)
     }
-  }, [resumeOpen, closeResume])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [resumeOpen])
 
   useEffect(
     () => () => {
@@ -526,13 +432,34 @@ function TimeCard() {
   const [time, setTime] = useState(new Date())
   const [is24Hour, setIs24Hour] = useState(false)
 
+  // Perf: interval dijeda saat tab disembunyikan — sebelumnya
+  // membangunkan main thread tiap detik walau tab tidak terlihat.
   useEffect(() => {
+    if (document.hidden) {
+      return
+    }
+
     const timer = window.setInterval(() => {
       setTime(new Date())
     }, 1000)
 
+    const onVisibility = () => {
+      if (!document.hidden) {
+        setTime(new Date())
+      }
+    }
+
+    document.addEventListener(
+      'visibilitychange',
+      onVisibility,
+    )
+
     return () => {
       window.clearInterval(timer)
+      document.removeEventListener(
+        'visibilitychange',
+        onVisibility,
+      )
     }
   }, [])
 
@@ -789,13 +716,22 @@ function loadCachedGithubStats():
       return null
     }
 
+    // A9: validasi ketat — count/level ikut dicek. Cache korup
+    // (mis. count string) sebelumnya lolos lalu meracuni reduce
+    // menjadi konkatenasi string.
     const contributions = Array.isArray(
       parsed.contributions,
     )
       ? parsed.contributions.filter(
           (item) =>
             item &&
-            typeof item.date === 'string',
+            typeof item.date === 'string' &&
+            /^\d{4}-\d{2}-\d{2}$/.test(item.date) &&
+            typeof item.count === 'number' &&
+            Number.isFinite(item.count) &&
+            typeof item.level === 'number' &&
+            item.level >= 0 &&
+            item.level <= 4,
         )
       : []
 
@@ -896,9 +832,12 @@ function normalizeContributionList(
  * Saat `npm run dev` (tanpa Vercel) route ini tidak ada dan
  * mengembalikan HTML, sehingga otomatis jatuh ke sumber cadangan.
  */
-async function fetchOfficialContributions(): Promise<ContributionPayload> {
+async function fetchOfficialContributions(
+  signal?: AbortSignal,
+): Promise<ContributionPayload> {
   const response = await fetch('/api/github-contributions', {
     cache: 'no-store',
+    signal,
   })
 
   if (!response.ok) {
@@ -944,12 +883,14 @@ async function fetchOfficialContributions(): Promise<ContributionPayload> {
  */
 async function fetchContributionYear(
   year: string,
+  signal?: AbortSignal,
 ): Promise<{
   total: number | null
   contributions: GithubContribution[]
 }> {
   const response = await fetch(
     `https://github-contributions-api.jogruber.de/v4/${GITHUB_USERNAME}?y=${year}`,
+    { signal },
   )
 
   if (!response.ok) {
@@ -976,59 +917,9 @@ async function fetchContributionYear(
   }
 }
 
-async function fetchExactStreakStats(): Promise<{
-  length: number
-  start: string | null
-  end: string | null
-} | null> {
-  const streakUrl = new URL(
-    'https://streak-stats.demolab.com/',
-  )
-  streakUrl.searchParams.set('user', GITHUB_USERNAME)
-  streakUrl.searchParams.set('type', 'json')
-  streakUrl.searchParams.set('timezone', 'UTC')
-
-  const proxyUrl = new URL(
-    'https://api.allorigins.win/raw',
-  )
-  proxyUrl.searchParams.set('url', streakUrl.toString())
-  proxyUrl.searchParams.set('cache', String(Date.now()))
-
-  const response = await fetch(proxyUrl.toString(), {
-    cache: 'no-store',
-  })
-
-  if (!response.ok) {
-    throw new Error(
-      `Streak Stats request failed: ${response.status}`,
-    )
-  }
-
-  const json = (await response.json()) as {
-    longestStreak?: unknown
-    longestStreakStart?: unknown
-    longestStreakEnd?: unknown
-  }
-
-  const length = Number(json.longestStreak)
-  if (!Number.isFinite(length) || length < 0) {
-    return null
-  }
-
-  return {
-    length,
-    start:
-      typeof json.longestStreakStart === 'string'
-        ? json.longestStreakStart
-        : null,
-    end:
-      typeof json.longestStreakEnd === 'string'
-        ? json.longestStreakEnd
-        : null,
-  }
-}
-
-async function fetchGithubContributions(): Promise<{
+async function fetchGithubContributions(
+  signal?: AbortSignal,
+): Promise<{
   total: number | null
   contributions: GithubContribution[]
   streakContributions: GithubContribution[]
@@ -1041,20 +932,30 @@ async function fetchGithubContributions(): Promise<{
   // (2) mirror pihak ketiga sebagai cadangan. Mirror bisa tertinggal
   // beberapa jam (mis. total 172 padahal GitHub sudah 173), jadi
   // hanya dipakai kalau sumber resmi gagal.
+  //
+  // B12: signal diteruskan — unmount membatalkan request beneran,
+  // bukan cuma mengabaikan hasilnya.
   let lastYear: ContributionPayload
 
   try {
-    lastYear = await fetchOfficialContributions()
+    lastYear = await fetchOfficialContributions(signal)
 
     if (!lastYear.contributions.length) {
       throw new Error('Official calendar returned no data')
     }
   } catch (error) {
-    console.warn(
-      'Official GitHub calendar unavailable, using mirror:',
-      error,
+    // Dibatalkan → jangan fallback, langsung lempar.
+    if (signal?.aborted) {
+      throw error
+    }
+
+    // Bukan error: saat `npm run dev` (tanpa Vercel) route /api tidak
+    // ada dan mengembalikan HTML, sehingga otomatis memakai mirror
+    // cadangan. Di production (Vercel) sumber resmi dipakai.
+    console.info(
+      'Official GitHub calendar not available here, using mirror fallback.',
     )
-    lastYear = await fetchContributionYear('last')
+    lastYear = await fetchContributionYear('last', signal)
   }
 
   if (!lastYear.contributions.length) {
@@ -1131,6 +1032,67 @@ const ContributionCalendar = memo(function ContributionCalendar({
   )
 })
 
+/*
+ * Angka count-up terisolasi: komponen memo kecil ini yang me-render
+ * ulang tiap frame rAF, BUKAN seluruh GithubContributions.
+ * Sebelumnya 2× useCountUp di parent me-re-render seluruh kartu
+ * (±60×/detik): header, stats, toLocaleString tiap frame.
+ * Tampilan & angka akhir identik.
+ */
+const AnimatedTotalHeading = memo(function AnimatedTotalHeading({
+  total,
+  start,
+  loading,
+}: {
+  total: number
+  start: boolean
+  loading: boolean
+}) {
+  const value = useCountUp(total, 1400, start)
+
+  if (loading) {
+    return <>GitHub contributions</>
+  }
+
+  return <>{`${value.toLocaleString('en-US')} contributions`}</>
+})
+
+const AnimatedTotalStat = memo(function AnimatedTotalStat({
+  total,
+  start,
+  loading,
+}: {
+  total: number
+  start: boolean
+  loading: boolean
+}) {
+  const value = useCountUp(total, 1400, start)
+
+  if (loading) {
+    return <>—</>
+  }
+
+  return <>{value.toLocaleString('en-US')}</>
+})
+
+const AnimatedStreakStat = memo(function AnimatedStreakStat({
+  length,
+  start,
+  loading,
+}: {
+  length: number
+  start: boolean
+  loading: boolean
+}) {
+  const value = useCountUp(length, 1100, start)
+
+  if (loading) {
+    return <>—</>
+  }
+
+  return <>{value}</>
+})
+
 function GithubContributions() {
   const [contributions, setContributions] =
     useState<GithubContribution[]>([])
@@ -1162,6 +1124,13 @@ function GithubContributions() {
 
   useEffect(() => {
     let cancelled = false
+    // B12: batalkan request jaringan + timeout 15 detik agar loading
+    // tidak menggantung selamanya saat fetch macet.
+    const controller = new AbortController()
+    const timeout = window.setTimeout(
+      () => controller.abort(),
+      15000,
+    )
 
     const fetchContributions = async () => {
       // Show the last good data instantly, then refresh.
@@ -1198,7 +1167,9 @@ function GithubContributions() {
 
       try {
         const fresh =
-          await fetchGithubContributions()
+          await fetchGithubContributions(
+            controller.signal,
+          )
 
         if (cancelled) return
 
@@ -1232,12 +1203,23 @@ function GithubContributions() {
             fresh.contributions,
         })
       } catch (err) {
+        if (cancelled) return
+
+        // Abort murni (unmount/timeout tanpa cache) → anggap gagal
+        // memuat, bukan error misterius.
+        if (
+          controller.signal.aborted &&
+          !cached
+        ) {
+          setCalendarError(true)
+          setStatsError(true)
+          return
+        }
+
         console.error(
           'GitHub contributions error:',
           err,
         )
-
-        if (cancelled) return
 
         if (cached) {
           // Cached official data: keep showing it,
@@ -1260,6 +1242,8 @@ function GithubContributions() {
 
     return () => {
       cancelled = true
+      window.clearTimeout(timeout)
+      controller.abort()
     }
   }, [])
 
@@ -1310,17 +1294,9 @@ function GithubContributions() {
   const { ref: cardRef, inView: cardInView } =
     useInView<HTMLElement>(0.25)
 
-  const animatedTotal = useCountUp(
-    displayTotal,
-    1400,
-    cardInView && !loading,
-  )
-
-  const animatedStreak = useCountUp(
-    displayStreak.length,
-    1100,
-    cardInView && !loading,
-  )
+  // B13: angka tidak restart dari 0 saat data fresh tiba — mulai
+  // dari nilai cache yang sedang tampil supaya tidak melompat mundur.
+  const countStart = cardInView && !loading
 
   return (
     <section
@@ -1339,9 +1315,11 @@ function GithubContributions() {
 
           <div className="github-heading">
             <h2>
-              {loading
-                ? 'GitHub contributions'
-                : `${animatedTotal.toLocaleString('en-US')} contributions`}
+              <AnimatedTotalHeading
+                total={displayTotal}
+                start={countStart}
+                loading={loading}
+              />
             </h2>
 
             <a
@@ -1367,11 +1345,11 @@ function GithubContributions() {
         <div className="github-stats">
           <div className="github-stat">
             <strong>
-              {loading
-                ? '—'
-                : animatedTotal.toLocaleString(
-                    'en-US',
-                  )}
+              <AnimatedTotalStat
+                total={displayTotal}
+                start={countStart}
+                loading={loading}
+              />
             </strong>
 
             <span>Total</span>
@@ -1386,9 +1364,11 @@ function GithubContributions() {
             }
           >
             <strong>
-              {loading
-                ? '—'
-                : animatedStreak}
+              <AnimatedStreakStat
+                length={displayStreak.length}
+                start={countStart}
+                loading={loading}
+              />
             </strong>
 
             <span>Streak</span>

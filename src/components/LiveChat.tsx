@@ -27,6 +27,7 @@ import {
   onSnapshot,
   orderBy,
   query,
+  runTransaction,
   serverTimestamp,
   setDoc,
   updateDoc,
@@ -121,9 +122,14 @@ function parseReactions(
   return out
 }
 
+/**
+ * A1: ambil 100 pesan TERBARU (desc) — hasil dibalik ke asc saat
+ * render supaya urutan kronologis tetap. Sebelumnya asc+limit(100)
+ * mengambil 100 TERLAMA: setelah >100 pesan, pesan baru hilang.
+ */
 const MESSAGES_QUERY = query(
   collection(db, 'messages'),
-  orderBy('createdAt', 'asc'),
+  orderBy('createdAt', 'desc'),
   limit(100),
 )
 
@@ -2731,7 +2737,9 @@ export default function LiveChat() {
       // ("dimana?", "teknologinya?") tahu topik terakhir.
       const userMsg: AssistantMessage =
         {
-          id: `u-${Date.now()}`,
+          // B8: counter + random — Date.now() saja bisa tabrakan
+          // bila 2 pesan dibuat dalam 1ms → key React duplikat.
+          id: `u-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
           from: 'user',
           text,
         }
@@ -2753,7 +2761,7 @@ export default function LiveChat() {
           setAssistantMessages((prev) => [
             ...prev,
             {
-              id: `b-${Date.now()}`,
+              id: `b-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
               from: 'bot',
               text: buildAssistantReply(
                 text,
@@ -2834,12 +2842,19 @@ export default function LiveChat() {
 
   /**
    * AUTH STATE
+   * A4: token generasi — sync async yang kedaluwarsa (ganti akun
+   * cepat / unmount) dibuang, profil lama tak menimpa yang baru.
    */
+  const authGeneration = useRef(0)
+
   useEffect(() => {
     const unsubscribe =
       onAuthStateChanged(
         auth,
         (nextUser) => {
+          authGeneration.current += 1
+          const generation = authGeneration.current
+
           setUser(nextUser)
 
           if (!nextUser) {
@@ -2852,6 +2867,11 @@ export default function LiveChat() {
                 await nextUser.reload()
               } catch {
                 // Gunakan data yang tersedia.
+              }
+
+              // Kedaluwarsa: akun sudah berganti / unmount.
+              if (generation !== authGeneration.current) {
+                return
               }
 
               const current =
@@ -2889,6 +2909,12 @@ export default function LiveChat() {
                 null
 
               if (name) {
+                // Cek ulang sebelum setState — bisa kedaluwarsa
+                // selama await di atas.
+                if (generation !== authGeneration.current) {
+                  return
+                }
+
                 const nextProfile = {
                   name,
                   photoURL,
@@ -2988,7 +3014,11 @@ export default function LiveChat() {
       // Cache rusak → abaikan.
     }
 
-    return unsubscribe
+    return () => {
+      // Batalkan sync yang masih jalan.
+      authGeneration.current += 1
+      unsubscribe()
+    }
   }, [])
 
   /**
@@ -3003,7 +3033,9 @@ export default function LiveChat() {
    * name: "Deni Purwanto"
    */
   useEffect(() => {
-    if (!user) {
+    // B4/perf: heal + direktori hanya saat panel terbuka —
+    // sebelumnya jalan tiap pesan baru walau chat tertutup.
+    if (!user || !open) {
       return
     }
 
@@ -3100,7 +3132,9 @@ export default function LiveChat() {
     user,
     profile,
     messages,
+    open,
   ])
+  // ^ open digate di dalam heal: hanya jalan saat panel terbuka.
 
   /**
    * DIREKTORI NAMA PUBLIK — dibaca SEMUA orang
@@ -3111,6 +3145,10 @@ export default function LiveChat() {
    * asli walau sedang tidak login.
    */
   useEffect(() => {
+    if (!open) {
+      return
+    }
+
     const uids = new Set<string>()
 
     for (const message of messages) {
@@ -3195,7 +3233,7 @@ export default function LiveChat() {
     return () => {
       cancelled = true
     }
-  }, [messages])
+  }, [messages, open])
 
   /**
    * FIRESTORE REALTIME LISTENER
@@ -3293,7 +3331,7 @@ export default function LiveChat() {
               },
             )
 
-          setMessages(next)
+          setMessages(next.slice().reverse())
 
           next.forEach(
             rememberSender,
@@ -3311,22 +3349,49 @@ export default function LiveChat() {
 
   /**
    * AUTO SCROLL
+   * B6: hanya gulir otomatis bila pengguna SUDAH di dekat bawah
+   * (<=120px). Sebelumnya tiap pesan baru menarik paksa ke bawah
+   * walau pengguna sedang membaca riwayat atas.
    */
+  const messagesBoxRef =
+    useRef<HTMLDivElement | null>(null)
+
   useEffect(() => {
     if (!open) {
       return
     }
 
+    const box = messagesBoxRef.current
+
+    if (!initialScrollDone.current) {
+      bottomRef.current?.scrollIntoView({
+        behavior: 'auto',
+        block: 'end',
+      })
+
+      if (messages.length > 0) {
+        initialScrollDone.current = true
+      }
+
+      return
+    }
+
+    if (box) {
+      const distanceFromBottom =
+        box.scrollHeight -
+        box.scrollTop -
+        box.clientHeight
+
+      // Pengguna membaca atas → jangan ganggu.
+      if (distanceFromBottom > 120) {
+        return
+      }
+    }
+
     bottomRef.current?.scrollIntoView({
-      behavior: initialScrollDone.current
-        ? 'smooth'
-        : 'auto',
+      behavior: 'smooth',
       block: 'end',
     })
-
-    if (messages.length > 0) {
-      initialScrollDone.current = true
-    }
   }, [
     messages.length,
     open,
@@ -3425,7 +3490,12 @@ export default function LiveChat() {
 
   /**
    * SEND MESSAGE
+   * A3: guard double-submit pakai REF sinkron (bukan state `sending`
+   * yang baru terlihat setelah re-render) — klik 2x cepat tidak
+   * menghasilkan pesan ganda.
    */
+  const sendingRef = useRef(false)
+
   const handleSend =
     useCallback(async () => {
       const text =
@@ -3434,11 +3504,13 @@ export default function LiveChat() {
       if (
         !text ||
         !user ||
-        sending
+        sending ||
+        sendingRef.current
       ) {
         return
       }
 
+      sendingRef.current = true
       setSending(true)
       setSendError(null)
 
@@ -3519,6 +3591,7 @@ export default function LiveChat() {
           'Message failed to send. Check Firestore rules and try again.',
         )
       } finally {
+        sendingRef.current = false
         setSending(false)
       }
     }, [
@@ -3543,6 +3616,11 @@ export default function LiveChat() {
    * - Ketuk emoji lain -> pindah: field emoji lama yang
    *   jadi kosong ikut dihapus, uid ditambah ke emoji baru.
    */
+  /**
+   * A2: reaksi via TRANSAKSI atomik — baca & tulis di server dalam
+   * satu operasi. Sebelumnya read-modify-write manual dari snapshot
+   * lokal: dua user bereaksi bersamaan → satu tulisan menimpa lain.
+   */
   const toggleReaction =
     useCallback(
       async (
@@ -3554,67 +3632,92 @@ export default function LiveChat() {
           return
         }
 
-        const current =
-          message.reactions[emoji] ?? []
-        const mine =
-          current.includes(user.uid)
-
-        const updates: Record<
-          string,
-          string[] | ReturnType<typeof deleteField>
-        > = {}
-
-        if (mine) {
-          // Batal: kalau sisanya kosong, hapus field-nya
-          // sekalian supaya tidak ada array kosong.
-          const rest = current.filter(
-            (uid) => uid !== user.uid,
-          )
-
-          updates[`reactions.${emoji}`] =
-            rest.length > 0
-              ? rest
-              : deleteField()
-        } else {
-          // Pindah: bersihkan uid-ku dari emoji lain
-          // (field yang jadi kosong ikut dihapus),
-          // lalu tambah ke emoji yang diketuk.
-          for (const [
-            key,
-            uids,
-          ] of Object.entries(
-            message.reactions,
-          )) {
-            if (
-              key !== emoji &&
-              uids.includes(user.uid)
-            ) {
-              const rest = uids.filter(
-                (uid) =>
-                  uid !== user.uid,
-              )
-
-              updates[`reactions.${key}`] =
-                rest.length > 0
-                  ? rest
-                  : deleteField()
-            }
-          }
-
-          updates[`reactions.${emoji}`] = [
-            ...current,
-            user.uid,
-          ]
-        }
+        const uid = user.uid
+        const messageRef = doc(
+          db,
+          'messages',
+          message.id,
+        )
 
         try {
-          await updateDoc(
-            doc(
-              db,
-              'messages',
-              message.id,
-            ),
-            updates,
+          await runTransaction(
+            db,
+            async (tx) => {
+              const snap =
+                await tx.get(messageRef)
+
+              if (!snap.exists()) {
+                return
+              }
+
+              const data =
+                snap.data() as DocumentData
+
+              const reactions =
+                parseReactions(
+                  data.reactions,
+                )
+
+              const current =
+                reactions[emoji] ?? []
+              const mine =
+                current.includes(uid)
+
+              const updates: Record<
+                string,
+                | string[]
+                | ReturnType<
+                    typeof deleteField
+                  >
+              > = {}
+
+              if (mine) {
+                // Batal: kalau sisanya kosong, hapus field-nya
+                // sekalian supaya tidak ada array kosong.
+                const rest =
+                  current.filter(
+                    (id) => id !== uid,
+                  )
+
+                updates[`reactions.${emoji}`] =
+                  rest.length > 0
+                    ? rest
+                    : deleteField()
+              } else {
+                // Pindah: bersihkan uid-ku dari emoji lain
+                // (field yang jadi kosong ikut dihapus),
+                // lalu tambah ke emoji yang diketuk.
+                for (const [
+                  key,
+                  uids,
+                ] of Object.entries(
+                  reactions,
+                )) {
+                  if (
+                    key !== emoji &&
+                    uids.includes(uid)
+                  ) {
+                    const rest =
+                      uids.filter(
+                        (id) =>
+                          id !== uid,
+                      )
+
+                    updates[`reactions.${key}`] =
+                      rest.length > 0
+                        ? rest
+                        : deleteField()
+                  }
+                }
+
+                updates[`reactions.${emoji}`] = [
+                  ...current,
+                  uid,
+                ]
+              }
+
+              tx.update(messageRef, updates)
+            },
           )
         } catch {
           setSendError(
@@ -4024,6 +4127,7 @@ export default function LiveChat() {
           <div
             className="chat-messages"
             aria-live="polite"
+            ref={messagesBoxRef}
           >
             {loadingMessages ? (
               <div className="chat-loading">

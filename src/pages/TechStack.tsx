@@ -139,10 +139,20 @@ const categories: Category[] = [
 function TechStack() {
   const [activeCategory, setActiveCategory] = useState('frontend')
 
-  const active = useMemo(
-    () => categories.find((category) => category.id === activeCategory) ?? categories[0],
-    [activeCategory],
-  )
+  // B22: fallback eksplisit bila kategori tak ketemu & array kosong.
+  const active =
+    useMemo(
+      () =>
+        categories.find(
+          (category) => category.id === activeCategory,
+        ) ?? categories[0] ?? {
+          id: 'frontend',
+          label: 'Frontend',
+          icon: Code2,
+          items: [],
+        },
+      [activeCategory],
+    )
 
   return (
     <section className="page-section techstack-page">
@@ -185,7 +195,14 @@ function TechStack() {
               }}
             >
               <div className={`techstack-mark ${item.markClass}`} aria-hidden="true">
-                <img src={item.logo} alt="" loading="lazy" />
+                <img
+                  src={item.logo}
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                  width={28}
+                  height={28}
+                />
               </div>
 
               <h2>{item.name}</h2>

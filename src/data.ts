@@ -226,8 +226,11 @@ export const experiences: ExperienceItem[] = [
     year: 'Jan 2025 — Jun 2025',
     role: 'Full Stack Developer',
     company: 'Department of Trade and Industry - Bandung Regency',
+    // A7: deskripsi sebelumnya copy-paste identik dengan pengalaman
+    // laboratorium/geospasial sumur bor di atas — diperbaiki sesuai
+    // tags & achievements (UMKM, CodeIgniter, QGIS/Leaflet).
     description:
-      'Developed digital solutions for laboratory management, equipment borrowing services, and geospatial data visualization to support operational and technical teams',
+      'Developed an MSME information system with interactive geospatial mapping to improve data management and presentation for the trade and industry office',
     type: 'Internship',
     active: false,
     image: '/experience/pemkab.png',

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import {
   getStoredLanguage,
   setSiteLanguage,
@@ -6,11 +6,11 @@ import {
 } from '../manualTranslations'
 
 function LanguageToggle() {
-  const [language, setLanguage] = useState<SiteLanguage>('en')
-
-  useEffect(() => {
-    setLanguage(getStoredLanguage())
-  }, [])
+  // B9: lazy initializer — tidak ada flash indikator salah + tidak
+  // balapan dengan translateDom awal.
+  const [language, setLanguage] = useState<SiteLanguage>(() =>
+    getStoredLanguage(),
+  )
 
   const switchTo = (nextLanguage: SiteLanguage) => {
     if (nextLanguage === language) return

@@ -261,6 +261,8 @@ function Awards() {
                     <img
                       src="/awards/maganghub.jpg"
                       alt="University Graduate Internship Program"
+                      loading="lazy"
+                      decoding="async"
                     />
                   </button>
 
@@ -311,6 +313,8 @@ function Awards() {
       <img
         src="/awards/pbi.jpg"
         alt="Certificate of Competency – Project Based Internship"
+        loading="lazy"
+        decoding="async"
       />
     </button>
 
@@ -353,6 +357,8 @@ function Awards() {
                     <img
                       src="/awards/piagam.webp"
                       alt="Best Performing Student in Academic Achievement"
+                      loading="lazy"
+                      decoding="async"
                     />
                   </button>
 
@@ -401,6 +407,8 @@ function Awards() {
                     <img
                       src="/awards/hartik2.webp"
                       alt="Hartik Competition 2023"
+                      loading="lazy"
+                      decoding="async"
                     />
                   </button>
 
@@ -449,6 +457,8 @@ function Awards() {
                     <img
                       src="/awards/aslab1.webp"
                       alt="Laboratory Assistant and Teaching Instructor"
+                      loading="lazy"
+                      decoding="async"
                     />
                   </button>
 
@@ -497,6 +507,8 @@ function Awards() {
                     <img
                       src="/awards/aslab2.webp"
                       alt="Laboratory Assistant and Teaching Instructor"
+                      loading="lazy"
+                      decoding="async"
                     />
                   </button>
 

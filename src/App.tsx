@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { Suspense, lazy, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { ElementType } from 'react'
 import {
   Award,
@@ -12,18 +12,37 @@ import {
 } from 'lucide-react'
 
 import Dashboard from './pages/Dashboard'
-import Experience from './pages/Experience'
-import Projects from './pages/Projects'
-import Awards from './pages/Awards'
-import TechStack from './pages/TechStack'
-import Community from './pages/Community'
-import Blog from './pages/Blog'
-import Contact from './pages/Contact'
-import LiveChat from './components/LiveChat'
 import ThemeToggle from './components/ThemeToggle'
 import AccentPicker from './components/ThemeCard'
 import LanguageToggle from './components/LanguageToggle'
 import { useManualTranslation } from './manualTranslations'
+// Halaman non-dashboard di-lazy-load: bundle awal hanya berisi
+// Dashboard + shell, halaman lain diunduh saat pertama dibuka.
+// Tampilan identik — hanya momentum unduh yang berubah.
+const Experience = lazy(() => import('./pages/Experience'))
+const Projects = lazy(() => import('./pages/Projects'))
+const Awards = lazy(() => import('./pages/Awards'))
+const TechStack = lazy(() => import('./pages/TechStack'))
+const Community = lazy(() => import('./pages/Community'))
+const Blog = lazy(() => import('./pages/Blog'))
+const Contact = lazy(() => import('./pages/Contact'))
+// LiveChat (±4500 baris + Firebase) juga lazy: panel + SDK
+// tidak membebani first paint sebelum tombol chat dibuka.
+const LiveChat = lazy(() => import('./components/LiveChat'))
+// Prefetch panel chat saat browser idle supaya tombol chat
+// tetap terasa instan walau chunk-nya lazy.
+if (typeof window !== 'undefined') {
+  const preloadChat = () => import('./components/LiveChat')
+  const idle =
+    (window as unknown as {
+      requestIdleCallback?: (cb: () => void) => number
+    }).requestIdleCallback
+  if (typeof idle === 'function') {
+    idle.call(window, preloadChat)
+  } else {
+    window.setTimeout(preloadChat, 3000)
+  }
+}
 
 type SectionId =
   | 'dashboard'
@@ -57,23 +76,28 @@ const pathToSection: Record<string, SectionId> = Object.fromEntries(
   navItems.map((item) => [item.path, item.id]),
 )
 
-function App() {
-  useManualTranslation()
-  const [active, setActive] = useState<SectionId>(() => {
-    if (typeof window === 'undefined') {
-      return 'dashboard'
-    }
+function getInitialSection(): SectionId {
+  if (typeof window === 'undefined') {
+    return 'dashboard'
+  }
 
-    const section =
-      pathToSection[window.location.pathname] ||
-      'dashboard'
-
-    if (!pathToSection[window.location.pathname]) {
-  window.history.replaceState({}, '', '/')
+  return (
+    pathToSection[window.location.pathname] ||
+    'dashboard'
+  )
 }
 
-    return section
-  })
+function App() {
+  useManualTranslation()
+  // A6: inisializer harus murni — tanpa replaceState saat render.
+  const [active, setActive] = useState<SectionId>(getInitialSection)
+
+  // URL tak dikenal dinormalkan sekali setelah mount.
+  useEffect(() => {
+    if (!pathToSection[window.location.pathname]) {
+      window.history.replaceState({}, '', '/')
+    }
+  }, [])
 
   const [mobileOpen, setMobileOpen] = useState(false)
   const [search, setSearch] = useState('')
@@ -256,6 +280,9 @@ function App() {
               src="/profil.png"
               alt="Deni Purwanto"
               className="avatar"
+              width={76}
+              height={76}
+              decoding="async"
               onError={(e) => {
                 const img =
                   e.currentTarget
@@ -349,6 +376,9 @@ function App() {
               src="/profil.png"
               alt="Deni Purwanto"
               className="mobile-header-avatar"
+              width={34}
+              height={34}
+              decoding="async"
               onError={(e) => {
                 const img = e.currentTarget
                 img.onerror = null
@@ -373,16 +403,18 @@ function App() {
 
         <div className="content">
           <div key={active} className="page-swap">
-            {active === 'dashboard' && <Dashboard />}
-          {active === 'experience' && <Experience />}
-          {active === 'projects' && (
-            <Projects search={search} setSearch={setSearch} />
-          )}
-          {active === 'awards' && <Awards />}
-          {active === 'stack' && <TechStack />}
-          {active === 'community' && <Community />}
-          {active === 'blog' && <Blog />}
-          {active === 'contact' && <Contact />}
+            <Suspense fallback={null}>
+              {active === 'dashboard' && <Dashboard />}
+              {active === 'experience' && <Experience />}
+              {active === 'projects' && (
+                <Projects search={search} setSearch={setSearch} />
+              )}
+              {active === 'awards' && <Awards />}
+              {active === 'stack' && <TechStack />}
+              {active === 'community' && <Community />}
+              {active === 'blog' && <Blog />}
+              {active === 'contact' && <Contact />}
+            </Suspense>
 
           </div>
 
@@ -393,7 +425,9 @@ function App() {
         </div>
       </main>
 
-      <LiveChat />
+      <Suspense fallback={null}>
+        <LiveChat />
+      </Suspense>
     </div>
   )
 }

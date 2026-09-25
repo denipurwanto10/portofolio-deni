@@ -32,6 +32,7 @@ function ExperienceDetails({
           src={item.image}
           alt={`${item.role} — ${item.company}`}
           loading="lazy"
+          decoding="async"
         />
       </div>
 

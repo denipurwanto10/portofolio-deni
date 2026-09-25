@@ -76,36 +76,56 @@ export function useInView<T extends HTMLElement>(
   const [inView, setInView] = useState(false)
 
   useEffect(() => {
-    const el = ref.current
+    // A8: ref bisa null saat effect pertama (konten async/tertunda) —
+    // coba lagi via rAF beberapa kali alih-alih menyerah selamanya.
+    let attempts = 0
+    let raf = 0
+    let observer: IntersectionObserver | null = null
 
-    if (!el) {
-      return
+    const attach = () => {
+      const el = ref.current
+
+      if (!el) {
+        attempts += 1
+
+        if (attempts < 30) {
+          raf = requestAnimationFrame(attach)
+        }
+
+        return
+      }
+
+      if (
+        typeof IntersectionObserver ===
+        'undefined'
+      ) {
+        setInView(true)
+        return
+      }
+
+      observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              setInView(true)
+              observer?.disconnect()
+            }
+          })
+        },
+        { threshold },
+      )
+
+      observer.observe(el)
     }
 
-    if (
-      typeof IntersectionObserver ===
-      'undefined'
-    ) {
-      setInView(true)
-      return
-    }
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setInView(true)
-            observer.disconnect()
-          }
-        })
-      },
-      { threshold },
-    )
-
-    observer.observe(el)
+    attach()
 
     return () => {
-      observer.disconnect()
+      if (raf !== 0) {
+        cancelAnimationFrame(raf)
+      }
+
+      observer?.disconnect()
     }
   }, [threshold])
 

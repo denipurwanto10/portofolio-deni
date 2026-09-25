@@ -381,11 +381,31 @@ export function translateText(value: string): string {
 const originalText = new WeakMap<Text, string>()
 const originalAttributes = new WeakMap<Element, Map<string, string>>()
 
-function translateDom(language: SiteLanguage) {
+/**
+ * Subtree yang ISINYA tidak diterjemahkan (konten buatan pengguna yang
+ * berubah tiap detik: pesan chat, kalender kontribusi). Dilewati saat
+ * walk + observer supaya mutasi high-churn tidak memicu full-body walk.
+ * Struktur/tombol statis di dalamnya tetap diterjemahkan normal karena
+ * pemicu (addedNodes) tetap memproses node baru di luar area ini.
+ */
+const SKIP_TRANSLATE_SELECTOR =
+  '.chat-messages, .chat-bubble, .github-calendar, .cc-root'
+
+function translateDom(
+  language: SiteLanguage,
+  scope?: ParentNode,
+) {
   const root = document.body
   if (!root) return
 
-  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT)
+  // Batasi ke subtree yang berubah bila diberi scope (dari observer) —
+  // jauh lebih murah daripada walk seluruh body tiap mutasi.
+  const walkerRoot = scope ?? root
+
+  const walker = document.createTreeWalker(
+    walkerRoot,
+    NodeFilter.SHOW_TEXT,
+  )
   let node: Node | null
 
   while ((node = walker.nextNode())) {
@@ -393,6 +413,7 @@ function translateDom(language: SiteLanguage) {
     const parent = textNode.parentElement
 
     if (!parent || parent.closest('.notranslate, [translate="no"]')) continue
+    if (parent.closest(SKIP_TRANSLATE_SELECTOR)) continue
     if (parent.tagName === 'SCRIPT' || parent.tagName === 'STYLE') continue
 
     const current = textNode.nodeValue ?? ''
@@ -414,12 +435,13 @@ function translateDom(language: SiteLanguage) {
     textNode.nodeValue = language === 'id' ? translateText(source) : source
   }
 
-  const elements = root.querySelectorAll<HTMLElement>(
+  const elements = walkerRoot.querySelectorAll<HTMLElement>(
     'input, textarea, button, [aria-label], [title], img',
   )
 
   elements.forEach((element) => {
     if (element.closest('.notranslate, [translate="no"]')) return
+    if (element.closest(SKIP_TRANSLATE_SELECTOR)) return
 
     let attrs = originalAttributes.get(element)
     if (!attrs) {
@@ -453,15 +475,24 @@ function translateDom(language: SiteLanguage) {
 
 export function getStoredLanguage(): SiteLanguage {
   if (typeof window === 'undefined') return 'en'
-  return window.localStorage.getItem(LANGUAGE_STORAGE_KEY) === 'id'
-    ? 'id'
-    : 'en'
+  // A10: storage bisa melempar (mode privat/pemblokir) — jangan crash boot.
+  try {
+    return window.localStorage.getItem(LANGUAGE_STORAGE_KEY) === 'id'
+      ? 'id'
+      : 'en'
+  } catch {
+    return 'en'
+  }
 }
 
 export function setSiteLanguage(language: SiteLanguage) {
   if (typeof window === 'undefined') return
 
-  window.localStorage.setItem(LANGUAGE_STORAGE_KEY, language)
+  try {
+    window.localStorage.setItem(LANGUAGE_STORAGE_KEY, language)
+  } catch {
+    // Persist best-effort saja — bahasa sesi tetap diterapkan.
+  }
   translateDom(language)
   window.dispatchEvent(
     new CustomEvent<SiteLanguage>(LANGUAGE_EVENT, {
@@ -476,6 +507,7 @@ export function useManualTranslation() {
 
     let translating = false
     let scheduled = false
+    const pendingScopes: ParentNode[] = []
 
     const runTranslation = () => {
       if (translating) return
@@ -487,21 +519,71 @@ export function useManualTranslation() {
       }
     }
 
-    const scheduleTranslation = () => {
-      if (scheduled || translating) return
-      scheduled = true
-      requestAnimationFrame(() => {
-        scheduled = false
-        runTranslation()
-      })
-    }
-
     runTranslation()
+
+    // (scheduleTranslation tidak lagi dipakai — observer di bawah
+    // menjadwalkan batch per-subtree secara langsung.)
 
     // Observe only DOM insertions/removals. Do NOT observe characterData:
     // translateDom() itself changes text nodes, which would otherwise trigger
     // this observer again and create an endless loop that freezes the page.
-    const observer = new MutationObserver(scheduleTranslation)
+    //
+    // Perf: terjemahkan hanya subtree yang berubah (addedNodes) — bukan
+    // full-body walk tiap pesan chat masuk. Node teks konten pengguna
+    // (chat/kalender) dilewati via SKIP_TRANSLATE_SELECTOR.
+    const observer = new MutationObserver((records) => {
+      const scopes = new Set<ParentNode>()
+
+      for (const record of records) {
+        for (const node of Array.from(record.addedNodes)) {
+          if (node instanceof HTMLElement) {
+            // Subtree high-churn → lewati sepenuhnya.
+            if (node.closest?.(SKIP_TRANSLATE_SELECTOR)) continue
+            scopes.add(node)
+          } else if (
+            node instanceof Text &&
+            node.parentElement &&
+            !node.parentElement.closest?.(SKIP_TRANSLATE_SELECTOR)
+          ) {
+            scopes.add(node.parentElement)
+          }
+        }
+      }
+
+      if (scopes.size === 0) {
+        // Perubahan murni di area skip (mis. pesan chat baru) —
+        // tidak ada yang perlu diterjemahkan.
+        return
+      }
+
+      if (scheduled || translating) {
+        // Batch tertunda: tandai agar mencakup scope baru ini juga.
+        pendingScopes.push(...scopes)
+        return
+      }
+
+      scheduled = true
+      pendingScopes.length = 0
+      pendingScopes.push(...scopes)
+      requestAnimationFrame(() => {
+        scheduled = false
+        const batch = pendingScopes.splice(0)
+        translating = true
+        try {
+          if (batch.length === 0) {
+            translateDom(language)
+          } else {
+            for (const scope of batch) {
+              if (scope.isConnected) {
+                translateDom(language, scope)
+              }
+            }
+          }
+        } finally {
+          translating = false
+        }
+      })
+    })
 
     observer.observe(document.body, {
       childList: true,

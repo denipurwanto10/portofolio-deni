@@ -105,12 +105,23 @@ function CustomCursor() {
     let shown = false
     let lastTarget: Element | null = null
 
+    // Perf: pointermove mentah (±1000 event/detik) di-coalesce via rAF —
+    // tulis DOM maksimal 1x per frame. Tanpa ini tiap gerakan menulis
+    // style.transform + closest() 2 selector panjang di main thread.
+    let pendingMove: PointerEvent | null = null
+    let moveRaf = 0
+
     const setVisible = (value: boolean) => {
       shown = value
       root.dataset.visible = String(value)
     }
 
-    const onMove = (event: PointerEvent) => {
+    const flushMove = () => {
+      moveRaf = 0
+      const event = pendingMove
+      pendingMove = null
+      if (!event) return
+
       if (!cursor || event.pointerType === 'touch') return
 
       cursor.style.transform = `translate3d(${event.clientX}px, ${event.clientY}px, 0)`
@@ -124,6 +135,14 @@ function CustomCursor() {
       if (target !== lastTarget) {
         lastTarget = target
         root.dataset.state = detectState(target)
+      }
+    }
+
+    const onMove = (event: PointerEvent) => {
+      pendingMove = event
+
+      if (moveRaf === 0) {
+        moveRaf = requestAnimationFrame(flushMove)
       }
     }
 
@@ -307,6 +326,9 @@ function CustomCursor() {
     window.addEventListener('blur', onHide)
 
     return () => {
+      if (moveRaf !== 0) {
+        cancelAnimationFrame(moveRaf)
+      }
       window.removeEventListener('pointermove', onMove)
       window.removeEventListener('pointerdown', onDown)
       window.removeEventListener('pointerup', onUp)
