@@ -164,6 +164,7 @@ const translations: Record<string, string> = {
   'Production-ready React framework': 'Framework React siap produksi',
   'Modern framework for content-driven websites': 'Framework modern untuk situs berbasis konten',
   'Progressive framework for web interfaces': 'Framework progresif untuk antarmuka web',
+  'Fast build tool for modern web apps': 'Build tool cepat untuk aplikasi web modern',
   'Utility-first responsive styling': 'Styling responsif berbasis utility',
   'Dynamic language for web applications': 'Bahasa dinamis untuk aplikasi web',
   'Responsive frontend component framework': 'Framework komponen frontend responsif',

@@ -33,6 +33,7 @@ const categories: Category[] = [
 { name: 'Next.js', description: 'Production-ready React framework', mark: 'N', markClass: 'next', logo: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nextjs/nextjs-original.svg' },
 { name: 'Astro', description: 'Modern framework for content-driven websites', mark: '✦', markClass: 'astro', logo: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/astro/astro-original.svg' },
 { name: 'Vue.js', description: 'Progressive framework for web interfaces', mark: 'V', markClass: 'vue', logo: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/vuejs/vuejs-original.svg' },
+{ name: 'Vite', description: 'Fast build tool for modern web apps', mark: '⚡', markClass: 'vite', logo: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/vitejs/vitejs-original.svg' },
 { name: 'Tailwind CSS', description: 'Utility-first responsive styling', mark: '≋', markClass: 'tailwind', logo: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/tailwindcss/tailwindcss-original.svg' },
 { name: 'JavaScript', description: 'Dynamic language for web applications', mark: 'JS', markClass: 'javascript', logo: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg' },
 { name: 'Bootstrap', description: 'Responsive frontend component framework', mark: 'B', markClass: 'bootstrap', logo: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/bootstrap/bootstrap-original.svg' },
