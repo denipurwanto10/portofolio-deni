@@ -1,9 +1,5 @@
-import {
-  useEffect,
-  useRef,
-  useState,
-} from 'react'
-import { Palette, X } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { Check } from 'lucide-react'
 
 export const ACCENTS = [
   { id: 'default', name: 'Default', hex: '#111111' },
@@ -18,6 +14,8 @@ export type AccentId =
   (typeof ACCENTS)[number]['id']
 
 const STORAGE_KEY = 'portfolio-accent'
+
+let accentTransitionTimer: number | undefined
 
 export function getStoredAccent(): AccentId {
   try {
@@ -39,10 +37,26 @@ export function getStoredAccent(): AccentId {
 }
 
 export function applyAccent(id: AccentId) {
-  document.documentElement.setAttribute(
+  const root = document.documentElement
+
+  root.setAttribute(
     'data-accent',
     id,
   )
+
+  /*
+   * Samakan dengan withThemeTransition di ThemeToggle:
+   * pasang atribut ±450ms supaya SELURUH elemen berubah
+   * warna serempak (lihat html[data-accent-transition] di
+   * styles.css), bukan cuma yang punya transisi sendiri.
+   */
+  root.setAttribute('data-accent-transition', '')
+
+  window.clearTimeout(accentTransitionTimer)
+
+  accentTransitionTimer = window.setTimeout(() => {
+    root.removeAttribute('data-accent-transition')
+  }, 450)
 
   try {
     window.localStorage.setItem(
@@ -55,167 +69,76 @@ export function applyAccent(id: AccentId) {
 }
 
 /*
- * Tombol theme mengambang — duduk tepat di atas
- * tombol chat. Diklik → membuka menu pilihan warna
- * aksen (menutup saat klik di luar / tekan Escape).
- * Pilihan tersimpan di localStorage.
+ * Pemilih warna aksen — dipasang di sidebar tepat di bawah
+ * ThemeToggle (dark/light). Dots warna langsung mengganti
+ * variabel --accent situs (lihat blok [data-accent] di styles.css).
+ * Pilihan tersimpan di localStorage dan diterapkan sebelum
+ * React render (lihat script anti-flash di index.html).
  */
-function ThemePicker() {
+function AccentPicker() {
   const [accent, setAccent] =
     useState<AccentId>(() => getStoredAccent())
-
-  const [open, setOpen] = useState(false)
-
-  const rootRef =
-    useRef<HTMLDivElement | null>(null)
 
   // Terapkan warna tersimpan saat pertama dipasang.
   useEffect(() => {
     applyAccent(getStoredAccent())
   }, [])
 
-  // Tutup menu saat klik di luar / tekan Escape.
-  useEffect(() => {
-    if (!open) {
-      return
-    }
-
-    const onPointerDown = (
-      event: PointerEvent,
-    ) => {
-      if (
-        rootRef.current &&
-        !rootRef.current.contains(
-          event.target as Node,
-        )
-      ) {
-        setOpen(false)
-      }
-    }
-
-    const onKeyDown = (
-      event: KeyboardEvent,
-    ) => {
-      if (event.key === 'Escape') {
-        setOpen(false)
-      }
-    }
-
-    document.addEventListener(
-      'pointerdown',
-      onPointerDown,
-    )
-    document.addEventListener(
-      'keydown',
-      onKeyDown,
-    )
-
-    return () => {
-      document.removeEventListener(
-        'pointerdown',
-        onPointerDown,
-      )
-      document.removeEventListener(
-        'keydown',
-        onKeyDown,
-      )
-    }
-  }, [open])
-
-  const active =
-    ACCENTS.find(
-      (item) => item.id === accent,
-    ) ?? ACCENTS[0]
-
   return (
-    <div
-      className="theme-fab-root"
-      ref={rootRef}
-    >
-      {open && (
-        <div
-          className="theme-menu"
-          role="menu"
-          aria-label="Choose accent color"
-        >
-          <p className="theme-menu-title">
-            ACCENT COLOR
-          </p>
+    <div className="accent-picker">
+      <span className="accent-picker-label">
+        Accent color
+      </span>
 
-          <div
-            className="theme-swatches"
-            role="radiogroup"
-            aria-label="Choose accent color"
-          >
-            {ACCENTS.map((item) => {
-              const selected =
-                item.id === accent
-
-              return (
-                <button
-                  key={item.id}
-                  type="button"
-                  role="radio"
-                  aria-checked={selected}
-                  title={item.name}
-                  aria-label={`${item.name} theme`}
-                  className={
-                    selected
-                      ? 'theme-swatch selected'
-                      : 'theme-swatch'
-                  }
-                  style={{
-                    ['--swatch' as string]:
-                      item.hex,
-                  }}
-                  onClick={() => {
-                    setAccent(item.id)
-                    applyAccent(item.id)
-                  }}
-                >
-                  {selected && (
-                    <span className="theme-check">
-                      ✓
-                    </span>
-                  )}
-                </button>
-              )
-            })}
-          </div>
-
-          <p className="theme-menu-name">
-            <strong>{active.name}</strong>
-            <span> · saved automatically</span>
-          </p>
-        </div>
-      )}
-
-      <button
-        type="button"
-        className={
-          open
-            ? 'theme-fab open'
-            : 'theme-fab'
-        }
-        onClick={() =>
-          setOpen((value) => !value)
-        }
-        aria-expanded={open}
-        aria-label={
-          open
-            ? 'Tutup pemilih tema'
-            : 'Buka pemilih tema'
-        }
-        title="Theme"
+      <div
+        className="accent-swatches"
+        role="radiogroup"
+        aria-label="Choose accent color"
       >
-        {open ? (
-          <X size={22} />
-        ) : (
-          <Palette size={22} />
-        )}
-      </button>
+        {ACCENTS.map((item) => {
+          const selected =
+            item.id === accent
+
+          return (
+            <button
+              key={item.id}
+              type="button"
+              role="radio"
+              aria-checked={selected}
+              title={item.name}
+              aria-label={`${item.name} theme`}
+              className={[
+                'accent-swatch',
+                item.id === 'default'
+                  ? 'accent-swatch-default'
+                  : '',
+                selected ? 'selected' : '',
+              ]
+                .filter(Boolean)
+                .join(' ')}
+              style={{
+                ['--swatch' as string]:
+                  item.hex,
+              }}
+              onClick={() => {
+                setAccent(item.id)
+                applyAccent(item.id)
+              }}
+            >
+              {selected && (
+                <Check
+                  size={12}
+                  strokeWidth={3.5}
+                  className="accent-check"
+                  aria-hidden="true"
+                />
+              )}
+            </button>
+          )
+        })}
+      </div>
     </div>
   )
 }
 
-export default ThemePicker
+export default AccentPicker

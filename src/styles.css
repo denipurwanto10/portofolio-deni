@@ -40,9 +40,13 @@
   --text-muted-3: #36516f;
   --text-strong: #243b5a;
   --heat-0: #f1f4f8;
-  --heat-1: #d4d4d4;
-  --heat-2: #a3a3a3;
-  --heat-3: #525252;
+  /* Tingkat kontribusi 1–3 DITURUNKAN LANGSUNG dari --accent
+     (bukan abu-abu fixed) supaya seluruh kotak grafik GitHub
+     ikut berubah saat warna aksen diganti. level-4 = --accent
+     solid (lihat .github-day.level-4). */
+  --heat-1: color-mix(in srgb, var(--accent) 22%, var(--heat-0));
+  --heat-2: color-mix(in srgb, var(--accent) 50%, var(--heat-0));
+  --heat-3: color-mix(in srgb, var(--accent) 78%, var(--heat-0));
 
   --danger: #b91c1c;
   --danger-soft: #fee2e2;
@@ -79,9 +83,9 @@
   --text-muted-3: #ffffff;
   --text-strong: #ffffff;
   --heat-0: #161616;
-  --heat-1: #2b2b2b;
-  --heat-2: #474747;
-  --heat-3: #6b6b6b;
+  --heat-1: color-mix(in srgb, var(--accent) 25%, var(--heat-0));
+  --heat-2: color-mix(in srgb, var(--accent) 55%, var(--heat-0));
+  --heat-3: color-mix(in srgb, var(--accent) 80%, var(--heat-0));
 
   --danger: #f87171;
   --danger-soft: rgba(248, 113, 113, 0.14);
@@ -89,6 +93,98 @@
   /* Grid background pattern (dark) */
   --grid-line: rgba(255, 255, 255, 0.07);
   --grid-fade-to: #000000;
+}
+
+/* =========================
+   ACCENT COLORS
+   Dipilih lewat AccentPicker di sidebar (tepat di bawah
+   ThemeToggle), diterapkan sebagai atribut data-accent di
+   <html> (lihat ThemeCard.tsx + script anti-flash di
+   index.html). Nilai "default" tidak perlu rule sendiri —
+   sudah diwakili :root (light) & [data-theme='dark'] di atas.
+   Rule di sini ditaruh SETELAH dark mode supaya menang
+   dengan spesifisitas yang sama.
+============================= */
+[data-accent='ocean'] {
+  --accent: #2563eb;
+  --accent-soft: #dbeafe;
+  --accent-contrast: #ffffff;
+  --accent-shadow: rgba(37, 99, 235, 0.25);
+  --card-hover-border: #1d4ed8;
+}
+
+[data-accent='emerald'] {
+  --accent: #059669;
+  --accent-soft: #d1fae5;
+  --accent-contrast: #ffffff;
+  --accent-shadow: rgba(5, 150, 105, 0.25);
+  --card-hover-border: #047857;
+}
+
+[data-accent='violet'] {
+  --accent: #7c3aed;
+  --accent-soft: #ede9fe;
+  --accent-contrast: #ffffff;
+  --accent-shadow: rgba(124, 58, 237, 0.28);
+  --card-hover-border: #6d28d9;
+}
+
+[data-accent='orange'] {
+  --accent: #ea580c;
+  --accent-soft: #ffedd5;
+  --accent-contrast: #ffffff;
+  --accent-shadow: rgba(234, 88, 12, 0.25);
+  --card-hover-border: #c2410c;
+}
+
+[data-accent='rose'] {
+  --accent: #e11d48;
+  --accent-soft: #ffe4e6;
+  --accent-contrast: #ffffff;
+  --accent-shadow: rgba(225, 29, 72, 0.25);
+  --card-hover-border: #be123c;
+}
+
+/* Varian dark mode: aksen sedikit dicerahkan agar tetap
+   terbaca di latar gelap, soft memakai tint transparan. */
+[data-theme='dark'][data-accent='ocean'] {
+  --accent: #60a5fa;
+  --accent-soft: rgba(96, 165, 250, 0.16);
+  --accent-contrast: #061224;
+  --accent-shadow: rgba(96, 165, 250, 0.35);
+  --card-hover-border: #93c5fd;
+}
+
+[data-theme='dark'][data-accent='emerald'] {
+  --accent: #34d399;
+  --accent-soft: rgba(52, 211, 153, 0.16);
+  --accent-contrast: #052018;
+  --accent-shadow: rgba(52, 211, 153, 0.35);
+  --card-hover-border: #6ee7b7;
+}
+
+[data-theme='dark'][data-accent='violet'] {
+  --accent: #a78bfa;
+  --accent-soft: rgba(167, 139, 250, 0.16);
+  --accent-contrast: #1e1033;
+  --accent-shadow: rgba(167, 139, 250, 0.35);
+  --card-hover-border: #c4b5fd;
+}
+
+[data-theme='dark'][data-accent='orange'] {
+  --accent: #fb923c;
+  --accent-soft: rgba(251, 146, 60, 0.16);
+  --accent-contrast: #2a1503;
+  --accent-shadow: rgba(251, 146, 60, 0.35);
+  --card-hover-border: #fdba74;
+}
+
+[data-theme='dark'][data-accent='rose'] {
+  --accent: #fb7185;
+  --accent-soft: rgba(251, 113, 133, 0.16);
+  --accent-contrast: #2b0a12;
+  --accent-shadow: rgba(251, 113, 133, 0.35);
+  --card-hover-border: #fda4af;
 }
 
 * {
@@ -439,6 +535,101 @@ a {
 .theme-toggle-switch.on .theme-toggle-knob {
   transform: translateX(13px);
   background: var(--accent-contrast);
+}
+
+/* =========================
+   ACCENT PICKER (sidebar)
+   Duduk tepat di bawah ThemeToggle. Satu baris:
+   label kecil + dots warna yang bisa diklik.
+========================= */
+.accent-picker {
+  width: calc(100% - 24px);
+  margin: 8px 12px 0;
+  padding: 9px 11px;
+  border: 1px solid var(--border-soft);
+  border-radius: 10px;
+  background: transparent;
+}
+
+.accent-picker-label {
+  display: block;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  margin-bottom: 8px;
+}
+
+.accent-swatches {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.accent-swatch {
+  position: relative;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  outline: 2px solid var(--border-color);
+  outline-offset: 1px;
+  background: var(--swatch);
+  /* Potong isi (termasuk gradasi Default di ::before) mengikuti
+     lingkaran border — bukan kotak tombol. */
+  overflow: hidden;
+  background-clip: padding-box;
+  padding: 0;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  color: #ffffff;
+  transition:
+    transform 0.25s var(--ease-out),
+    outline-color 0.25s var(--ease-out);
+}
+
+/*
+ * Ikon Default: belahan hitam/putih digambar di ::before (area
+ * ISI saja, di dalam border transparan) supaya lingkaran
+ * dalamnya bulat sempurna — gradasi tidak meluber ke area
+ * border seperti sebelumnya.
+ */
+.accent-swatch-default::before {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #111111 50%, #ffffff 50%);
+  pointer-events: none;
+}
+
+.accent-swatch-default {
+  background: var(--border-color);
+}
+
+.accent-swatch-default > * {
+  position: relative;
+  z-index: 1;
+}
+
+.accent-swatch:hover {
+  transform: scale(1.15);
+}
+
+.accent-swatch.selected {
+  outline-color: var(--swatch);
+  border-color: var(--bg-surface);
+}
+
+.accent-swatch:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.accent-check {
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.45));
 }
 
 .sidebar-footer {
@@ -2544,9 +2735,9 @@ a {
   padding: 0;
   border: 0;
   border-radius: 50%;
-  background: #000000;
-  color: #ffffff;
-  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.12);
+  background: var(--accent);
+  color: var(--accent-contrast);
+  box-shadow: 0 4px 10px var(--accent-shadow);
   transform: translateY(-50%);
   transition:
     transform 0.28s var(--ease-out),
@@ -2556,7 +2747,8 @@ a {
 }
 
 .chat-send:hover:not(:disabled) {
-  background: #000000;
+  background: var(--accent);
+  color: var(--accent-contrast);
   transform: translateY(-50%) scale(1.04);
 }
 
@@ -7858,6 +8050,29 @@ html[data-theme-transition] *::after {
   transition-timing-function: ease;
 }
 
+/*
+ * Pergantian warna aksen: mekanisme sama seperti di atas —
+ * seluruh elemen berubah warna serempak selama ±450ms.
+ * Atribut dipasang oleh applyAccent (lihat ThemeCard.tsx).
+ * Tanpa ini, elemen dengan transisi warna sendiri (misal
+ * .github-day) ikut berubah tapi tidak serempak, dan yang
+ * tanpa transisi (misal teks nav aktif) berubah seketika.
+ */
+html[data-accent-transition] *,
+html[data-accent-transition] *::before,
+html[data-accent-transition] *::after {
+  transition-property:
+    background-color,
+    color,
+    border-color,
+    outline-color,
+    fill,
+    stroke,
+    box-shadow;
+  transition-duration: 300ms;
+  transition-timing-function: ease;
+}
+
 /* =========================
    LANGUAGE TOGGLE
    Segmented control "ID | EN" di dalam kartu
@@ -8069,14 +8284,14 @@ font {
 }
 
 [data-theme='dark'] .chat-send {
-  background: #ffffff;
-  color: #000000;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
+  background: var(--accent);
+  color: var(--accent-contrast);
+  box-shadow: 0 4px 10px var(--accent-shadow);
 }
 
 [data-theme='dark'] .chat-send:hover:not(:disabled) {
-  background: #ffffff;
-  color: #000000;
+  background: var(--accent);
+  color: var(--accent-contrast);
 }
 
 [data-theme='dark'] .chat-send:disabled {

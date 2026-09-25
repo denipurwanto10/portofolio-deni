@@ -21,6 +21,7 @@ import Blog from './pages/Blog'
 import Contact from './pages/Contact'
 import LiveChat from './components/LiveChat'
 import ThemeToggle from './components/ThemeToggle'
+import AccentPicker from './components/ThemeCard'
 import LanguageToggle from './components/LanguageToggle'
 import { useManualTranslation } from './manualTranslations'
 
@@ -310,6 +311,8 @@ function App() {
         </nav>
 
         <ThemeToggle />
+
+        <AccentPicker />
 
         <div className="sidebar-footer">
           <strong>
