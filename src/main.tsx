@@ -2,8 +2,18 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App'
 import ErrorBoundary from './components/ErrorBoundary'
-import CustomCursor from './components/CustomCursor'
+import { lazy, Suspense } from 'react'
 import './styles.css'
+
+// Perf: CustomCursor (panah + fisika cipratan ±400 baris) di-lazy —
+// boot awal tidak membayar parse/eksekusinya. CustomCursor sendiri
+// sudah return null di layar sentuh, dan cipratan + panah dipasang
+// malas (idle effect), jadi penundaan ini tidak mengubah tampilan
+// maupun perilaku: kursor muncul sebelum pengguna sempat menggerakkan
+// mouse (idle callback jalan dalam ~1 detik setelah paint).
+const CustomCursor = lazy(
+  () => import('./components/CustomCursor'),
+)
 
 /**
  * BUG FIX: layar tiba-tiba blank saat pindah halaman.
@@ -82,6 +92,8 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     <ErrorBoundary>
       <App />
     </ErrorBoundary>
-    <CustomCursor />
+    <Suspense fallback={null}>
+      <CustomCursor />
+    </Suspense>
   </React.StrictMode>,
 )

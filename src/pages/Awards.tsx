@@ -605,6 +605,7 @@ function Awards() {
                   className={`award-modal-image slide-${direction}`}
                   src={selectedAward.image}
                   alt={selectedAward.title}
+                  decoding="async"
                 />
 
                 {awardItems.length > 1 && (

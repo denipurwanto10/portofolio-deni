@@ -78,9 +78,15 @@ export function useInView<T extends HTMLElement>(
   useEffect(() => {
     // A8: ref bisa null saat effect pertama (konten async/tertunda) —
     // coba lagi via rAF beberapa kali alih-alih menyerah selamanya.
+    // Perf: observer dibuat MALAS (idle) — halaman dashboard memasang
+    // beberapa useInView sekaligus; pembuatannya ditunda sampai
+    // browser idle supaya tidak menumpuk di critical path first paint.
     let attempts = 0
     let raf = 0
+    let idleId = 0
+    let timeoutId = 0
     let observer: IntersectionObserver | null = null
+    let disposed = false
 
     const attach = () => {
       const el = ref.current
@@ -118,11 +124,46 @@ export function useInView<T extends HTMLElement>(
       observer.observe(el)
     }
 
-    attach()
+    const schedule = () => {
+      if (disposed) return
+
+      if (
+        typeof window !== 'undefined' &&
+        typeof window.requestIdleCallback ===
+          'function'
+      ) {
+        idleId = window.requestIdleCallback(
+          attach,
+          { timeout: 1500 },
+        )
+      } else {
+        timeoutId = window.setTimeout(
+          attach,
+          400,
+        )
+      }
+    }
+
+    schedule()
 
     return () => {
+      disposed = true
+
       if (raf !== 0) {
         cancelAnimationFrame(raf)
+      }
+
+      if (
+        typeof window !== 'undefined' &&
+        typeof window.cancelIdleCallback ===
+          'function' &&
+        idleId !== 0
+      ) {
+        window.cancelIdleCallback(idleId)
+      }
+
+      if (timeoutId !== 0) {
+        window.clearTimeout(timeoutId)
       }
 
       observer?.disconnect()

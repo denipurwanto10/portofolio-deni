@@ -504,12 +504,8 @@ export function setSiteLanguage(language: SiteLanguage) {
 export function useManualTranslation() {
   useEffect(() => {
     let language = getStoredLanguage()
-
-    // Perf/LCP: bahasa default situs adalah Inggris — tidak ada yang
-    // perlu diubah saat boot bila masih 'en'. Full-body walk awal
-    // (±ribuan node) dilewati; observer tetap dipasang supaya
-    // pergantian bahasa nanti tetap berfungsi.
-    const needsBootWalk = language !== 'en'
+    let disposed = false
+    let observer: MutationObserver | null = null
 
     let translating = false
     let scheduled = false
@@ -525,91 +521,114 @@ export function useManualTranslation() {
       }
     }
 
-    if (needsBootWalk) {
-      runTranslation()
-    } else {
-      document.documentElement.lang = language
-      document.documentElement.dataset.language =
-        language
-    }
+    const attachObserver = () => {
+      if (disposed || observer) return
 
-    // (scheduleTranslation tidak lagi dipakai — observer di bawah
-    // menjadwalkan batch per-subtree secara langsung.)
+      // Observe only DOM insertions/removals. Do NOT observe characterData:
+      // translateDom() itself changes text nodes, which would otherwise trigger
+      // this observer again and create an endless loop that freezes the page.
+      //
+      // Perf: terjemahkan hanya subtree yang berubah (addedNodes) — bukan
+      // full-body walk tiap pesan chat masuk. Node teks konten pengguna
+      // (chat/kalender) dilewati via SKIP_TRANSLATE_SELECTOR.
+      observer = new MutationObserver((records) => {
+        const scopes = new Set<ParentNode>()
 
-    // Observe only DOM insertions/removals. Do NOT observe characterData:
-    // translateDom() itself changes text nodes, which would otherwise trigger
-    // this observer again and create an endless loop that freezes the page.
-    //
-    // Perf: terjemahkan hanya subtree yang berubah (addedNodes) — bukan
-    // full-body walk tiap pesan chat masuk. Node teks konten pengguna
-    // (chat/kalender) dilewati via SKIP_TRANSLATE_SELECTOR.
-    const observer = new MutationObserver((records) => {
-      const scopes = new Set<ParentNode>()
-
-      for (const record of records) {
-        for (const node of Array.from(record.addedNodes)) {
-          if (node instanceof HTMLElement) {
-            // Subtree high-churn → lewati sepenuhnya.
-            if (node.closest?.(SKIP_TRANSLATE_SELECTOR)) continue
-            scopes.add(node)
-          } else if (
-            node instanceof Text &&
-            node.parentElement &&
-            !node.parentElement.closest?.(SKIP_TRANSLATE_SELECTOR)
-          ) {
-            scopes.add(node.parentElement)
-          }
-        }
-      }
-
-      if (scopes.size === 0) {
-        // Perubahan murni di area skip (mis. pesan chat baru) —
-        // tidak ada yang perlu diterjemahkan.
-        return
-      }
-
-      if (scheduled || translating) {
-        // Batch tertunda: tandai agar mencakup scope baru ini juga.
-        pendingScopes.push(...scopes)
-        return
-      }
-
-      scheduled = true
-      pendingScopes.length = 0
-      pendingScopes.push(...scopes)
-      requestAnimationFrame(() => {
-        scheduled = false
-        const batch = pendingScopes.splice(0)
-        translating = true
-        try {
-          if (batch.length === 0) {
-            translateDom(language)
-          } else {
-            for (const scope of batch) {
-              if (scope.isConnected) {
-                translateDom(language, scope)
-              }
+        for (const record of records) {
+          for (const node of Array.from(record.addedNodes)) {
+            if (node instanceof HTMLElement) {
+              // Subtree high-churn → lewati sepenuhnya.
+              if (node.closest?.(SKIP_TRANSLATE_SELECTOR)) continue
+              scopes.add(node)
+            } else if (
+              node instanceof Text &&
+              node.parentElement &&
+              !node.parentElement.closest?.(SKIP_TRANSLATE_SELECTOR)
+            ) {
+              scopes.add(node.parentElement)
             }
           }
-        } finally {
-          translating = false
         }
-      })
-    })
 
-    observer.observe(document.body, {
-      childList: true,
-      subtree: true,
-    })
+        if (scopes.size === 0) {
+          // Perubahan murni di area skip (mis. pesan chat baru) —
+          // tidak ada yang perlu diterjemahkan.
+          return
+        }
+
+        if (scheduled || translating) {
+          // Batch tertunda: tandai agar mencakup scope baru ini juga.
+          pendingScopes.push(...scopes)
+          return
+        }
+
+        scheduled = true
+        pendingScopes.length = 0
+        pendingScopes.push(...scopes)
+        requestAnimationFrame(() => {
+          scheduled = false
+          const batch = pendingScopes.splice(0)
+          translating = true
+          try {
+            if (batch.length === 0) {
+              translateDom(language)
+            } else {
+              for (const scope of batch) {
+                if (scope.isConnected) {
+                  translateDom(language, scope)
+                }
+              }
+            }
+          } finally {
+            translating = false
+          }
+        })
+      })
+
+      observer.observe(document.body, {
+        childList: true,
+        subtree: true,
+      })
+    }
+
+    // Perf/LCP: bahasa default situs adalah Inggris — tidak ada yang
+    // perlu diubah saat boot bila masih 'en'. Observer dipasang
+    // MALAS (idle/setelah paint) supaya first paint tidak membayar
+    // biaya MutationObserver + walk awal.
+    const needsBootWalk = language !== 'en'
+
+    if (needsBootWalk) {
+      runTranslation()
+      attachObserver()
+    } else {
+      document.documentElement.lang = language
+      document.documentElement.dataset.language = language
+
+      if (
+        typeof window !== 'undefined' &&
+        typeof window.requestIdleCallback === 'function'
+      ) {
+        const idleId = window.requestIdleCallback(
+          () => attachObserver(),
+          { timeout: 2000 },
+        )
+        void idleId
+      } else {
+        window.setTimeout(attachObserver, 1200)
+      }
+    }
 
     const onLanguageChange = (event: Event) => {
       language = (event as CustomEvent<SiteLanguage>).detail
+      attachObserver()
       translateDom(language)
     }
 
     window.addEventListener(LANGUAGE_EVENT, onLanguageChange)
     return () => {
-      observer.disconnect()
+      disposed = true
+      observer?.disconnect()
+      observer = null
       window.removeEventListener(LANGUAGE_EVENT, onLanguageChange)
     }
   }, [])

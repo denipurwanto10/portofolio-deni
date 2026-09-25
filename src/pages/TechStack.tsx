@@ -195,6 +195,9 @@ function TechStack() {
               }}
             >
               <div className={`techstack-mark ${item.markClass}`} aria-hidden="true">
+                {/* Perf: logo CDN hanya diunduh saat kartu terlihat —
+                    TechStack bukan halaman awal, jadi jangan berebut
+                    bandwidth dengan LCP. Tampilan identik. */}
                 <img
                   src={item.logo}
                   alt=""

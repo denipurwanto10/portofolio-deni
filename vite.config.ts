@@ -32,6 +32,11 @@ export default defineConfig({
           if (id.includes('node_modules/lucide-react')) {
             return 'lucide'
           }
+          // Perf: CSS kursor (±230 baris) hanya dipakai bersama chunk
+          // CustomCursor yang lazy — jangan ikut ke CSS awal.
+          if (id.includes('CustomCursor.css')) {
+            return 'cursor-css'
+          }
           if (id.includes('node_modules')) {
             return 'vendor'
           }
