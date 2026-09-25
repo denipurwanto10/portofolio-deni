@@ -4447,7 +4447,7 @@ a {
 .experience-card {
   position: relative;
   display: grid;
-  grid-template-columns: 96px minmax(0, 1fr);
+  grid-template-columns: 88px minmax(0, 1fr);
   gap: 20px;
   padding: 18px;
   background: var(--bg-surface);
@@ -4468,8 +4468,8 @@ a {
 
 
 .experience-image-wrap {
-  width: 80px;
-  height: 80px;
+  width: 72px;
+  height: 72px;
   border: 1px solid var(--border-color);
   border-radius: 11px;
   overflow: hidden;
@@ -4694,8 +4694,8 @@ a {
   }
 
   .experience-image-wrap {
-    width: 88px;
-    height: 88px;
+    width: 80px;
+    height: 80px;
     margin-top: 0;
     justify-self: start;
   }
@@ -6928,8 +6928,8 @@ a {
   }
 
   .experience-image-wrap {
-    width: 64px;
-    height: 64px;
+    width: 58px;
+    height: 58px;
     margin: 0;
     padding: 4px;
     border-radius: 10px;
@@ -7052,8 +7052,8 @@ a {
   }
 
   .experience-image-wrap {
-    width: 58px;
-    height: 58px;
+    width: 54px;
+    height: 54px;
   }
 }
 
@@ -7212,8 +7212,8 @@ a {
   }
 
   .experience-image-wrap {
-    width: 56px;
-    height: 56px;
+    width: 52px;
+    height: 52px;
     padding: 4px;
     margin: 0;
     border-radius: 9px;
@@ -7327,8 +7327,8 @@ a {
   }
 
   .experience-image-wrap {
-    width: 50px;
-    height: 50px;
+    width: 46px;
+    height: 46px;
     margin-top: 0;
   }
 
