@@ -8813,7 +8813,8 @@ font {
   border-color: #a1a1aa;
 }
 
-/* Scrollbar di dalam chat: tipis dan tidak mencolok */
+/* Scrollbar di dalam chat (dark): abu netral ramping, cocok dengan
+   versi ramping baru di blok MODERN SCROLLBAR di atas. */
 [data-theme='dark'] .chat-messages {
   scrollbar-color: #3f3f46 transparent;
 }
@@ -8821,6 +8822,7 @@ font {
 [data-theme='dark'] .chat-messages::-webkit-scrollbar-thumb,
 [data-theme='dark'] .chat-messages::-webkit-scrollbar-thumb:hover {
   background: #3f3f46;
+  background-clip: padding-box;
 }
 
 /* Tautan di dalam jawaban virtual assistant */
