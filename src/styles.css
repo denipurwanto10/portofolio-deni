@@ -6588,12 +6588,12 @@ a {
 
   /* Chat */
   .chat-button {
-    right: 14px;
-    bottom: calc(14px + env(safe-area-inset-bottom));
-    /* Mobile: tombol lebih besar & mudah disentuh (±60px target
-       sentuh). Desktop tetap 52px seperti semula. */
-    width: 60px;
-    height: 60px;
+    right: 18px;
+    bottom: calc(18px + env(safe-area-inset-bottom));
+    /* Mobile: sedikit di atas desktop (52px) tapi tetap nyaman
+       disentuh. */
+    width: 54px;
+    height: 54px;
   }
 
   .chat-panel {

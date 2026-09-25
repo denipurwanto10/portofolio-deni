@@ -3948,7 +3948,7 @@ export default function LiveChat({
         }
       >
         <MessageSquareText
-          size={28}
+          size={25}
         />
       </button>
 
