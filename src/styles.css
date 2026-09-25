@@ -2943,20 +2943,21 @@ a {
   outline-offset: 1px;
 }
 
-/* Tooltip kontribusi (portal ke body, position:fixed): bubble kecil —
-   "X contributions" tebal + "on [tanggal]" redup, dengan panah kecil
-   menunjuk ke kotak. Karena fixed + dihitung dari viewport, tidak
-   pernah kepotong wrapper/kartu di ukuran layar mana pun. Lebar
-   dibatasi + teks boleh wrap 2 baris di layar sangat sempit. */
+/* Tooltip kontribusi (portal ke body, position:fixed): bubble satu
+   baris — "X contributions | tanggal" dengan separator. Karena fixed
+   + dihitung dari viewport, tidak pernah kepotong wrapper/kartu di
+   ukuran layar mana pun. Lebar dibatasi + teks boleh wrap di layar
+   sangat sempit. */
 .github-tip {
   position: fixed;
   z-index: 9998;
   display: flex;
-  flex-direction: column;
-  gap: 1px;
+  flex-direction: row;
+  align-items: baseline;
+  gap: 6px;
   width: max-content;
-  max-width: min(200px, calc(100vw - 32px));
-  padding: 7px 10px;
+  max-width: min(240px, calc(100vw - 32px));
+  padding: 7px 11px;
   border-radius: 8px;
   background: #101828;
   color: #f8fafc;
@@ -2974,11 +2975,17 @@ a {
 .github-tip strong {
   font-weight: 700;
   color: #ffffff;
+  white-space: nowrap;
 }
 
-.github-tip span {
+.github-tip-sep {
+  color: rgba(248, 250, 252, 0.4);
+}
+
+.github-tip span:last-child {
   color: rgba(248, 250, 252, 0.72);
   font-size: 10px;
+  white-space: nowrap;
 }
 
 /* Panah kecil: di bawah bubble (tooltip di atas kotak)… */
@@ -3010,7 +3017,11 @@ a {
   color: #0f172a;
 }
 
-[data-theme='dark'] .github-tip span {
+[data-theme='dark'] .github-tip-sep {
+  color: rgba(15, 23, 42, 0.35);
+}
+
+[data-theme='dark'] .github-tip span:last-child {
   color: rgba(15, 23, 42, 0.68);
 }
 

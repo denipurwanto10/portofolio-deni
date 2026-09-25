@@ -1147,9 +1147,10 @@ const ContributionCalendar = memo(function ContributionCalendar({
               {tip.day.count} contribution
               {tip.day.count === 1 ? '' : 's'}
             </strong>
-            <span>
-              on {formatGithubDate(tip.day.date)}
+            <span className="github-tip-sep" aria-hidden="true">
+              |
             </span>
+            <span>{formatGithubDate(tip.day.date)}</span>
           </div>,
           document.body,
         )}
