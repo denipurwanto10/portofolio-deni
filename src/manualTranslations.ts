@@ -59,12 +59,13 @@ const translations: Record<string, string> = {
   'Attendance App': 'Aplikasi Absensi',
   'MandiriNewsApps': 'MandiriNewsApps',
   'Portfolio V2': 'Portfolio V2',
-  'Visualisasi Pipa Sumur Bor': 'Visualisasi Pipa Sumur Bor',
-  'PPDB Flutter': 'PPDB Flutter',
-  'GIS Penduduk': 'GIS Penduduk',
+  'Borewell Pipe Visualization': 'Visualisasi Pipa Sumur Bor',
+  'Diabetes Detection ML': 'Deteksi Diabetes ML',
+  'PPDB Flutter — Student Admissions': 'PPDB Flutter — Penerimaan Siswa Baru',
+  'Population GIS': 'GIS Penduduk',
   'PetClinic': 'PetClinic',
   'Catshop': 'Catshop',
-  'Menu Restoran': 'Menu Restoran',
+  'Restaurant Menu': 'Menu Restoran',
 
   // Localized dates
   'Dec 2025 — Jun 2026': 'Des 2025 — Jun 2026',

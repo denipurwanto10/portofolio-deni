@@ -123,7 +123,7 @@ export const projects: Project[] = [
     category: 'Frontend',
   },
   {
-    title: 'Visualisasi Pipa Sumur Bor',
+    title: 'Borewell Pipe Visualization',
     description:
       'An interactive web app for visualizing borewell construction — pipes, screens, open hole, and groundwater level on a proportional canvas, plus technical data forms and photo documentation.',
     tags: ['Vite', 'React', 'Tailwind CSS', 'pdf-lib'],
@@ -133,7 +133,7 @@ export const projects: Project[] = [
     category: 'Web App',
   },
   {
-    title: 'Deteksi Diabetes ML',
+    title: 'Diabetes Detection ML',
     description:
       'A simple machine learning model for diabetes prediction — Logistic Regression on medical parameters (glucose, blood pressure, BMI, age) with positive/negative prediction output.',
     tags: ['Python', 'scikit-learn', 'Pandas', 'NumPy', 'Jupyter'],
@@ -142,7 +142,7 @@ export const projects: Project[] = [
     category: 'Desktop & AI',
   },
   {
-    title: 'PPDB Flutter',
+    title: 'PPDB Flutter — Student Admissions',
     description:
       'A Flutter mobile app for new student admissions (PPDB) — auth, role-based dashboards, student data management with search/filter, grade input, and automatic selection.',
     tags: ['Flutter', 'Dart', 'Firebase'],
@@ -151,7 +151,7 @@ export const projects: Project[] = [
     category: 'Mobile',
   },
   {
-    title: 'GIS Penduduk',
+    title: 'Population GIS',
     description:
       'A web-based geospatial population information system — interactive Leaflet.js maps, resident CRUD, dynamic filters (RT/RW, gender, status), statistics, and a MySQL database.',
     tags: ['PHP', 'MySQL', 'Leaflet.js', 'JavaScript'],
@@ -178,7 +178,7 @@ export const projects: Project[] = [
     category: 'Backend',
   },
   {
-    title: 'Menu Restoran',
+    title: 'Restaurant Menu',
     description:
       'A Java desktop app for restaurant menu management — secure login/registration, category and menu CRUD, and MySQL integration via JDBC with a Swing interface.',
     tags: ['Java', 'Swing', 'MySQL', 'JDBC'],
