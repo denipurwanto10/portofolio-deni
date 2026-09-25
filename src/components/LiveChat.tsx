@@ -4318,11 +4318,14 @@ export default function LiveChat() {
                                           emoji
                                         }
                                       </span>
-                                      <span className="chat-reaction-count">
-                                        {
-                                          uids.length
-                                        }
-                                      </span>
+                                      {uids.length >
+                                        1 && (
+                                          <span className="chat-reaction-count">
+                                            {
+                                              uids.length
+                                            }
+                                          </span>
+                                        )}
                                     </button>
                                   )
                                 },
