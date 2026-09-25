@@ -4331,7 +4331,7 @@ a {
 .experience-card {
   position: relative;
   display: grid;
-  grid-template-columns: 112px minmax(0, 1fr);
+  grid-template-columns: 96px minmax(0, 1fr);
   gap: 20px;
   padding: 18px;
   background: var(--bg-surface);
@@ -4352,8 +4352,8 @@ a {
 
 
 .experience-image-wrap {
-  width: 96px;
-  height: 96px;
+  width: 80px;
+  height: 80px;
   border: 1px solid var(--border-color);
   border-radius: 11px;
   overflow: hidden;
