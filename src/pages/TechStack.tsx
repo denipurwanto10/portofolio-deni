@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import {
   BarChart3,
-  Code2,
+  CodeXml,
   Database,
   Palette,
 } from 'lucide-react'
@@ -18,7 +18,7 @@ type TechItem = {
 type Category = {
   id: string
   label: string
-  icon: typeof Code2
+  icon: typeof CodeXml
   items: TechItem[]
 }
 
@@ -26,7 +26,7 @@ const categories: Category[] = [
   {
     id: 'frontend',
     label: 'Frontend',
-    icon: Code2,
+    icon: CodeXml,
     items: [
     { name: 'React', description: 'Building interactive user interfaces', mark: '⚛', markClass: 'react', logo: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg' },
 { name: 'TypeScript', description: 'Typed JavaScript for scalable apps', mark: 'TS', markClass: 'js', logo: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg' },
@@ -148,7 +148,7 @@ function TechStack() {
         ) ?? categories[0] ?? {
           id: 'frontend',
           label: 'Frontend',
-          icon: Code2,
+          icon: CodeXml,
           items: [],
         },
       [activeCategory],
@@ -158,7 +158,7 @@ function TechStack() {
     <section className="page-section techstack-page">
       <div className="techstack-panel">
         <SectionTitle
-          icon={<Code2 />}
+          icon={<CodeXml />}
           title="Tech Stack"
           subtitle="Technologies and tools I use to build performant and scalable digital products."
         />

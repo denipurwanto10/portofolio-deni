@@ -5,7 +5,7 @@ import {
   useRef,
   useState,
 } from 'react'
-import { MessageCircle } from 'lucide-react'
+import { MessageSquareText } from 'lucide-react'
 
 // Panel chat (±4500 baris + Firebase SDK) diunduh hanya saat
 // tombol pertama kali dibuka — first paint tidak terbebani.
@@ -56,7 +56,8 @@ function LiveChatLoader() {
           onPointerDown={prefetchPanel}
           aria-label="Open live chat"
         >
-          <MessageCircle size={23} />
+          {/* Ikon chat gaya baru — styling tombol tetap seperti semula. */}
+          <MessageSquareText size={24} />
         </button>
       )}
 

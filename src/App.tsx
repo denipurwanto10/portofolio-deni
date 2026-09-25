@@ -3,12 +3,12 @@ import type { ElementType } from 'react'
 import {
   Award,
   BriefcaseBusiness,
-  Code2,
-  Grid2X2,
+  CodeXml,
+  FolderKanban,
+  LayoutDashboard,
   Mail,
-  Menu,
+  Medal,
   MonitorCog,
-  X,
 } from 'lucide-react'
 
 import Dashboard from './pages/Dashboard'
@@ -50,11 +50,11 @@ type NavItem = {
 }
 
 const navItems: NavItem[] = [
-  { id: 'dashboard', label: 'Dashboard', icon: Grid2X2, path: '/' },
+  { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, path: '/' },
   { id: 'experience', label: 'Experience', icon: BriefcaseBusiness, path: '/experience' },
-  { id: 'projects', label: 'Projects', icon: Code2, path: '/projects' },
-  { id: 'awards', label: 'Awards & Certs', icon: Award, path: '/awards-certs' },
-  { id: 'stack', label: 'Tech Stack', icon: MonitorCog, path: '/tech-stack' },
+  { id: 'projects', label: 'Projects', icon: FolderKanban, path: '/projects' },
+  { id: 'awards', label: 'Awards & Certs', icon: Medal, path: '/awards-certs' },
+  { id: 'stack', label: 'Tech Stack', icon: CodeXml, path: '/tech-stack' },
   // { id: 'community', label: 'Community', icon: UsersRound, path: '/community' },
   // { id: 'blog', label: 'Blog', icon: BookOpen, path: '/blog' },
   { id: 'contact', label: 'Contact', icon: Mail, path: '/contact' },
@@ -383,9 +383,16 @@ function App() {
             aria-label={mobileOpen ? 'Tutup menu' : 'Buka menu'}
             aria-expanded={mobileOpen}
           >
-            {mobileOpen ? <X size={20} strokeWidth={2.2} /> : (
-              <Menu size={21} strokeWidth={2.1} />
-            )}
+            {/* Hamburger morph: 3 garis CSS beranimasi jadi X.
+                Satu elemen tetap — transisi murni, tanpa swap ikon. */}
+            <span
+              className="burger"
+              aria-hidden="true"
+            >
+              <i />
+              <i />
+              <i />
+            </span>
           </button>
         </header>
 

@@ -1,8 +1,8 @@
 import {
-  Award,
   CalendarDays,
   ChevronLeft,
   ChevronRight,
+  Medal,
   Trophy,
   X,
 } from 'lucide-react'
@@ -238,7 +238,7 @@ function Awards() {
       <div className="awards-panel">
 
         <SectionTitle
-          icon={<Award />}
+          icon={<Medal />}
           title="Achievement"
           subtitle="Awards and Certification."
         />

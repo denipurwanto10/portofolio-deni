@@ -1,10 +1,10 @@
 import { useMemo, useState } from 'react'
 import type { ElementType } from 'react'
 import {
-  Code2,
   Cpu,
   Database,
   ExternalLink,
+  FolderKanban,
   Github,
   Globe,
   Layers3,
@@ -20,7 +20,7 @@ const categoryIcons: Record<string, ElementType> = {
   'Web App': Globe,
   'Full-Stack': Layers3,
   'Desktop & AI': Cpu,
-  Frontend: Code2,
+  Frontend: FolderKanban,
   Backend: Database,
   Mobile: Smartphone,
 }
@@ -78,7 +78,7 @@ function Projects({
       <div className="projects-panel">
         <div className="projects-head">
           <SectionTitle
-            icon={<Code2 />}
+            icon={<FolderKanban />}
             title="Projects"
             subtitle={`A collection of work from GitHub — ${projects.length} projects.`}
           />
@@ -171,7 +171,7 @@ function Projects({
               const Icon =
                 categoryIcons[
                   project.category
-                ] ?? Code2
+                ] ?? FolderKanban
 
               return (
                 <article

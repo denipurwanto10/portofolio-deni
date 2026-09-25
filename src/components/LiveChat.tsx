@@ -8,8 +8,7 @@ import {
 import {
   Bot,
   LogOut,
-  MessageCircle,
-  MessageSquare,
+  MessageSquareText,
   Reply,
   SendHorizonal,
   Smile,
@@ -3874,7 +3873,7 @@ export default function LiveChat({
           open ? -1 : 0
         }
       >
-        <MessageCircle
+        <MessageSquareText
           size={23}
         />
       </button>
@@ -4078,7 +4077,7 @@ export default function LiveChat({
                 }}
               >
                 <div className="chat-composer-field">
-                  <MessageSquare
+                  <MessageSquareText
                     className="chat-composer-icon"
                     size={21}
                     strokeWidth={1.7}
@@ -4574,7 +4573,7 @@ export default function LiveChat({
                 }}
               >
                 <div className="chat-composer-field">
-                  <MessageSquare
+                  <MessageSquareText
                     className="chat-composer-icon"
                     size={21}
                     strokeWidth={1.7}

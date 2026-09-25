@@ -5976,6 +5976,56 @@ a {
     transform: scale(0.94);
   }
 
+  /* Burger morph → X: 3 garis beranimasi (garis tengah memudar,
+     atas/bawah berputar menyilang). Satu elemen tetap — murni
+     transisi, tanpa swap ikon. */
+  .mobile-header-menu .burger {
+    position: relative;
+    display: block;
+    width: 20px;
+    height: 14px;
+  }
+
+  .mobile-header-menu .burger i {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    border-radius: 999px;
+    background: currentColor;
+    transition:
+      transform 0.32s var(--ease-out),
+      opacity 0.2s var(--ease-out),
+      top 0.32s var(--ease-out);
+  }
+
+  .mobile-header-menu .burger i:nth-child(1) {
+    top: 0;
+  }
+
+  .mobile-header-menu .burger i:nth-child(2) {
+    top: 6px;
+  }
+
+  .mobile-header-menu .burger i:nth-child(3) {
+    top: 12px;
+  }
+
+  .mobile-header.is-open .mobile-header-menu .burger i:nth-child(1) {
+    top: 6px;
+    transform: rotate(45deg);
+  }
+
+  .mobile-header.is-open .mobile-header-menu .burger i:nth-child(2) {
+    opacity: 0;
+    transform: scaleX(0);
+  }
+
+  .mobile-header.is-open .mobile-header-menu .burger i:nth-child(3) {
+    top: 6px;
+    transform: rotate(-45deg);
+  }
+
   .mobile-header-menu svg {
   }
 
