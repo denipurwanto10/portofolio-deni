@@ -8408,66 +8408,135 @@ font {
 }
 
 /* =========================================================
-   MODERN SCROLLBAR
-   Bentuk pill seperti referensi, dengan warna mengikuti theme:
-   light = var(--accent), dark = var(--accent).
+   MODERN SCROLLBAR — desktop only (perangkat mouse)
+   Thumb gradasi glossy + glow, otomatis mengikuti aksen
+   & tema (light/dark + semua varian aksen) lewat
+   var(--accent) dan var(--accent-shadow).
+   Mobile/touch tetap disembunyikan (blok MOBILE di bawah).
 ========================================================= */
-html,
-body {
-  scrollbar-width: thin;
-  scrollbar-color: var(--accent) transparent;
-}
+@media (hover: hover) and (pointer: fine) {
+  html,
+  body {
+    scrollbar-width: thin;
+    scrollbar-color: var(--accent) transparent;
+  }
 
-html::-webkit-scrollbar,
-body::-webkit-scrollbar,
-.sidebar::-webkit-scrollbar,
-.nav::-webkit-scrollbar,
-.chat-messages::-webkit-scrollbar,
-.project-filters::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
-}
+  .sidebar,
+  .nav,
+  .chat-messages,
+  .project-filters {
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in srgb, var(--accent) 55%, transparent) transparent;
+  }
 
-html::-webkit-scrollbar-track,
-body::-webkit-scrollbar-track,
-.sidebar::-webkit-scrollbar-track,
-.nav::-webkit-scrollbar-track,
-.chat-messages::-webkit-scrollbar-track,
-.project-filters::-webkit-scrollbar-track {
-  background: transparent;
-}
+  /* ---- Scrollbar utama halaman: lebar + rel tipis di tengah ---- */
+  html::-webkit-scrollbar,
+  body::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+  }
 
-html::-webkit-scrollbar-thumb,
-body::-webkit-scrollbar-thumb,
-.sidebar::-webkit-scrollbar-thumb,
-.nav::-webkit-scrollbar-thumb,
-.chat-messages::-webkit-scrollbar-thumb,
-.project-filters::-webkit-scrollbar-thumb {
-  min-height: 48px;
-  border: 0;
-  border-radius: 999px;
-  background: var(--accent);
-  opacity: 0.92;
-  transition: opacity 180ms ease, background-color 180ms ease;
-}
+  html::-webkit-scrollbar-track,
+  body::-webkit-scrollbar-track {
+    background: linear-gradient(
+      90deg,
+      transparent calc(50% - 1px),
+      color-mix(in srgb, var(--accent) 20%, transparent) calc(50% - 1px),
+      color-mix(in srgb, var(--accent) 20%, transparent) calc(50% + 1px),
+      transparent calc(50% + 1px)
+    );
+  }
 
-html::-webkit-scrollbar-thumb:hover,
-body::-webkit-scrollbar-thumb:hover,
-.sidebar::-webkit-scrollbar-thumb:hover,
-.nav::-webkit-scrollbar-thumb:hover,
-.chat-messages::-webkit-scrollbar-thumb:hover,
-.project-filters::-webkit-scrollbar-thumb:hover {
-  background: var(--accent);
-  opacity: 1;
-}
+  /* ---- Thumb: pil melayang — kilau kaca + gradasi memudar + glow ---- */
+  html::-webkit-scrollbar-thumb,
+  body::-webkit-scrollbar-thumb {
+    min-height: 56px;
+    border: 3px solid transparent;
+    border-radius: 999px;
+    background:
+      linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0.3) 0%,
+        rgba(255, 255, 255, 0) 45%
+      ),
+      linear-gradient(
+        180deg,
+        var(--accent) 0%,
+        color-mix(in srgb, var(--accent) 55%, transparent) 100%
+      );
+    background-clip: padding-box;
+    box-shadow: 0 0 10px var(--accent-shadow);
+  }
 
-html::-webkit-scrollbar-corner,
-body::-webkit-scrollbar-corner,
-.sidebar::-webkit-scrollbar-corner,
-.nav::-webkit-scrollbar-corner,
-.chat-messages::-webkit-scrollbar-corner,
-.project-filters::-webkit-scrollbar-corner {
-  background: transparent;
+  html::-webkit-scrollbar-thumb:hover,
+  body::-webkit-scrollbar-thumb:hover {
+    background:
+      linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0.38) 0%,
+        rgba(255, 255, 255, 0) 45%
+      ),
+      linear-gradient(
+        180deg,
+        var(--accent) 0%,
+        color-mix(in srgb, var(--accent) 80%, transparent) 100%
+      );
+    background-clip: padding-box;
+    box-shadow: 0 0 14px var(--accent-shadow);
+  }
+
+  html::-webkit-scrollbar-thumb:active,
+  body::-webkit-scrollbar-thumb:active {
+    background: var(--accent);
+    background-clip: padding-box;
+  }
+
+  html::-webkit-scrollbar-corner,
+  body::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+
+  /* ---- Panel dalam (sidebar/nav/chat/filter): ramping & kalem ---- */
+  .sidebar::-webkit-scrollbar,
+  .nav::-webkit-scrollbar,
+  .chat-messages::-webkit-scrollbar,
+  .project-filters::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  .sidebar::-webkit-scrollbar-track,
+  .nav::-webkit-scrollbar-track,
+  .chat-messages::-webkit-scrollbar-track,
+  .project-filters::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .sidebar::-webkit-scrollbar-thumb,
+  .nav::-webkit-scrollbar-thumb,
+  .chat-messages::-webkit-scrollbar-thumb,
+  .project-filters::-webkit-scrollbar-thumb {
+    min-height: 40px;
+    border: 2px solid transparent;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--accent) 50%, transparent);
+    background-clip: padding-box;
+  }
+
+  .sidebar::-webkit-scrollbar-thumb:hover,
+  .nav::-webkit-scrollbar-thumb:hover,
+  .chat-messages::-webkit-scrollbar-thumb:hover,
+  .project-filters::-webkit-scrollbar-thumb:hover {
+    background: color-mix(in srgb, var(--accent) 85%, transparent);
+    background-clip: padding-box;
+  }
+
+  .sidebar::-webkit-scrollbar-corner,
+  .nav::-webkit-scrollbar-corner,
+  .chat-messages::-webkit-scrollbar-corner,
+  .project-filters::-webkit-scrollbar-corner {
+    background: transparent;
+  }
 }
 
 /* =========================================================
