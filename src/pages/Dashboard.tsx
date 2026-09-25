@@ -1126,7 +1126,94 @@ function GithubContributions() {
   const [statsError, setStatsError] =
     useState(false)
 
+  // Perf/LCP: fetch jaringan DITUNDA sampai kartu masuk viewport
+  // (atau 2,5 dtk setelah mount bila observer tak tersedia) — supaya
+  // request API + mirror tidak berebut bandwidth dengan gambar LCP
+  // & CSS saat first paint di jaringan HP. Cache lokal tetap
+  // dibaca sinkron saat mount agar kartu tidak kosong.
+  const [fetchArmed, setFetchArmed] =
+    useState(false)
+
+  const { ref: fetchGateRef } = useInView<HTMLElement>(0)
+
   useEffect(() => {
+    const el = fetchGateRef.current
+
+    if (!el) {
+      return
+    }
+
+    if (
+      typeof IntersectionObserver ===
+      'undefined'
+    ) {
+      setFetchArmed(true)
+      return
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (
+          entries.some(
+            (entry) => entry.isIntersecting,
+          )
+        ) {
+          setFetchArmed(true)
+          observer.disconnect()
+        }
+      },
+    )
+
+    observer.observe(el)
+
+    const fallback = window.setTimeout(() => {
+      setFetchArmed(true)
+    }, 2500)
+
+    return () => {
+      observer.disconnect()
+      window.clearTimeout(fallback)
+    }
+  }, [fetchGateRef])
+
+  useEffect(() => {
+    // Cache lokal: baca sinkron saat mount — tanpa jaringan.
+    const cached =
+      loadCachedGithubStats()
+
+    if (!cached) {
+      return
+    }
+
+    setContributions(cached.contributions)
+    setTotal(cached.total)
+    setLongestStreak(
+      cached.longestStreak !== null
+        ? {
+            length: cached.longestStreak,
+            start:
+              cached.longestStreakStart,
+            end: cached.longestStreakEnd,
+          }
+        : null,
+    )
+    setCacheLabel(cached.asOf)
+    setCalendarStale(true)
+    setLoading(false)
+  }, [])
+
+  // Gate jaringan: hanya refresh saat kartu terlihat.
+  const cachedForGate = useMemo(
+    loadCachedGithubStats,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [fetchArmed],
+  )
+
+  useEffect(() => {
+    if (!fetchArmed) {
+      return
+    }
+
     let cancelled = false
     // B12: batalkan request jaringan + timeout 15 detik agar loading
     // tidak menggantung selamanya saat fetch macet.
@@ -1136,32 +1223,10 @@ function GithubContributions() {
       15000,
     )
 
+    const cached = cachedForGate
+
     const fetchContributions = async () => {
-      // Show the last good data instantly, then refresh.
-      const cached =
-        loadCachedGithubStats()
-
-      if (cached) {
-        setContributions(
-          cached.contributions,
-        )
-
-        setTotal(cached.total)
-        setLongestStreak(
-          cached.longestStreak !== null
-            ? {
-                length:
-                  cached.longestStreak,
-                start:
-                  cached.longestStreakStart,
-                end: cached.longestStreakEnd,
-              }
-            : null,
-        )
-        setCacheLabel(cached.asOf)
-        setCalendarStale(true)
-        setLoading(false)
-      } else {
+      if (!cached) {
         setLoading(true)
       }
 
@@ -1264,7 +1329,7 @@ function GithubContributions() {
       window.clearTimeout(timeout)
       controller.abort()
     }
-  }, [])
+  }, [fetchArmed, cachedForGate])
 
   /*
    * "Total" is the official last-year number from
@@ -1320,7 +1385,15 @@ function GithubContributions() {
   return (
     <section
       className="github-card"
-      ref={cardRef}
+      ref={(node) => {
+        // Dua ref pada satu section: gate fetch + inView count-up.
+        ;(
+          cardRef as React.MutableRefObject<HTMLElement | null>
+        ).current = node
+        ;(
+          fetchGateRef as React.MutableRefObject<HTMLElement | null>
+        ).current = node
+      }}
     >
       {/* HEADER */}
 

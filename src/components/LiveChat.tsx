@@ -2669,9 +2669,13 @@ function renderAssistantText(text: string) {
 // Harus sama dengan durasi animasi keluar panel di styles.css.
 const CHAT_EXIT_MS = 180
 
-export default function LiveChat() {
+export default function LiveChat({
+  startOpen = false,
+}: {
+  startOpen?: boolean
+} = {}) {
   const [open, setOpen] =
-    useState(false)
+    useState(startOpen)
 
   const [closing, setClosing] =
     useState(false)

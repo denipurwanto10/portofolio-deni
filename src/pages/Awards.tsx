@@ -29,14 +29,14 @@ type AwardItem = {
 
 const awardItems: AwardItem[] = [
   {
-    image: '/awards/maganghub.jpg',
+    image: '/awards/maganghub.webp',
     title: 'University Graduate Internship Program',
     subtitle: 'Center for Groundwater and Environmental Geology • June 2026',
     alt: 'University Graduate Internship Program',
     label: 'View University Graduate Internship Program image',
   },
   {
-    image: '/awards/pbi.jpg',
+    image: '/awards/pbi.webp',
     title: 'Certificate of Competency',
     subtitle: 'Project Based Internship • December 2025',
     alt: 'Certificate of Competency – Project Based Internship',
@@ -259,7 +259,7 @@ function Awards() {
                     aria-label="View University Graduate Internship Program image"
                   >
                     <img
-                      src="/awards/maganghub.jpg"
+                      src="/awards/maganghub.webp"
                       alt="University Graduate Internship Program"
                       loading="lazy"
                       decoding="async"
@@ -311,7 +311,7 @@ function Awards() {
       aria-label="View Project Based Internship Certificate image"
     >
       <img
-        src="/awards/pbi.jpg"
+        src="/awards/pbi.webp"
         alt="Certificate of Competency – Project Based Internship"
         loading="lazy"
         decoding="async"

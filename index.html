@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="Personal portfolio of a full-stack developer" />
-    <link rel="icon" type="image/png" sizes="192x192" href="/images/deni.png" />
+    <link rel="icon" type="image/webp" href="/images/deni.webp" />
     <!-- Perf: font tidak lagi via @import di CSS (render-blocking berantai).
          Preconnect + display=swap mempercepat FCP/LCP tanpa ubah tampilan. -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -28,6 +28,14 @@
     </noscript>
     <!-- Logo TechStack dari CDN yang sama — preconnect hemat TLS berulang. -->
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <!-- LCP mobile = foto profil sidebar: preload agar tidak antre. -->
+    <link
+      rel="preload"
+      as="image"
+      href="/profil.webp"
+      type="image/webp"
+      fetchpriority="high"
+    />
     <title>Deni Purwanto — Portfolio</title>
   </head>
   <body>

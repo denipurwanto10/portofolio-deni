@@ -197,7 +197,7 @@ export const experiences: ExperienceItem[] = [
       'Developed digital solutions for laboratory management, equipment borrowing services, and geospatial data visualization to support operational and technical teams',
     type: 'Internship',
     active: false,
-    image: '/experience/esdm1.png',
+    image: '/experience/esdm1.webp',
     tags: ['React', 'TypeScript', 'Next.js', 'Node.js', 'Leaflet.js', 'Laravel', 'MySQL', 'Tailwind CSS'],
     achievements: [
       'Developed a Laravel-based laboratory management application to digitize data management and equipment borrowing processes, replacing manual paper-based workflows',
@@ -233,7 +233,7 @@ export const experiences: ExperienceItem[] = [
       'Developed an MSME information system with interactive geospatial mapping to improve data management and presentation for the trade and industry office',
     type: 'Internship',
     active: false,
-    image: '/experience/pemkab.png',
+    image: '/experience/pemkab.webp',
     tags: ['Codeigniter', 'Bootstrap', 'MySQL', 'QGIS', 'Leaflet.js', 'Node.js', 'Express.js'],
     achievements: [
       'Developed a web-based MSME information system that improved data management and presentation efficiency by up to 40%',
@@ -249,7 +249,7 @@ export const experiences: ExperienceItem[] = [
       'Supported programming and database laboratory activities by guiding students, developing practicum materials, and maintaining laboratory infrastructure',
     type: 'Contract',
     active: false,
-    image: '/experience/unla.png',
+    image: '/experience/unla.webp',
     tags: ['Codeigniter', 'MySQL', 'Bootstrap', 'Tailwind CSS'],
     achievements: [
       'Guided 50+ students through programming and database practicums, covering Algorithms, Database Systems, Basic Web Development, and Web Frameworks',

@@ -12,6 +12,7 @@ import {
 } from 'lucide-react'
 
 import Dashboard from './pages/Dashboard'
+import LiveChatLoader from './components/LiveChatLoader'
 import ThemeToggle from './components/ThemeToggle'
 import AccentPicker from './components/ThemeCard'
 import LanguageToggle from './components/LanguageToggle'
@@ -26,23 +27,10 @@ const TechStack = lazy(() => import('./pages/TechStack'))
 const Community = lazy(() => import('./pages/Community'))
 const Blog = lazy(() => import('./pages/Blog'))
 const Contact = lazy(() => import('./pages/Contact'))
-// LiveChat (±4500 baris + Firebase) juga lazy: panel + SDK
-// tidak membebani first paint sebelum tombol chat dibuka.
-const LiveChat = lazy(() => import('./components/LiveChat'))
-// Prefetch panel chat saat browser idle supaya tombol chat
-// tetap terasa instan walau chunk-nya lazy.
-if (typeof window !== 'undefined') {
-  const preloadChat = () => import('./components/LiveChat')
-  const idle =
-    (window as unknown as {
-      requestIdleCallback?: (cb: () => void) => number
-    }).requestIdleCallback
-  if (typeof idle === 'function') {
-    idle.call(window, preloadChat)
-  } else {
-    window.setTimeout(preloadChat, 3000)
-  }
-}
+// LiveChat (±4500 baris + Firebase) TIDAK di-prefetch otomatis:
+// chunk berat diunduh hanya saat ada niat membuka (hover/focus/
+// sentuh tombol) lewat LiveChatLoader, supaya tidak berebut
+// bandwidth dengan gambar LCP saat first paint di jaringan HP.
 
 type SectionId =
   | 'dashboard'
@@ -277,7 +265,7 @@ function App() {
         <div className="profile">
           <div className="avatar-wrap">
             <img
-              src="/profil.png"
+              src="/profil.webp"
               alt="Deni Purwanto"
               className="avatar"
               width={76}
@@ -373,7 +361,7 @@ function App() {
         <header className={`mobile-header ${mobileOpen ? 'is-open' : ''}`}>
           <div className="mobile-header-profile">
             <img
-              src="/profil.png"
+              src="/profil.webp"
               alt="Deni Purwanto"
               className="mobile-header-avatar"
               width={34}
@@ -425,9 +413,7 @@ function App() {
         </div>
       </main>
 
-      <Suspense fallback={null}>
-        <LiveChat />
-      </Suspense>
+      <LiveChatLoader />
     </div>
   )
 }

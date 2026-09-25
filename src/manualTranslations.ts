@@ -505,6 +505,12 @@ export function useManualTranslation() {
   useEffect(() => {
     let language = getStoredLanguage()
 
+    // Perf/LCP: bahasa default situs adalah Inggris — tidak ada yang
+    // perlu diubah saat boot bila masih 'en'. Full-body walk awal
+    // (±ribuan node) dilewati; observer tetap dipasang supaya
+    // pergantian bahasa nanti tetap berfungsi.
+    const needsBootWalk = language !== 'en'
+
     let translating = false
     let scheduled = false
     const pendingScopes: ParentNode[] = []
@@ -519,7 +525,13 @@ export function useManualTranslation() {
       }
     }
 
-    runTranslation()
+    if (needsBootWalk) {
+      runTranslation()
+    } else {
+      document.documentElement.lang = language
+      document.documentElement.dataset.language =
+        language
+    }
 
     // (scheduleTranslation tidak lagi dipakai — observer di bawah
     // menjadwalkan batch per-subtree secara langsung.)
