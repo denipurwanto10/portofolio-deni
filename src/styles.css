@@ -4385,17 +4385,32 @@ a {
 }
 
 /* Logo transparan: lepas bingkai + background + padding —
-   kembali seperti sebelum konversi WebP. */
+   kembali seperti sebelum konversi WebP. !important agar menang
+   atas override ukuran di media query mobile. */
 .experience-image-wrap.is-logo {
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-  padding: 0;
-  overflow: visible;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  padding: 0 !important;
+  overflow: visible !important;
 }
 
 .experience-image-wrap.is-logo .experience-image {
   object-fit: contain;
+}
+
+/* Foto (mandiri): rounded tanpa border. */
+.experience-image-wrap.is-photo {
+  border: 0;
+  border-radius: 16px;
+  padding: 0;
+  background: transparent;
+  overflow: hidden;
+}
+
+.experience-image-wrap.is-photo .experience-image {
+  object-fit: cover;
+  border-radius: 16px;
 }
 
 .experience-image {
