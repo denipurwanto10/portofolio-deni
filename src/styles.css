@@ -3606,7 +3606,15 @@ a {
  */
 .page-swap {
   animation: page-enter 0.55s var(--ease-out-soft) backwards;
-  will-change: transform, opacity, filter;
+  /* Perf: will-change dilepas setelah animasi selesai (via
+     animationend di bawah) — sebelumnya menahan layer GPU
+     selamanya di seluruh halaman. */
+}
+
+.page-swap.animation-done,
+.reveal.animation-done {
+  animation: none;
+  will-change: auto;
 }
 
 /*
@@ -3621,7 +3629,6 @@ a {
     calc(var(--reveal-index, 0) * 50ms),
     400ms
   );
-  will-change: transform, opacity;
 }
 
 /*

@@ -342,10 +342,16 @@ function CustomCursor() {
 
   if (typeof window === 'undefined') return null
 
+  // Perf: perangkat sentuh (mayoritas mobile) tidak merender SAMA
+  // SEKALI — sebelumnya root + fx + 4 listener tetap dipasang walau
+  // panah tak pernah dipakai. Tampilan desktop tidak berubah.
+  if (!finePointer) {
+    return null
+  }
+
   return (
     <div className="cc-root" ref={rootRef} aria-hidden="true">
       <div className="cc-fx" ref={fxRef} />
-      {finePointer && (
       <div className="cc-cursor" ref={cursorRef}>
         {/* Panah navigasi: ujung (0,0) = titik klik */}
         <svg
@@ -405,7 +411,6 @@ function CustomCursor() {
           />
         </svg>
       </div>
-      )}
     </div>
   )
 }

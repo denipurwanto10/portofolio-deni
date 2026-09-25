@@ -112,6 +112,34 @@ function App() {
   }, [active])
 
 
+  // Perf: setelah animasi masuk selesai, lepas animasi + will-change
+  // supaya browser tidak menahan layer GPU selamanya. Tampilan
+  // identik — class hanya mematikan animasi yang sudah selesai.
+  useEffect(() => {
+    const done = (event: AnimationEvent) => {
+      const el = event.target as HTMLElement | null
+
+      if (
+        el?.classList?.contains('page-swap') ||
+        el?.classList?.contains('reveal')
+      ) {
+        el.classList.add('animation-done')
+      }
+    }
+
+    document.addEventListener(
+      'animationend',
+      done,
+    )
+
+    return () => {
+      document.removeEventListener(
+        'animationend',
+        done,
+      )
+    }
+  }, [])
+
   useEffect(() => {
     const onPopState = () => {
       const section =

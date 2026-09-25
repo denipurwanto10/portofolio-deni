@@ -40,6 +40,10 @@ html.cc-active iframe {
   z-index: 2147483646;
   pointer-events: none;
   overflow: hidden;
+  /* Perf: overlay full-viewport dikeluarkan dari hitungan layout/
+     paint halaman — browser boleh melewatinya saat render ulang. */
+  contain: strict;
+  content-visibility: auto;
 }
 
 /* Panah baru terlihat setelah mouse bergerak (efek cipratan tidak

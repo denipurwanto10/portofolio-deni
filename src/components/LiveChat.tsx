@@ -2694,6 +2694,12 @@ export default function LiveChat({
     }, CHAT_EXIT_MS)
   }, [])
 
+  // Jejak pesan terakhir yang sudah di-heal per UID — heal berikutnya
+  // hanya memeriksa pesan yang lebih baru, bukan seluruh riwayat.
+  const healCheckedRef = useRef(
+    new Map<string, string>(),
+  )
+
   useEffect(
     () => () => window.clearTimeout(closeTimer.current),
     [],
@@ -3064,15 +3070,39 @@ export default function LiveChat({
     }
 
     let cancelled = false
+    // Debounce 800ms: tiap pesan baru me-reset timer — heal jalan
+    // sekali setelah room tenang, bukan tiap pesan (sebelumnya tiap
+    // snapshot memicu scan + write berulang).
+    const timer = window.setTimeout(() => {
+      // Hanya pesan yang BELUM dicek (id > terakhir dicek) —
+      // bukan scan seluruh riwayat tiap kali.
+      const lastChecked =
+        healCheckedRef.current.get(user.uid) ?? ''
+      const fresh = lastChecked
+        ? messages.filter(
+            (message) =>
+              message.id > lastChecked,
+          )
+        : messages
 
-    const heal =
-      async () => {
+      if (fresh.length > 0) {
+        const newest =
+          fresh[fresh.length - 1]
+        if (newest) {
+          healCheckedRef.current.set(
+            user.uid,
+            newest.id,
+          )
+        }
+      }
+
+      const heal = async () => {
         /**
          * Hanya pesan dengan UID
          * yang benar-benar sama.
          */
         const targets =
-          messages.filter(
+          fresh.filter(
             (message) =>
               message.uid ===
                 user.uid &&
@@ -3126,10 +3156,12 @@ export default function LiveChat({
         }
       }
 
-    void heal()
+      void heal()
+    }, 800)
 
     return () => {
       cancelled = true
+      window.clearTimeout(timer)
     }
   }, [
     user,
@@ -3152,24 +3184,33 @@ export default function LiveChat({
       return
     }
 
-    const uids = new Set<string>()
-
-    for (const message of messages) {
-      if (
-        message.uid &&
-        !publicNames.has(message.uid)
-      ) {
-        uids.add(message.uid)
-      }
-    }
-
-    if (uids.size === 0) {
-      return
-    }
-
     let cancelled = false
 
-    const load = async () => {
+    // Batch 1 detik: UID yang belum dikenal dikumpulkan dulu —
+    // tiap pesan baru me-reset timer, fetch jalan sekali setelah
+    // room tenang (maks 10 UID per batch, sisanya batch berikut).
+    // Sebelumnya tiap snapshot memicu getDoc per UID seketika.
+    const timer = window.setTimeout(() => {
+      const uids = new Set<string>()
+
+      for (const message of messages) {
+        if (
+          message.uid &&
+          !publicNames.has(message.uid)
+        ) {
+          uids.add(message.uid)
+
+          if (uids.size >= 10) {
+            break
+          }
+        }
+      }
+
+      if (uids.size === 0 || cancelled) {
+        return
+      }
+
+      const load = async () => {
       let changed = false
 
       for (const uid of uids) {
@@ -3232,17 +3273,50 @@ export default function LiveChat({
     }
 
     void load()
+    }, 1000)
 
     return () => {
       cancelled = true
+      window.clearTimeout(timer)
     }
   }, [messages, open])
 
   /**
    * FIRESTORE REALTIME LISTENER
+   * Perf: dijeda saat tab disembunyikan — snapshot tiap pesan baru
+   * membangunkan main thread (parse + setState + render) walau
+   * pengguna sedang di tab lain. Saat kembali, listener dipasang
+   * ulang dan langsung dapat data terbaru (tanpa pesan hilang).
+   * `tabLive` juga jadi sinyal tunda untuk heal/direktori.
    */
+  const [tabLive, setTabLive] =
+    useState(true)
+
   useEffect(() => {
-    if (!open) {
+    const onVisibility = () => {
+      setTabLive(!document.hidden)
+    }
+
+    // Sinkronkan state awal (panel bisa dibuka saat tab hidden).
+    onVisibility()
+
+    document.addEventListener(
+      'visibilitychange',
+      onVisibility,
+    )
+
+    return () => {
+      document.removeEventListener(
+        'visibilitychange',
+        onVisibility,
+      )
+    }
+  }, [])
+
+  useEffect(() => {
+    // Panel tertutup ATAU tab hidden → lepas listener sepenuhnya.
+    // Re-attach saat kembali otomatis memberi snapshot terbaru.
+    if (!open || !tabLive) {
       return
     }
 
@@ -3348,7 +3422,7 @@ export default function LiveChat({
       )
 
     return unsubscribe
-  }, [open])
+  }, [open, tabLive])
 
   /**
    * AUTO SCROLL
