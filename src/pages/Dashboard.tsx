@@ -981,7 +981,63 @@ async function fetchGithubContributions(
 /*
  * Kalender kontribusi dipisah sebagai komponen memo: ±370 sel ini
  * tidak perlu dirender ulang saat angka count-up berubah tiap frame.
+ *
+ * Tooltip DIPINDAH ke level kalender (satu bubble portal): tiap kotak
+ * hanya mengirim data hover-nya, bubble dirender sekali di wrapper
+ * dengan posisi dari getBoundingClientRect. Ini memperbaiki bug
+ * tooltip kepotong — sebelumnya bubble dirender DI DALAM kotak
+ * (overflow:hidden wrapper + scale hover + 370 state) sehingga
+ * terpotong di tepi atas/kartu dan berat (±370 listener + animasi).
+ * Sekarang responsif di semua ukuran: posisi dihitung dari viewport
+ * (fixed), flip otomatis atas/bawah/kiri/kanan, ikut theme + accent.
  */
+function ContributionDay({
+  day,
+  onHover,
+  onLeave,
+}: {
+  day: GithubContribution
+  onHover: (day: GithubContribution, rect: DOMRect) => void
+  onLeave: () => void
+}) {
+  const label = `${day.count} contribution${day.count === 1 ? '' : 's'} on ${formatGithubDate(day.date)}`
+
+  return (
+    <div
+      className={`github-day level-${day.level}`}
+      tabIndex={0}
+      role="img"
+      aria-label={label}
+      onMouseEnter={(event) =>
+        onHover(
+          day,
+          event.currentTarget.getBoundingClientRect(),
+        )
+      }
+      onMouseMove={(event) =>
+        onHover(
+          day,
+          event.currentTarget.getBoundingClientRect(),
+        )
+      }
+      onMouseLeave={onLeave}
+      onFocus={(event) =>
+        onHover(
+          day,
+          event.currentTarget.getBoundingClientRect(),
+        )
+      }
+      onBlur={onLeave}
+      onTouchStart={(event) =>
+        onHover(
+          day,
+          event.currentTarget.getBoundingClientRect(),
+        )
+      }
+    />
+  )
+}
+
 const ContributionCalendar = memo(function ContributionCalendar({
   weeks,
   monthLabels,
@@ -989,6 +1045,51 @@ const ContributionCalendar = memo(function ContributionCalendar({
   weeks: ContributionWeek[]
   monthLabels: MonthLabel[]
 }) {
+  // Satu tooltip untuk seluruh kalender — diposisikan fixed dari
+  // rect kotak yang di-hover, jadi tidak pernah kepotong wrapper.
+  const [tip, setTip] = useState<{
+    day: GithubContribution
+    rect: DOMRect
+  } | null>(null)
+
+  const handleHover = useCallback(
+    (day: GithubContribution, rect: DOMRect) => {
+      setTip({ day, rect })
+    },
+    [],
+  )
+
+  const handleLeave = useCallback(() => {
+    setTip(null)
+  }, [])
+
+  // Posisi bubble: di atas kotak; flip ke bawah bila mentok atas,
+  // geser horizontal agar selalu di dalam viewport.
+  const tipPlacement = useMemo(() => {
+    if (!tip || typeof window === 'undefined') {
+      return undefined
+    }
+
+    const { rect } = tip
+    const cx = rect.left + rect.width / 2
+    const halfWidth = 88
+    const gap = 10
+    const height = 52
+
+    const fitsAbove = rect.top >= height + gap + 8
+
+    const top = fitsAbove
+      ? rect.top - gap - height
+      : rect.bottom + gap
+
+    const left = Math.min(
+      Math.max(cx, halfWidth + 8),
+      window.innerWidth - halfWidth - 8,
+    )
+
+    return { top, left, isBelow: !fitsAbove }
+  }, [tip])
+
   return (
     <div className="github-calendar-wrapper">
       <div className="github-months">
@@ -1016,18 +1117,42 @@ const ContributionCalendar = memo(function ContributionCalendar({
               style={{ ['--week-index' as string]: weekIndex }}
             >
               {week.map((day) => (
-                <div
+                <ContributionDay
                   key={day.date}
-                  className={`github-day level-${day.level}`}
-                  title={`${day.count} contributions on ${formatGithubDate(
-                    day.date,
-                  )}`}
+                  day={day}
+                  onHover={handleHover}
+                  onLeave={handleLeave}
                 />
               ))}
             </div>
           ),
         )}
       </div>
+
+      {tip &&
+        createPortal(
+          <div
+            className={
+              tipPlacement?.isBelow
+                ? 'github-tip is-below'
+                : 'github-tip'
+            }
+            role="tooltip"
+            style={{
+              top: tipPlacement?.top,
+              left: tipPlacement?.left,
+            }}
+          >
+            <strong>
+              {tip.day.count} contribution
+              {tip.day.count === 1 ? '' : 's'}
+            </strong>
+            <span>
+              on {formatGithubDate(tip.day.date)}
+            </span>
+          </div>,
+          document.body,
+        )}
     </div>
   )
 })

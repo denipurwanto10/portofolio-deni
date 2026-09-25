@@ -2943,6 +2943,97 @@ a {
   outline-offset: 1px;
 }
 
+/* Tooltip kontribusi (portal ke body, position:fixed): bubble kecil —
+   "X contributions" tebal + "on [tanggal]" redup, dengan panah kecil
+   menunjuk ke kotak. Karena fixed + dihitung dari viewport, tidak
+   pernah kepotong wrapper/kartu di ukuran layar mana pun. Lebar
+   dibatasi + teks boleh wrap 2 baris di layar sangat sempit. */
+.github-tip {
+  position: fixed;
+  z-index: 9998;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  width: max-content;
+  max-width: min(200px, calc(100vw - 32px));
+  padding: 7px 10px;
+  border-radius: 8px;
+  background: #101828;
+  color: #f8fafc;
+  font-size: 11px;
+  line-height: 1.45;
+  text-align: center;
+  white-space: normal;
+  overflow-wrap: break-word;
+  pointer-events: none;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.35);
+  transform: translate(-50%, 0);
+  animation: github-tip-in 0.16s var(--ease-out) both;
+}
+
+.github-tip strong {
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.github-tip span {
+  color: rgba(248, 250, 252, 0.72);
+  font-size: 10px;
+}
+
+/* Panah kecil: di bawah bubble (tooltip di atas kotak)… */
+.github-tip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: #101828;
+}
+
+/* …atau di atas bubble saat flip ke bawah kotak. */
+.github-tip.is-below::after {
+  top: auto;
+  bottom: 100%;
+  border-top-color: transparent;
+  border-bottom-color: #101828;
+}
+
+[data-theme='dark'] .github-tip {
+  background: #f1f5f9;
+  color: #0f172a;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+}
+
+[data-theme='dark'] .github-tip strong {
+  color: #0f172a;
+}
+
+[data-theme='dark'] .github-tip span {
+  color: rgba(15, 23, 42, 0.68);
+}
+
+[data-theme='dark'] .github-tip::after {
+  border-top-color: #f1f5f9;
+}
+
+[data-theme='dark'] .github-tip.is-below::after {
+  border-top-color: transparent;
+  border-bottom-color: #f1f5f9;
+}
+
+@keyframes github-tip-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 3px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
 /* Contribution intensity */
 
 .github-day.level-0 {
