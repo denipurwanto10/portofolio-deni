@@ -5648,16 +5648,33 @@ a {
 }
 
 
-/* Resume Modal — mobile */
+/* Resume Modal — mobile: tampilan SAMA seperti semula (panel
+   mengambang + radius), hanya posisi dikunci agar tidak ikut
+   bergeser/overscroll dengan halaman di belakang. Zoom tetap milik
+   PDF viewer bawaan (pinch + toolbar di dalam iframe). */
 @media (max-width: 640px) {
   .resume-modal {
     padding: 10px;
+    /* Kunci visual viewport HP: tidak ikut saat address bar
+       muncul/hilang, dan gesture tidak membubble ke halaman. */
+    height: 100dvh;
+    overflow: hidden;
+    overscroll-behavior: none;
   }
 
   .resume-modal-panel {
     width: 100%;
-    height: 94vh;
+    height: 88vh;
+    max-height: 100dvh;
     border-radius: 12px;
+  }
+
+  .resume-modal-frame {
+    /* Isolasi gesture: scroll/pinch di atas PDF tetap di dalam
+       iframe viewer (zoom PDF), tidak membubble jadi scroll modal
+       atau zoom seluruh halaman. */
+    touch-action: none;
+    overscroll-behavior: contain;
   }
 
   .resume-modal-header {
