@@ -86,10 +86,6 @@ function AccentPicker() {
 
   return (
     <div className="accent-picker">
-      <span className="accent-picker-label">
-        Accent color
-      </span>
-
       <div
         className="accent-swatches"
         role="radiogroup"

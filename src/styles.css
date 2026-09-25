@@ -551,16 +551,6 @@ a {
   background: transparent;
 }
 
-.accent-picker-label {
-  display: block;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.6px;
-  text-transform: uppercase;
-  color: var(--text-tertiary);
-  margin-bottom: 8px;
-}
-
 .accent-swatches {
   display: flex;
   align-items: center;

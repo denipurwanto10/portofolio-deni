@@ -321,7 +321,6 @@ const translations: Record<string, string> = {
 
   // Misc. accessibility labels
   'Choose accent color': 'Pilih warna aksen',
-  'Accent color': 'Warna aksen',
   Theme: 'Tema',
   'Light mode': 'Mode terang',
   'Dark mode': 'Mode gelap',
