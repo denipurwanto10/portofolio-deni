@@ -26,7 +26,15 @@ function ExperienceDetails({
         ['--reveal-index' as string]: index,
       }}
     >
-      <div className="experience-image-wrap">
+      {/* Logo transparan (esdm1/unla): tanpa bingkai/background.
+          Foto kotak penuh (mandiri/pemkab): tetap berbingkai. */}
+      <div
+        className={
+          item.image.endsWith('.webp')
+            ? 'experience-image-wrap is-logo'
+            : 'experience-image-wrap'
+        }
+      >
         <img
           className="experience-image"
           src={item.image}
