@@ -207,8 +207,8 @@ export const experiences: ExperienceItem[] = [
   },
   {
     year: 'Nov 2025 — Dec 2025',
-    role: 'Project-Based Intern: Mobile Apps Developer - Mandiri x Rakamin Academy',
-    company: 'PT Bank Mandiri (Persero) Tbk. · Rakamin Academy',
+    role: 'Project-Based Intern: Mobile Apps Developer',
+    company: 'Bank Mandiri - Rakamin Academy',
     description:
       'Developed an Android application as part of the Bank Mandiri x Rakamin Academy Virtual Internship Experience, focusing on API integration, data handling, and mobile UI/UX implementation',
     type: 'Internship',

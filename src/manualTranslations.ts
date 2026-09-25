@@ -269,16 +269,19 @@ const translations: Record<string, string> = {
     'Memelihara komputer laboratorium, perangkat lunak, dan sistem pendukung untuk memastikan kegiatan praktikum berjalan lancar',
 
   // Roles/types
+  'Project-Based Intern: Mobile Apps Developer':
+    'Magang Berbasis Proyek: Pengembang Aplikasi Mobile',
+  // Varian lama (dengan suffix) tetap didukung bila muncul.
   'Project-Based Intern: Mobile Apps Developer - Mandiri x Rakamin Academy':
     'Magang Berbasis Proyek: Pengembang Aplikasi Mobile - Mandiri x Rakamin Academy',
-  'Full Stack Developer (Pranata Komputer)': 'Full Stack Developer (Pranata Komputer)',
+  'Full Stack Developer (Pranata Komputer)': 'Pengembang Full Stack (Pranata Komputer)',
   'Laboratory Assistant': 'Asisten Laboratorium',
   'Department of Trade and Industry - Bandung Regency':
     'Dinas Perdagangan dan Perindustrian - Kabupaten Bandung',
 
   // Award labels
   'Center for Groundwater and Environmental Geology • June 2026':
-    'Pusat Air Tanah dan Geologi Lingkungan • Juni 2026',
+    'Pusat Air Tanah dan Geologi Tata Lingkungan • Juni 2026',
   'Bank Mandiri Mobile Apps Developer • Dec 2025':
     'Pengembang Aplikasi Mobile Bank Mandiri • Des 2025',
   'Project Based Internship • December 2025':
@@ -316,7 +319,7 @@ const translations: Record<string, string> = {
   'View July 2023 Laboratory Assistant and Teaching Instructor image':
     'Lihat gambar Asisten Laboratorium dan Pengajar Juli 2023',
   'Center for Groundwater and Environmental Geology':
-    'Pusat Air Tanah dan Geologi Lingkungan',
+    'Pusat Air Tanah dan Geologi Tata Lingkungan',
   'Informatics Engineering Study Program': 'Program Studi Teknik Informatika',
 
   // Misc. accessibility labels

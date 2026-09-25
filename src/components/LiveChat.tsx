@@ -870,7 +870,7 @@ function localizeYear(value: string): string {
  * penghargaan di sana, tambahkan juga di sini.
  */
 const ASSISTANT_AWARDS = [
-  'Program Magang Lulusan Universitas — Pusat Air Tanah dan Geologi Lingkungan (Juni 2026)',
+  'Program Magang Lulusan Universitas — Pusat Air Tanah dan Geologi Tata Lingkungan (Juni 2026)',
   'Mahasiswa Berprestasi Akademik Terbaik — HUT UNLA (Mei 2024)',
   'Juara 2 Lomba UI/UX Design — Hartik Competition 2023 (Oktober 2023)',
   'Asisten Laboratorium & Instruktur Pengajar — Prodi Teknik Informatika (Juli 2023 & Juli 2024)',
