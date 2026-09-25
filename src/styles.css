@@ -3704,6 +3704,51 @@ a {
     infinite;
 }
 
+/*
+ * Refresh overlay: menutup area konten saat data fresh lambat
+ * (>600ms) padahal cache sudah tampil. Data cache tetap di bawah
+ * (tidak hilang), overlay tembus pandang dengan skeleton + teks.
+ * Animasi fade-in supaya tidak kedip saat refresh cepat.
+ */
+.github-content {
+  position: relative;
+  margin-top: 18px;
+}
+
+.github-content .github-calendar-wrapper {
+  margin-top: 0;
+}
+
+.github-refresh-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 18px;
+  border-radius: 10px;
+  background: color-mix(
+    in srgb,
+    var(--bg-surface) 82%,
+    transparent
+  );
+  animation: fade-in 0.25s var(--ease-out) both;
+}
+
+.github-refresh-overlay .github-skeleton-grid.overlay {
+  width: 100%;
+  max-width: 420px;
+  margin-top: 0;
+  grid-template-columns: repeat(13, 1fr);
+}
+
+.github-refresh-overlay .github-loading-text {
+  margin-top: 12px;
+}
+
 /* Hormati pengguna yang mematikan animasi */
 @media (prefers-reduced-motion: reduce) {
   *,

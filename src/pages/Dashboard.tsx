@@ -1117,6 +1117,10 @@ function GithubContributions() {
   const [isStale, setIsStale] = useState(false)
 
   const [loading, setLoading] = useState(true)
+  // Refresh data fresh di latar setelah cache tampil — bila berjalan
+  // lama (>600ms), tampilkan overlay skeleton tipis di atas data cache
+  // supaya jelas sedang memuat, bukan macet.
+  const [refreshing, setRefreshing] = useState(false)
   const [calendarError, setCalendarError] =
     useState(false)
   const [statsError, setStatsError] =
@@ -1164,6 +1168,16 @@ function GithubContributions() {
       setIsStale(false)
       setStatsError(false)
       setCalendarError(false)
+
+      // Tandai refresh berjalan; timer 600ms supaya refresh cepat
+      // (<600ms) tidak mem-flash overlay sama sekali.
+      const refreshTimer = cached
+        ? window.setTimeout(() => {
+            if (!cancelled) {
+              setRefreshing(true)
+            }
+          }, 600)
+        : undefined
 
       try {
         const fresh =
@@ -1232,7 +1246,12 @@ function GithubContributions() {
           setStatsError(true)
         }
       } finally {
+        if (refreshTimer !== undefined) {
+          window.clearTimeout(refreshTimer)
+        }
+
         if (!cancelled) {
+          setRefreshing(false)
           setLoading(false)
         }
       }
@@ -1423,11 +1442,34 @@ function GithubContributions() {
           </a>
         </div>
       ) : (
-        <>
+        <div className="github-content">
           <ContributionCalendar
             weeks={weeks}
             monthLabels={monthLabels}
           />
+
+          {refreshing && (
+            <div
+              className="github-refresh-overlay"
+              aria-live="polite"
+              aria-label="Refreshing GitHub contributions"
+            >
+              <div className="github-skeleton-grid overlay">
+                {Array.from({ length: 52 }).map(
+                  (_, index) => (
+                    <span
+                      key={index}
+                      className="skeleton"
+                    />
+                  ),
+                )}
+              </div>
+
+              <span className="github-loading-text">
+                Refreshing contributions...
+              </span>
+            </div>
+          )}
 
           <div className="github-card-footer">
             <a
@@ -1457,7 +1499,7 @@ function GithubContributions() {
               <span>More</span>
             </div>
           </div>
-        </>
+        </div>
       )}
     </section>
   )
