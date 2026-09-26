@@ -4031,8 +4031,8 @@ a {
 .techstack-mark.firebase { color: var(--accent); }
 .techstack-mark.vscode { color: #007acc; }
 .techstack-mark.postman { color: var(--accent); }
-
-
+.techstack-mark.ninerouter { color: #f97815; }
+.techstack-mark.hermesagent { color: var(--accent); }
 
 .techstack-card h2 {
   margin: 0 0 5px;

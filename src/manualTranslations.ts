@@ -208,6 +208,9 @@ const translations: Record<string, string> = {
   'Web infrastructure and edge network platform':
     'Platform infrastruktur web dan jaringan edge',
   'Geospatial analysis and mapping': 'Analisis geospasial dan pemetaan',
+  'Smart AI router for 60+ providers':
+    'Router AI pintar untuk 60+ penyedia',
+  'Self-improving AI coding agent': 'Agen coding AI yang belajar sendiri',
 
   // Contact
   Email: 'Email',
