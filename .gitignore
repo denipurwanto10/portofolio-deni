@@ -6,3 +6,7 @@ node_modules/
 !.env.example
 
 dist/
+
+# Sumber asli resolusi tinggi untuk sertifikat — sudah di-convert
+# ke .webp yang dipakai website. Jangan di-commit (duplikat & besar).
+public/awards/*.jpg
