@@ -2046,9 +2046,12 @@ a {
   text-align: center;
 }
 
+/* Avatar di samping bubble, tapi rata BAWAH (bottom-aligned),
+   mirip WhatsApp: teks panjang → avatar menempel di pojok bawah
+   bubble, bukan di baris pertama. */
 .chat-message {
   display: flex;
-  align-items: flex-start;
+  align-items: flex-end;
   gap: 8px;
   animation: rise-in 0.36s var(--ease-out) both;
 }
