@@ -2273,6 +2273,19 @@ a {
   background: var(--accent-soft);
 }
 
+/* Dark mode: --accent-soft itu pastel untuk latar terang (mis. rose
+   = #ffe4e6). Di latar gelap, ikon Smile putih di atas lingkaran
+   pastel pucat = nyaris tak terlihat. Jadi hover pakai overlay
+   transparan mengikuti pola .nav-item:hover di dark mode. */
+[data-theme='dark'] .chat-react-button:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+[data-theme='dark']:not([data-accent='default'])
+  .chat-react-button:hover {
+  background: color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
 .chat-react-button:active {
   transform: scale(0.92);
 }
@@ -9000,12 +9013,30 @@ font {
 }
 
 [data-theme='dark'] .chat-react-emoji:hover {
-  background: rgba(255, 255, 255, 0.08);
+  background: transparent;
 }
 
 [data-theme='dark'] .chat-react-emoji.is-active {
   background: rgba(255, 255, 255, 0.1);
   outline-color: #a1a1aa;
+}
+
+/* Emoji reaksi harus tetap COLOR di dark mode.
+
+   `color-scheme: dark` bisa menurunkan emoji ke TEXT
+   presentation (monokrom) — hasilnya hampir tak terlihat
+   di atas latar gelap, terutama ❤️. `font-variant-emoji`
+   + tumpukan font color-emoji memaksa COLOR presentation
+   yang sama di light & dark mode. Pilihan aksen tidak
+   memengaruhi warna emoji (emoji pakai palet OS sendiri). */
+.chat-react-emoji,
+.chat-reaction > span:first-child {
+  font-family:
+    'Apple Color Emoji',
+    'Segoe UI Emoji',
+    'Noto Color Emoji',
+    sans-serif;
+  font-variant-emoji: emoji;
 }
 
 /* Pil reaksi (👍 1) — dark mode */
