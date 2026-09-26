@@ -9229,12 +9229,13 @@ font {
 
 /* Sentinel: penanda posisi untuk IntersectionObserver. */
 .sticky-sentinel {
-  display: block;
+  position: absolute;
+  width: 1px;
   height: 1px;
   margin: 0;
   padding: 0;
   border: 0;
-  visibility: hidden;
+  opacity: 0;
   pointer-events: none;
 }
 
