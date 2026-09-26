@@ -3,6 +3,14 @@ import { RefreshCw } from 'lucide-react'
 
 type Props = {
   children: ReactNode
+  /**
+   * Konten cadangan saat ada error. Kalau tidak diberikan,
+   * dipakai tampilan "Ups, ada yang tidak beres" + tombol
+   * muat ulang. Scope ErrorBoundary di LiveChatLoader memakai
+   * fallback supaya panel chat yang gagal TIDAK menjatuhkan
+   * seluruh halaman.
+   */
+  fallback?: ReactNode
 }
 
 type State = {
@@ -34,6 +42,11 @@ class ErrorBoundary extends Component<Props, State> {
   render() {
     if (!this.state.hasError) {
       return this.props.children
+    }
+
+    // Fallback custom (mis. panel chat) — halaman tetap hidup.
+    if (this.props.fallback) {
+      return this.props.fallback
     }
 
     return (

@@ -6,6 +6,7 @@ import {
   useState,
 } from 'react'
 import { MessageSquareText } from 'lucide-react'
+import ErrorBoundary from './ErrorBoundary'
 
 // Panel chat (±4500 baris + Firebase SDK) diunduh hanya saat
 // tombol pertama kali dibuka — first paint tidak terbebani.
@@ -62,9 +63,11 @@ function LiveChatLoader() {
       )}
 
       {opened && (
-        <Suspense fallback={null}>
-          <LiveChatPanel startOpen />
-        </Suspense>
+        <ErrorBoundary fallback={<p>Chat lagi gangguan, coba lagi nanti.</p>}>
+          <Suspense fallback={null}>
+            <LiveChatPanel startOpen />
+          </Suspense>
+        </ErrorBoundary>
       )}
     </>
   )
