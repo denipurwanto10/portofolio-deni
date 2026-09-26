@@ -133,6 +133,16 @@ export const projects: Project[] = [
     category: 'Web App',
   },
   {
+    title: 'Measurement Track — Survey Route App',
+    description:
+      'A geospatial web app for planning and recording survey measurement tracks — route drawing on an interactive map, distance and track statistics, and export of measurement results.',
+    tags: ['Vite', 'React', 'Tailwind CSS'],
+    link: 'https://github.com/denipurwanto10/lintasan-pengukuran',
+    demo: 'https://lintasan-pengukuran.vercel.app',
+    language: 'JavaScript',
+    category: 'Web App',
+  },
+  {
     title: 'Diabetes Detection ML',
     description:
       'A simple machine learning model for diabetes prediction — Logistic Regression on medical parameters (glucose, blood pressure, BMI, age) with positive/negative prediction output.',

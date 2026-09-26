@@ -60,6 +60,7 @@ const translations: Record<string, string> = {
   'MandiriNewsApps': 'MandiriNewsApps',
   'Portfolio V2': 'Portfolio V2',
   'Borewell Pipe Visualization': 'Visualisasi Pipa Sumur Bor',
+  'Measurement Track — Survey Route App': 'Lintasan Pengukuran — Aplikasi Rute Survei',
   'Diabetes Detection ML': 'Deteksi Diabetes ML',
   'PPDB Flutter — Student Admissions': 'PPDB Flutter — Penerimaan Siswa Baru',
   'Population GIS': 'GIS Penduduk',
@@ -243,6 +244,10 @@ const translations: Record<string, string> = {
     'Aplikasi absensi karyawan berbasis web — login dan logout, dasbor, pengelolaan pengguna dan departemen, clock-in dan clock-out, riwayat absensi, serta laporan.',
   'A Kotlin Android news app — article lists from a REST API, categories (tech, business, sports), illustrated article details, and modern navigation. A Mandiri x Rakamin Academy project.':
     'Aplikasi berita Android berbasis Kotlin — daftar artikel dari REST API, kategori (teknologi, bisnis, olahraga), detail artikel bergambar, dan navigasi modern. Proyek Mandiri x Rakamin Academy.',
+  'An interactive web app for visualizing borewell construction — pipes, screens, open hole, and groundwater level on a proportional canvas, plus technical data forms and photo documentation.':
+    'Aplikasi web interaktif untuk memvisualisasikan konstruksi sumur bor — pipa, saringan, open hole, dan muka air tanah pada kanvas proporsional, lengkap formulir data teknis dan dokumentasi foto.',
+  'A geospatial web app for planning and recording survey measurement tracks — route drawing on an interactive map, distance and track statistics, and export of measurement results.':
+    'Aplikasi web geospasial untuk merencanakan dan merekam jalur pengukuran survei — penggambaran rute pada peta interaktif, statistik jarak dan lintasan, serta ekspor hasil pengukuran.',
 
   // Experience descriptions
   'Developed digital solutions for laboratory management, equipment borrowing services, and geospatial data visualization to support operational and technical teams':
