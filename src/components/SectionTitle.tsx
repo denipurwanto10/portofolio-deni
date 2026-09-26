@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { useHeaderStuck } from '../hooks/useHeaderStuck'
 
 type SectionTitleProps = {
   icon: ReactNode
@@ -15,8 +16,21 @@ function SectionTitle({
   title: string
   subtitle: string
 }) {
+  const { sentinelRef, stuck } =
+    useHeaderStuck()
+
   return (
-    <div className="section-title">
+    <>
+      <span
+        ref={sentinelRef}
+        className="sticky-sentinel"
+        aria-hidden="true"
+      />
+
+      <div
+        className="section-title"
+        data-stuck={stuck ? 'true' : undefined}
+      >
       <span>{icon}</span>
 
       <div>
@@ -24,7 +38,8 @@ function SectionTitle({
 
         <p>{subtitle}</p>
       </div>
-    </div>
+      </div>
+    </>
   )
 }
 

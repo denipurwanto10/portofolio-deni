@@ -5440,7 +5440,7 @@ a {
   display: block;
 
   max-width: 100%;
-  max-height: 62vh;
+  max-height: 75vh;
 
   width: auto;
   height: auto;
@@ -9211,4 +9211,89 @@ font {
 .assistant-quick-reply:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
+}
+
+/* =========================================================
+   STICKY HEADERS — transparent at top, glass when stuck
+
+   .projects-head (Projects) dan .section-title (halaman lain)
+   adalah header sticky di top:14px. Defaultnya transparan,
+   jadi menyatu dengan panel di belakangnya. Saat di-scroll dan
+   header menempel (data-stuck="true"), latar jadi --bg-glass
+   + blur(8px) sama persis seperti kartu & panel.
+
+   Semua dari token yang sudah ada, jadi otomatis ikut light/dark
+   dan 6 pilihan aksen. Tidak ada warna hardcode baru, dan tidak
+   ada border-radius / padding / font-size yang diubah.
+   ========================================================= */
+
+/* Sentinel: penanda posisi untuk IntersectionObserver. */
+.sticky-sentinel {
+  display: block;
+  height: 1px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* Default: tanpa background sama sekali. */
+.projects-head,
+.section-title {
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  transition:
+    background 0.28s var(--ease-out),
+    backdrop-filter 0.28s var(--ease-out);
+}
+
+/* Menempel: glass + kabut accent, sama seperti panel. */
+.projects-head[data-stuck='true'],
+.section-title[data-stuck='true'] {
+  background:
+    linear-gradient(
+      to bottom,
+      color-mix(in srgb, var(--accent-soft) 40%, transparent) 0%,
+      transparent 38%
+    ),
+    var(--bg-glass);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+/* Dark + aksen default: --accent putih, pakai overlay netral. */
+[data-theme='dark'][data-accent='default']
+  .projects-head[data-stuck='true'],
+[data-theme='dark'][data-accent='default']
+  .section-title[data-stuck='true'] {
+  background:
+    linear-gradient(
+      to bottom,
+      rgba(255, 255, 255, 0.05) 0%,
+      transparent 38%
+    ),
+    var(--bg-glass);
+}
+
+/* Dark + aksen berwarna: accent dicampur surface, biar redup. */
+[data-theme='dark']:not([data-accent='default'])
+  .projects-head[data-stuck='true'],
+[data-theme='dark']:not([data-accent='default'])
+  .section-title[data-stuck='true'] {
+  background:
+    linear-gradient(
+      to bottom,
+      color-mix(in srgb, var(--accent) 7%, var(--bg-surface)) 0%,
+      transparent 38%
+    ),
+    var(--bg-glass);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .projects-head,
+  .section-title {
+    transition: none;
+  }
 }

@@ -15,6 +15,7 @@ import {
 } from 'lucide-react'
 import SectionTitle from '../components/SectionTitle'
 import { projects } from '../data'
+import { useHeaderStuck } from '../hooks/useHeaderStuck'
 
 const categoryIcons: Record<string, ElementType> = {
   'Web App': Globe,
@@ -42,6 +43,9 @@ function Projects({
 }) {
   const [activeCategory, setActiveCategory] =
     useState('All')
+
+  const { sentinelRef, stuck } =
+    useHeaderStuck()
 
   const categories = useMemo(
     () => [
@@ -76,7 +80,16 @@ function Projects({
   return (
     <section className="page-section projects-page">
       <div className="projects-panel">
-        <div className="projects-head">
+        <span
+          ref={sentinelRef}
+          className="sticky-sentinel"
+          aria-hidden="true"
+        />
+
+        <div
+          className="projects-head"
+          data-stuck={stuck ? 'true' : undefined}
+        >
           <SectionTitle
             icon={<FolderKanban />}
             title="Projects"
