@@ -3997,6 +3997,30 @@ a {
   object-fit: contain;
 }
 
+/* Cross-fade untuk logo yang punya varian dark: Hermes Agent
+   light → nous-girl.png, dark → nous-girl-dark.png. HTML merender
+   dua img di dalam grid yang sama (stacked); CSS menggerakkan
+   opacity, bukan menambah state React (lihat TechStack.tsx). */
+.techstack-mark img.techstack-logo-light,
+.techstack-mark img.techstack-logo-dark {
+  grid-area: 1 / 1;
+  width: 42px;
+  height: 42px;
+  transition: opacity 150ms ease;
+}
+
+.techstack-mark img.techstack-logo-dark {
+  opacity: 0;
+}
+
+[data-theme='dark'] .techstack-mark img.techstack-logo-light {
+  opacity: 0;
+}
+
+[data-theme='dark'] .techstack-mark img.techstack-logo-dark {
+  opacity: 1;
+}
+
 /* GitHub & Vercel */
 .techstack-mark.github img,
 .techstack-mark.vercel img {

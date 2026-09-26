@@ -13,6 +13,7 @@ type TechItem = {
   mark: string
   markClass: string
   logo: string
+  logoDark?: string
 }
 
 type Category = {
@@ -128,7 +129,7 @@ const categories: Category[] = [
 { name: 'Cloudflare', description: 'Web infrastructure and edge network platform', mark: 'CF', markClass: 'cloudflare', logo: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/cloudflare/cloudflare-original.svg' },
 { name: 'QGIS', description: 'Geospatial analysis and mapping', mark: 'Q', markClass: 'qgis', logo: 'https://upload.wikimedia.org/wikipedia/commons/9/91/QGIS_logo_new.svg' },
 { name: '9router', description: 'Smart AI router for 60+ providers', mark: '9', markClass: 'ninerouter', logo: 'https://cdn.jsdelivr.net/gh/selfhst/icons/svg/9router.svg' },
-{ name: 'Hermes Agent', description: 'Self-improving AI coding agent', mark: 'HA', markClass: 'hermesagent', logo: '/images/hermes-agent.png' },
+{ name: 'Hermes Agent', description: 'Self-improving AI coding agent', mark: 'HA', markClass: 'hermesagent', logo: '/images/nous-girl-dark.png', logoDark: '/images/nous-girl.png' },
     ],
   },
 ]
@@ -193,8 +194,18 @@ function TechStack() {
               <div className={`techstack-mark ${item.markClass}`} aria-hidden="true">
                 {/* Perf: logo CDN hanya diunduh saat kartu terlihat —
                     TechStack bukan halaman awal, jadi jangan berebut
-                    bandwidth dengan LCP. Tampilan identik. */}
+                    bandwidth dengan LCP. Tampilan identik.
+
+                    Logo yang punya varian dark (mis. Hermes Agent) dirender
+                    dua img dan ditukar lewat CSS [data-theme] — bukan lewat
+                    state React, jadi tidak memicu re-render saat tema
+                    diganti dan tidak perlu langganan store. */}
                 <img
+                  className={
+                    item.logoDark
+                      ? 'techstack-logo-light'
+                      : undefined
+                  }
                   src={item.logo}
                   alt=""
                   loading="lazy"
@@ -202,6 +213,17 @@ function TechStack() {
                   width={28}
                   height={28}
                 />
+                {item.logoDark && (
+                  <img
+                    className="techstack-logo-dark"
+                    src={item.logoDark}
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
+                    width={28}
+                    height={28}
+                  />
+                )}
               </div>
 
               <h2>{item.name}</h2>
