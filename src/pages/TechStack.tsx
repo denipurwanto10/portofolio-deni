@@ -128,7 +128,7 @@ const categories: Category[] = [
 { name: 'Vercel', description: 'Cloud platform for frontend deployment', mark: '▲', markClass: 'vercel', logo: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/vercel/vercel-original.svg' },
 { name: 'Cloudflare', description: 'Web infrastructure and edge network platform', mark: 'CF', markClass: 'cloudflare', logo: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/cloudflare/cloudflare-original.svg' },
 { name: 'QGIS', description: 'Geospatial analysis and mapping', mark: 'Q', markClass: 'qgis', logo: 'https://upload.wikimedia.org/wikipedia/commons/9/91/QGIS_logo_new.svg' },
-{ name: '9router', description: 'Smart AI router for 60+ providers', mark: '9', markClass: 'ninerouter', logo: 'https://cdn.jsdelivr.net/gh/selfhst/icons/svg/9router.svg' },
+{ name: '9Router', description: 'Smart AI router for 60+ providers', mark: '9', markClass: 'ninerouter', logo: 'https://cdn.jsdelivr.net/gh/selfhst/icons/svg/9router.svg' },
 { name: 'Hermes Agent', description: 'Self-improving AI coding agent', mark: 'HA', markClass: 'hermesagent', logo: '/images/nous-girl-dark.png', logoDark: '/images/nous-girl.png' },
     ],
   },
