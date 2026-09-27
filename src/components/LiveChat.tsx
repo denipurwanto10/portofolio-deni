@@ -809,7 +809,6 @@ const ASSISTANT_WELCOME: AssistantMessage = {
 
 const ASSISTANT_QUICK_REPLIES = [
   'Tentang Deni',
-  'Proyek',
   'Pengalaman',
   'Keahlian',
   'Penghargaan',
@@ -873,7 +872,7 @@ const ASSISTANT_AWARDS = [
   'Program Magang Lulusan Universitas — Pusat Air Tanah dan Geologi Tata Lingkungan (Juni 2026)',
   'Mahasiswa Berprestasi Akademik Terbaik — HUT UNLA (Mei 2024)',
   'Juara 2 Lomba UI/UX Design — Hartik Competition 2023 (Oktober 2023)',
-  'Asisten Laboratorium & Instruktur Pengajar — Prodi Teknik Informatika (Juli 2023 & Juli 2024)',
+  'Asisten Laboratorium — Prodi Teknik Informatika (Juli 2023 & Juli 2024)',
 ]
 
 /**
@@ -1137,6 +1136,7 @@ function normalizeAssistantInput(
  */
 type AssistantTopic =
   | 'education'
+  | 'school'
   | 'experience'
   | 'projects'
   | 'skills'
@@ -1154,6 +1154,33 @@ type AssistantContext = {
 function detectAssistantTopic(
   input: string,
 ): AssistantTopic | null {
+  // Sekolah (SMK) dicek DULU sebelum pendidikan, karena kata
+  // "sekolah" juga ada di keyword pendidikan umum.
+  if (
+    includesAnyKeyword(input, [
+      'smk',
+      'sma',
+      'angkasa',
+      'margahayu',
+      'stm',
+      'rpl',
+      'rekayasa perangkat lunak',
+    ]) ||
+    (includesAnyKeyword(input, [
+      'sekolah',
+      'school',
+    ]) &&
+      !includesAnyKeyword(input, [
+        'kuliah',
+        'kampus',
+        'universitas',
+        'unla',
+        'langlangbuana',
+      ]))
+  ) {
+    return 'school'
+  }
+
   if (
     includesAnyKeyword(input, [
       'kuliah',
@@ -1582,8 +1609,12 @@ function answerFromContext(
       'mana',
     ])
   ) {
+    if (ctx.topic === 'school') {
+      return 'Deni lulusan SMK Angkasa 1 Margahayu, jurusan RPL.'
+    }
+
     if (ctx.topic === 'education') {
-      return 'Deni kuliah di UNLA, Bandung — jurusan Teknik Informatika.'
+      return 'Deni lulusan UNLA Bandung, jurusan Teknik Informatika.'
     }
 
     if (ctx.topic === 'experience') {
@@ -1602,7 +1633,7 @@ function answerFromContext(
     includesAnyKeyword(input, ['kapan'])
   ) {
     if (ctx.topic === 'education') {
-      return 'Deni jadi aslab tahun 2022–2024, dan dapat penghargaan mahasiswa berprestasi Mei 2024.'
+      return 'Deni jadi asisten laboratorium tahun 2022–2024, dan dapat penghargaan mahasiswa berprestasi Mei 2024.'
     }
 
     if (ctx.topic === 'experience') {
@@ -1614,7 +1645,7 @@ function answerFromContext(
     includesAnyKeyword(input, ['siapa'])
   ) {
     if (ctx.topic === 'education') {
-      return 'Deni kuliah sebagai mahasiswa Informatika UNLA, sambil jadi aslab juga.'
+      return 'Deni asal SMA/SMK, lalu kuliah Teknik Informatika di UNLA. Lulusnya sudah.'
     }
 
     return 'Yang kita bahas Deni Purwanto — Full Stack Developer dari Bandung.'
@@ -1650,7 +1681,7 @@ function answerFromContext(
   ) {
     switch (ctx.topic) {
       case 'education':
-        return 'Deni kuliah Informatika di UNLA — jadi aslab 2022–2024, dapat penghargaan Mei 2024.'
+        return 'Deni lulusan Informatika UNLA — jadi asisten laboratorium 2022–2024, dapat penghargaan Mei 2024.'
       case 'experience':
         return `Pengalaman terakhir Deni:\n${experiences
           .slice(0, 3)
@@ -1767,6 +1798,64 @@ function buildAssistantReply(
     return 'Deni itu Full Stack Developer dari Bandung. Lulusan Informatika UNLA, 2+ tahun bikin aplikasi web dan GIS.'
   }
 
+  // Jurusan SMK. Dicek sebelum schoolHit, tapi hanya kalau
+  // input tidak menyebut sekolah/SMK — kalau "SMK RPL" muncul,
+  // jawaban schoolHit yang lebih lengkap (sekolah + kuliah) lebih
+  // tepat daripada cuma nama jurusan.
+  if (
+    includesAnyKeyword(input, [
+      'rpl',
+      'rekayasa perangkat lunak',
+    ]) &&
+    !includesAnyKeyword(input, [
+      'kuliah',
+      'kampus',
+      'unla',
+      'jurusan informatika',
+    ]) &&
+    !includesAnyKeyword(input, [
+      'smk',
+      'sma',
+      'sekolah',
+      'angkasa',
+      'margahayu',
+    ])
+  ) {
+    return 'Jurusan Deni waktu SMK Angkasa 1 Margahayu itu RPL — Rekayasa Perangkat Lunak.'
+  }
+
+  // Sekolah (SMK) — dicek SEBELUM pendidikan umum, karena kata
+  // "sekolah" juga ada di keyword pendidikan di bawah.
+  const schoolHit =
+    includesAnyKeyword(input, [
+      'smk',
+      'sma',
+      'angkasa',
+      'margahayu',
+      'stm',
+      'rpl',
+      'rekayasa perangkat lunak',
+    ]) ||
+    (includesAnyKeyword(input, [
+      'sekolah',
+      'school',
+      'sma/smk',
+    ]) &&
+      !includesAnyKeyword(input, [
+        'kuliah',
+        'kampus',
+        'universitas',
+        'unla',
+        'langlangbuana',
+        'jurusan',
+        'prodi',
+        'aslab',
+      ]))
+
+  if (schoolHit) {
+    return 'Deni lulusan SMK Angkasa 1 Margahayu jurusan RPL. Kuliah Teknik Informatika di UNLA Bandung.'
+  }
+
   // Pendidikan — termasuk "Deni kuliah di mana?"
   // Dicek LEBIH DULU dari lokasi/pengalaman supaya kata
   // "dimana" + "kuliah" tidak nyasar ke jawaban lokasi.
@@ -1806,8 +1895,8 @@ function buildAssistantReply(
       ]))
 
   if (educationHit) {
-    // "mengajar / instruktur / dosen" + kuliah = peran
-    // asisten lab, bukan info kampus umum.
+    // "mengajar / asisten lab" + kuliah = peran asisten
+    // laboratorium, bukan info kampus umum.
     if (
       includesAnyKeyword(input, [
         'mengajar',
@@ -1819,7 +1908,7 @@ function buildAssistantReply(
         'praktikum',
       ])
     ) {
-      return 'Pas kuliah Deni jadi aslab & instruktur (2022–2024) — bimbing 50+ mahasiswa praktikum Algoritma, Database, sama Web.'
+      return 'Pas kuliah Deni jadi asisten laboratorium (2022–2024) — bimbing 50+ mahasiswa praktikum Algoritma, Database, sama Web.'
     }
 
     if (
@@ -1830,10 +1919,10 @@ function buildAssistantReply(
         'kapan lulus',
       ])
     ) {
-      return 'Deni kuliah Teknik Informatika UNLA, aslab 2022–2024. Tahun lulusnya nggak ditulis di sini — tapi pengalamannya udah 2+ tahun.'
+      return 'Deni sudah lulus Teknik Informatika UNLA. Selama kuliah jadi asisten laboratorium (2022–2024). Tahun wisudanya nggak dicantumin di sini.'
     }
 
-    return 'Deni kuliah Informatika di UNLA, Bandung. Selama kuliah dia jadi aslab dan instruktur (2022–2024).'
+    return 'Deni lulusan Teknik Informatika UNLA Bandung. Selama kuliah dia jadi asisten laboratorium (2022–2024).'
   }
 
   // Penghargaan & sertifikat
@@ -1941,7 +2030,7 @@ function buildAssistantReply(
       'guru',
     ])
   ) {
-    return 'Di UNLA (2022–2024) Deni jadi aslab — bimbing 50+ mahasiswa praktikum, susun modul, sampai ngurus lab. Kuliahnya juga di UNLA, Teknik Informatika.'
+    return 'Di UNLA (2022–2024) Deni jadi asisten laboratorium — bimbing 50+ mahasiswa praktikum, susun modul, sampai ngurus lab. Lulusnya dari Teknik Informatika UNLA.'
   }
 
   // English: pendidikan & pengalaman & lokasi — dicek sebelum
@@ -1957,7 +2046,7 @@ function buildAssistantReply(
       'deni education',
     ])
   ) {
-    return 'Deni kuliah Teknik Informatika di UNLA, Bandung — sempat jadi aslab juga (2022–2024).'
+    return 'Deni lulusan Teknik Informatika di UNLA Bandung — selama kuliah jadi asisten laboratorium (2022–2024).'
   }
 
   if (
