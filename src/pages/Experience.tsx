@@ -83,8 +83,11 @@ function ExperienceDetails({
         <ChevronUp className={open ? '' : 'is-closed'} size={18} />
       </button>
 
-        {open && (
-          <div className="experience-details">
+      <div
+        className="experience-details"
+        data-open={open ? 'true' : undefined}
+      >
+        <div className="experience-details-inner">
           <h4>KEY ACHIEVEMENTS &amp; RESPONSIBILITIES</h4>
           <ul>
             {item.achievements.map((achievement) => (
@@ -94,8 +97,8 @@ function ExperienceDetails({
               </li>
             ))}
           </ul>
-          </div>
-        )}
+        </div>
+      </div>
       </div>
     </article>
   )
