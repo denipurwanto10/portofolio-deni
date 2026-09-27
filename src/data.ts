@@ -27,7 +27,7 @@ export const projects: Project[] = [
       'An all-in-one document toolkit web app — convert, merge, split, compress, protect, and edit PDF, Word, Excel, PowerPoint, and images, all running in the browser with an optional LibreOffice backend.',
     tags: ['React', 'Vite', 'Tailwind CSS', 'pdf-lib', 'LibreOffice'],
     link: 'https://github.com/denipurwanto10/Formatra-Convert',
-    demo: 'https://formatra-ten.vercel.app',
+    demo: 'https://formatraa.vercel.app/',
     language: 'JavaScript',
     category: 'Web App',
   },
