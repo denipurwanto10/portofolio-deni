@@ -13,6 +13,24 @@ import {
   useCountUp,
   useInView,
 } from '../hooks/useMotion'
+import streakRecordData from '../data/streakRecord.json'
+
+/*
+ * Rekor streak sepanjang masa — lihat catatan di dekat
+ * `displayStreak` di bawah. Fallback supaya tampilan tidak
+ * kosong kalau file JSON somehow tidak terbaca.
+ */
+const streakRecord =
+  streakRecordData.allTimeLongestStreak
+    ? streakRecordData
+    : {
+        username: streakRecordData.username,
+        allTimeLongestStreak: {
+          length: 0,
+          start: null,
+          end: null,
+        },
+      }
 
 // Harus sama dengan durasi animasi keluar modal di styles.css
 // (--modal-exit), supaya modal tidak terpotong saat ditutup.
@@ -1459,14 +1477,19 @@ function GithubContributions() {
 
   /*
    * "Total" is the official last-year number from
-   * the GitHub profile, and the streak is the
-   * longest streak from the same daily calendar —
-   * so they always match github.com/denipurwanto10.
+   * the GitHub profile.
+   *
+   * "Longest streak" sengaja memakai REKOR SEPANJANG MASA dari
+   * src/data/streakRecord.json, bukan hasil hitungan kalender
+   * 365 hari. Alasannya: kalender publik GitHub (dan mirror-nya)
+   * hanya menampilkan 365 hari terakhir, sehingga streak yang
+   * sudah/lewat melewati 1 tahun akan HILANG dan angkanya
+   * diam-diam turun — padahal rekor aslinya masih berlaku.
+   * File JSON itu ditulis dari riwayat penuh via GraphQL.
    */
   const displayTotal = total ?? 0
 
-  const displayStreak =
-    longestStreak ?? { length: 0, start: null, end: null }
+  const displayStreak = streakRecord.allTimeLongestStreak
 
   const streakRange =
     displayStreak.start && displayStreak.end

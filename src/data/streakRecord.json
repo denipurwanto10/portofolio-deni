@@ -1,0 +1,18 @@
+{
+  "username": "denipurwanto10",
+  "note": "Rekor kontribusi dihitung dari riwayat penuh via GitHub GraphQL contributionsCollection (bukan kalender publik 365 hari). Diperbarui manual via: node scripts/refresh-streak.mjs",
+  "accountCreatedAt": "2022-02-24T12:16:51Z",
+  "calculatedAt": "2026-09-27T00:30:27.548Z",
+  "allTimeLongestStreak": {
+    "length": 12,
+    "start": "2025-09-16",
+    "end": "2025-09-27"
+  },
+  "topRuns": [
+    { "length": 12, "start": "2025-09-16", "end": "2025-09-27" },
+    { "length": 6, "start": "2025-07-20", "end": "2025-07-25" },
+    { "length": 6, "start": "2026-02-10", "end": "2026-02-15" },
+    { "length": 5, "start": "2026-09-10", "end": "2026-09-14" },
+    { "length": 5, "start": "2026-09-23", "end": "2026-09-27" }
+  ]
+}
