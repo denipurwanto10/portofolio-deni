@@ -9537,3 +9537,80 @@ html {
     0 2px 6px rgba(0, 0, 0, 0.3),
     0 24px 80px rgba(0, 0, 0, 0.45);
 }
+
+/* =========================================================
+   HOVER TOMBOL EMOJI DI BUBBLE SENDIRI
+   Scoped, removable in one delete.
+
+   .chat-meta (Balas + tombol emoji) berada DI DALAM
+   .chat-bubble. Untuk pesan milik sendiri, bubble memberi
+   color: var(--accent-contrast) = putih di atas
+   background: var(--accent). .chat-react-button memakai
+   color: inherit, jadi ikon Smile-nya putih.
+
+   Tapi .chat-react-button:hover (baris ~2270) memberi
+   background: var(--accent-soft) yang di light mode itu
+   pastel pucat -> putih di atas pastel = tak terlihat.
+   Dark mode sudah punya override sendiri (rgba putih),
+   light mode tidak - makanya hanya mode light yang rusak.
+
+   Di sini hover di bubble sendiri memakai overlay gelap
+   semi-transparan: ikon putih tetap terbaca di atas accent
+   apa pun, dan bubble NON-mine tidak tersentuh.
+   ========================================================= */
+
+.chat-message.mine .chat-react-button:hover {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+[data-theme='dark'] .chat-message.mine .chat-react-button:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+/* =========================================================
+   BUBBLE CHAT DI DARK MODE - IKUT PERSIS LIGHT MODE
+   Scoped, removable in one delete.
+
+   Light mode (baris ~2156) memakai:
+     background: var(--accent);
+     color: var(--accent-contrast);
+   Sebelum ini dark mode memaksa abu-abu kaku (#34343a),
+   jadi warna aksen yang dipilih di sidebar tidak terlihat.
+   Sekarang dark mode memakai nilai yang SAMA dengan light
+   mode, sehingga tema bubble konsisten di kedua mode dan
+   ikut 6 pilihan aksen.
+
+   Catatan: untuk aksen default, --accent di dark = #ffffff
+   dan --accent-contrast = #000000, jadi bubble putih dengan
+   teks hitam. Itu pilihanmu, bukan sekadar ikut aturan.
+   Nama, jam, dan quote di bubble milik sendiri juga ikut
+   disetel ke accent-contrast, seperti di light mode.
+
+   --bubble-bg / --bubble-border ikut diperbarui karena pil
+   reaksi membacanya supaya tetap menyatu dengan bubble.
+   ========================================================= */
+
+[data-theme='dark'] .chat-message.mine .chat-bubble {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-contrast);
+  --bubble-bg: var(--accent);
+  --bubble-border: var(--accent);
+}
+
+[data-theme='dark'] .chat-message.mine .chat-name {
+  color: var(--accent-contrast);
+}
+
+[data-theme='dark'] .chat-message.mine .chat-quote {
+  background: color-mix(in srgb, var(--accent-contrast) 16%, transparent);
+  border-left-color: color-mix(
+    in srgb,
+    var(--accent-contrast) 85%,
+    transparent
+  );
+}
+
+[data-theme='dark'] .chat-message.mine .chat-quote strong {
+  color: var(--accent-contrast);
+}
