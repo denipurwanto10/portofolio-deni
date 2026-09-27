@@ -49,8 +49,16 @@
   --border-color: #dce5ef;
   --border-soft: #e2e8f0;
   --text-primary: #172036;
-  --text-secondary: #71829e;
-  --text-tertiary: #91a3bf;
+  /* POLISH: contrast. Nilai lama #71829e (3.90:1) dan #91a3bf
+     (2.56:1) di atas surface #ffffff GAGAL ambang WCAG AA 4.5:1
+     untuk teks kecil - judul sidebar "MENU" dan baris footer
+     nyaris tak terbaca. Kedua token dinaikkan minimal ke ambang
+     yang sama (hue tetap, hanya lightness), dan urutan ramp tetap
+     monoton: tertiary > secondary > muted-2 > muted-3 > strong >
+     primary. Token muted-2/3/strong/primary sudah lolos (5.83 /
+     8.19 / 11.36 / 16.20) jadi tidak disentuh. */
+  --text-secondary: #5d6b82;
+  --text-tertiary: #69768a;
   --text-muted-2: #506782;
   --text-muted-3: #36516f;
   --text-strong: #243b5a;
@@ -92,11 +100,18 @@
   --border-color: #232323;
   --border-soft: #1a1a1a;
   --text-primary: #ffffff;
-  --text-secondary: #ffffff;
-  --text-tertiary: #ffffff;
-  --text-muted-2: #ffffff;
-  --text-muted-3: #ffffff;
-  --text-strong: #ffffff;
+  /* POLISH: hierarki. Versi lama keenam token ini sama-sama
+     #ffffff, jadi di dark mode SELURUH ramp teks jadi satu nilai
+     - judul, body, dan label tidak punya bobot visual yang
+     berbeda. Dipilah jadi enam langkah blue-grey (hue sama
+     keluarga dengan light mode), semuanya tetap >= 4.5:1 di atas
+     --bg-surface #0d0d0d (terang terkecil / surface tergelap):
+     6.64 / 8.74 / 11.26 / 13.91 / 16.49 / 19.44. */
+  --text-secondary: #a3afbf;
+  --text-tertiary: #8c98a8;
+  --text-muted-2: #bcc6d4;
+  --text-muted-3: #d2dbe7;
+  --text-strong: #e7edf4;
   --heat-0: #161616;
   --heat-1: color-mix(in srgb, var(--accent) 25%, var(--heat-0));
   --heat-2: color-mix(in srgb, var(--accent) 55%, var(--heat-0));
@@ -9613,4 +9628,78 @@ html {
 
 [data-theme='dark'] .chat-message.mine .chat-quote strong {
   color: var(--accent-contrast);
+}
+
+/* =========================================================
+   TOUCH TARGETS - mobile hit areas (POLISH)
+   Hanya di coarse pointer. Memakai pola yang sudah dipakai
+   .chat-react-button::after di file ini: area sentuh 44px
+   tanpa mengubah ukuran visual, radius, padding, atau gap.
+
+   Catatan: ::after butuh position:relative pada induknya, tapi
+   ::after TIDAK mewarisi warna/pointer event dari induk, jadi
+   daftar ini dibuat eksplisit, bukan dengan wildcard. Semua
+   selector di bawah sudah dipastikan tidak punya position
+   absolute sendiri, sehingga position:relative di sini aman.
+========================================================= */
+
+@media (hover: none), (pointer: coarse) {
+
+  /* 22px -> 44px. Swatch bulat tidak bisa diberi padding tanpa
+     merusak outline, jadi ::after. Induknya sudah relative. */
+  .accent-swatch::after,
+  .lang-toggle-btn::after,
+  .project-filter::after,
+  .time-zone::after,
+  .github-username::after,
+  .projects-github::after,
+  .experience-toggle::after {
+    content: '';
+    position: absolute;
+    inset: 50%;
+    width: 44px;
+    height: 44px;
+    transform: translate(-50%, -50%);
+  }
+
+  .lang-toggle-btn,
+  .project-filter,
+  .time-zone,
+  .github-username,
+  .projects-github,
+  .experience-toggle,
+  .nav-item,
+  .techstack-tab,
+  .mobile-header-menu {
+    position: relative;
+  }
+
+    /* .nav-item (42px), .techstack-tab (42px) dan
+     .mobile-header-menu (40px) tidak bisa dinaikkan lewat
+     min-height: ada aturan `min-height: 42px !important` di
+     rule mobile (line ~7827) yang mengalahkan selector biasa,
+     dan .mobile-header-menu dikunci `flex: 0 0 42px` + `width:
+     42px` sehingga padding tidak menambah tinggi. Overlay ::after
+     menutupi isu specificity tanpa perlu !important. */
+  .nav-item::after,
+  .techstack-tab::after,
+  .mobile-header-menu::after {
+    content: '';
+    position: absolute;
+    inset: 50%;
+    width: 100%;
+    min-width: 44px;
+    height: 100%;
+    min-height: 44px;
+    transform: translate(-50%, -50%);
+  }
+
+  /* 35px -> 44px. Padding vertikal dinaikkan 4.5px per sisi;
+     tombol tetap setinggi konten + border, hanya lebih mudah
+     disentuh. */
+  .theme-toggle {
+    padding-top: 14px;
+    padding-bottom: 14px;
+  }
+
 }

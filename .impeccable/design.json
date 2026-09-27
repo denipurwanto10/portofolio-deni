@@ -1,0 +1,518 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-27T16:46:07.257705Z",
+  "title": "Design System: Deni Purwanto — Portfolio",
+  "extensions": {
+    "colorMeta": {
+      "ink": {
+        "role": "primary",
+        "displayName": "Ink",
+        "canonical": "#111111",
+        "tonalRamp": [
+          "oklch(15% 0.000 0)",
+          "oklch(26% 0.000 0)",
+          "oklch(38% 0.000 0)",
+          "oklch(50% 0.000 0)",
+          "oklch(62% 0.000 0)",
+          "oklch(74% 0.000 0)",
+          "oklch(85% 0.000 0)",
+          "oklch(95% 0.000 0)"
+        ]
+      },
+      "ink-text": {
+        "role": "primary",
+        "displayName": "Ink Text",
+        "canonical": "#172036",
+        "tonalRamp": [
+          "oklch(15% 0.044 266)",
+          "oklch(26% 0.044 266)",
+          "oklch(38% 0.044 266)",
+          "oklch(50% 0.044 266)",
+          "oklch(62% 0.044 266)",
+          "oklch(74% 0.044 266)",
+          "oklch(85% 0.044 266)",
+          "oklch(95% 0.044 266)"
+        ]
+      },
+      "frost": {
+        "role": "neutral",
+        "displayName": "Frost",
+        "canonical": "#ffffff",
+        "tonalRamp": [
+          "oklch(15% 0.000 0)",
+          "oklch(26% 0.000 0)",
+          "oklch(38% 0.000 0)",
+          "oklch(50% 0.000 0)",
+          "oklch(62% 0.000 0)",
+          "oklch(74% 0.000 0)",
+          "oklch(85% 0.000 0)",
+          "oklch(95% 0.000 0)"
+        ]
+      },
+      "frost-page": {
+        "role": "neutral",
+        "displayName": "Frost Page",
+        "canonical": "#f8fafc",
+        "tonalRamp": [
+          "oklch(15% 0.000 248)",
+          "oklch(26% 0.000 248)",
+          "oklch(38% 0.000 248)",
+          "oklch(50% 0.000 248)",
+          "oklch(62% 0.000 248)",
+          "oklch(74% 0.000 248)",
+          "oklch(85% 0.000 248)",
+          "oklch(95% 0.000 248)"
+        ]
+      },
+      "hairline": {
+        "role": "neutral",
+        "displayName": "Hairline",
+        "canonical": "#dce5ef",
+        "tonalRamp": [
+          "oklch(15% 0.000 251)",
+          "oklch(26% 0.000 251)",
+          "oklch(38% 0.000 251)",
+          "oklch(50% 0.000 251)",
+          "oklch(62% 0.000 251)",
+          "oklch(74% 0.000 251)",
+          "oklch(85% 0.000 251)",
+          "oklch(95% 0.000 251)"
+        ]
+      },
+      "hairline-soft": {
+        "role": "neutral",
+        "displayName": "Hairline Soft",
+        "canonical": "#e2e8f0",
+        "tonalRamp": [
+          "oklch(15% 0.000 256)",
+          "oklch(26% 0.000 256)",
+          "oklch(38% 0.000 256)",
+          "oklch(50% 0.000 256)",
+          "oklch(62% 0.000 256)",
+          "oklch(74% 0.000 256)",
+          "oklch(85% 0.000 256)",
+          "oklch(95% 0.000 256)"
+        ]
+      },
+      "slate-soft": {
+        "role": "secondary",
+        "displayName": "Slate Soft",
+        "canonical": "#71829e",
+        "tonalRamp": [
+          "oklch(15% 0.047 260)",
+          "oklch(26% 0.047 260)",
+          "oklch(38% 0.047 260)",
+          "oklch(50% 0.047 260)",
+          "oklch(62% 0.047 260)",
+          "oklch(74% 0.047 260)",
+          "oklch(85% 0.047 260)",
+          "oklch(95% 0.047 260)"
+        ]
+      },
+      "slate-faint": {
+        "role": "secondary",
+        "displayName": "Slate Faint",
+        "canonical": "#91a3bf",
+        "tonalRamp": [
+          "oklch(15% 0.046 259)",
+          "oklch(26% 0.046 259)",
+          "oklch(38% 0.046 259)",
+          "oklch(50% 0.046 259)",
+          "oklch(62% 0.046 259)",
+          "oklch(74% 0.046 259)",
+          "oklch(85% 0.046 259)",
+          "oklch(95% 0.046 259)"
+        ]
+      },
+      "signal-green": {
+        "role": "tertiary",
+        "displayName": "Signal Green",
+        "canonical": "#22c55e",
+        "tonalRamp": [
+          "oklch(15% 0.192 150)",
+          "oklch(26% 0.192 150)",
+          "oklch(38% 0.192 150)",
+          "oklch(50% 0.192 150)",
+          "oklch(62% 0.192 150)",
+          "oklch(74% 0.192 150)",
+          "oklch(85% 0.192 150)",
+          "oklch(95% 0.192 150)"
+        ]
+      },
+      "danger": {
+        "role": "tertiary",
+        "displayName": "Danger",
+        "canonical": "#b91c1c",
+        "tonalRamp": [
+          "oklch(15% 0.190 28)",
+          "oklch(26% 0.190 28)",
+          "oklch(38% 0.190 28)",
+          "oklch(50% 0.190 28)",
+          "oklch(62% 0.190 28)",
+          "oklch(74% 0.190 28)",
+          "oklch(85% 0.190 28)",
+          "oklch(95% 0.190 28)"
+        ]
+      },
+      "card-hover-border": {
+        "role": "neutral",
+        "displayName": "Card Hover Border",
+        "canonical": "#000000",
+        "tonalRamp": [
+          "oklch(15% 0.000 0)",
+          "oklch(26% 0.000 0)",
+          "oklch(38% 0.000 0)",
+          "oklch(50% 0.000 0)",
+          "oklch(62% 0.000 0)",
+          "oklch(74% 0.000 0)",
+          "oklch(85% 0.000 0)",
+          "oklch(95% 0.000 0)"
+        ]
+      },
+      "void": {
+        "role": "neutral",
+        "displayName": "Void",
+        "canonical": "#000000",
+        "tonalRamp": [
+          "oklch(15% 0.000 0)",
+          "oklch(26% 0.000 0)",
+          "oklch(38% 0.000 0)",
+          "oklch(50% 0.000 0)",
+          "oklch(62% 0.000 0)",
+          "oklch(74% 0.000 0)",
+          "oklch(85% 0.000 0)",
+          "oklch(95% 0.000 0)"
+        ]
+      },
+      "charcoal": {
+        "role": "neutral",
+        "displayName": "Charcoal",
+        "canonical": "#0d0d0d",
+        "tonalRamp": [
+          "oklch(15% 0.000 0)",
+          "oklch(26% 0.000 0)",
+          "oklch(38% 0.000 0)",
+          "oklch(50% 0.000 0)",
+          "oklch(62% 0.000 0)",
+          "oklch(74% 0.000 0)",
+          "oklch(85% 0.000 0)",
+          "oklch(95% 0.000 0)"
+        ]
+      },
+      "steel-muted-2": {
+        "role": "secondary",
+        "displayName": "Steel MUTED-2",
+        "canonical": "#506782",
+        "tonalRamp": [
+          "oklch(15% 0.051 253)",
+          "oklch(26% 0.051 253)",
+          "oklch(38% 0.051 253)",
+          "oklch(50% 0.051 253)",
+          "oklch(62% 0.051 253)",
+          "oklch(74% 0.051 253)",
+          "oklch(85% 0.051 253)",
+          "oklch(95% 0.051 253)"
+        ]
+      },
+      "steel-muted-3": {
+        "role": "secondary",
+        "displayName": "Steel MUTED-3",
+        "canonical": "#36516f",
+        "tonalRamp": [
+          "oklch(15% 0.060 252)",
+          "oklch(26% 0.060 252)",
+          "oklch(38% 0.060 252)",
+          "oklch(50% 0.060 252)",
+          "oklch(62% 0.060 252)",
+          "oklch(74% 0.060 252)",
+          "oklch(85% 0.060 252)",
+          "oklch(95% 0.060 252)"
+        ]
+      },
+      "steel-strong": {
+        "role": "secondary",
+        "displayName": "Steel STRONG",
+        "canonical": "#243b5a",
+        "tonalRamp": [
+          "oklch(15% 0.062 256)",
+          "oklch(26% 0.062 256)",
+          "oklch(38% 0.062 256)",
+          "oklch(50% 0.062 256)",
+          "oklch(62% 0.062 256)",
+          "oklch(74% 0.062 256)",
+          "oklch(85% 0.062 256)",
+          "oklch(95% 0.062 256)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "The Dashboard hero name only. Nothing else in the product reaches this size."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Sticky page-section titles, 24px."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Card headings, project/company/tech names, social platform names."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "About copy, card descriptions, chat message text. 14px / 1.65."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Tags, category pills, kbd hints, group labels, footer credits, timestamps. 10-13px, quiet."
+      },
+      "label-sm": {
+        "displayName": "Label Small",
+        "purpose": "Category pills, group labels, compact meta. 11px / 600."
+      },
+      "body-sm": {
+        "displayName": "Body Small",
+        "purpose": "Card sub-descriptions and chat message text. 13px / 1.5."
+      },
+      "meta": {
+        "displayName": "Meta",
+        "purpose": "Section subtitles, hints, secondary button labels. 12px."
+      }
+    },
+    "shadows": [
+      {
+        "name": "panel-hairline-lift",
+        "value": "0 1px 2px rgba(15, 23, 42, 0.06), 0 16px 40px rgba(15, 23, 42, 0.10), inset 0 1px 0 rgba(255, 255, 255, 0.7)",
+        "purpose": "The five page panels and three dashboard stat cards. The system's most-used shadow, deliberately quiet. Dark counterpart: 0 1px 0 rgba(255,255,255,0.06), 0 16px 40px rgba(0,0,0,0.50)."
+      },
+      {
+        "name": "float",
+        "value": "0 10px 22px var(--accent-shadow)",
+        "purpose": "Chat launcher, chat header controls, send button. Accent-tinted so it tracks the visitor's accent choice."
+      },
+      {
+        "name": "drawer-modal",
+        "value": "0 24px 60px rgba(0, 0, 0, 0.18)",
+        "purpose": "Mobile sidebar drawer and award lightbox. The only genuinely dark shadow. Dark mode: 0 24px 60px rgba(0,0,0,0.7) plus a 1px white 4% ring."
+      },
+      {
+        "name": "hover-lift",
+        "value": "0 14px 28px rgba(15, 23, 42, 0.08)",
+        "purpose": "Project, experience, and tech-stack cards on hover, paired with a 3-4px translateY and a border shift to --card-hover-border."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-out",
+        "value": "cubic-bezier(0.22, 1, 0.36, 1)",
+        "purpose": "Default easing for state transitions - hover fills, border shifts, small lifts. ~0.28s."
+      },
+      {
+        "name": "ease-out-soft",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Entrance animations: page swap, stagger reveals. Slower, softer settle."
+      },
+      {
+        "name": "ease-spring",
+        "value": "cubic-bezier(0.34, 1.56, 0.64, 1)",
+        "purpose": "Overshoot easing. INCUMBENT, NOT RECOMMENDED FOR NEW WORK: the mechanical detector flags it as dated bounce/elastic easing, and it is correct that it overshoots. It is used in exactly two places - the sidebar nav icon hover tilt and the theme-toggle knob - and is documented here for fidelity rather than as a pattern to copy. Prefer ease-out for anything new."
+      },
+      {
+        "name": "ease-in-out",
+        "value": "cubic-bezier(0.65, 0, 0.35, 1)",
+        "purpose": "Symmetric in-out, for rare cases that need equal accel and decel."
+      },
+      {
+        "name": "ease-drawer",
+        "value": "cubic-bezier(0.32, 0.72, 0, 1)",
+        "purpose": "The mobile sidebar drawer slide."
+      },
+      {
+        "name": "dur-fast",
+        "value": "200ms",
+        "purpose": "Small state flips - icon swaps, chip feedback, modal exit."
+      },
+      {
+        "name": "dur-base",
+        "value": "320ms",
+        "purpose": "Standard state transitions."
+      },
+      {
+        "name": "dur-slow",
+        "value": "480ms",
+        "purpose": "Rare; the slowest transitions in the system."
+      },
+      {
+        "name": "modal-exit",
+        "value": "200ms",
+        "purpose": "Modal and panel exit. Must stay in sync with MODAL_EXIT_MS in Dashboard.tsx and Awards.tsx."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "xl",
+        "value": "1713px"
+      },
+      {
+        "name": "wide",
+        "value": "1100px"
+      },
+      {
+        "name": "tablet",
+        "value": "900px"
+      },
+      {
+        "name": "breakpoint-md",
+        "value": "860px"
+      },
+      {
+        "name": "breakpoint-sm",
+        "value": "850px"
+      },
+      {
+        "name": "mobile",
+        "value": "760px"
+      },
+      {
+        "name": "mobile-sm",
+        "value": "700px"
+      },
+      {
+        "name": "mobile-xs",
+        "value": "640px"
+      },
+      {
+        "name": "mobile-xxs",
+        "value": "480px"
+      },
+      {
+        "name": "mobile-xxxs",
+        "value": "390px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button (Chat Launcher)",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The site's only always-visible solid button — a 52px accent circle that opens the assistant.",
+      "html": "<button class=\"ds-btn-primary\" type=\"button\" aria-label=\"Open chat\"><svg width=\"22\" height=\"22\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z\"/></svg></button>",
+      "css": ".ds-btn-primary { width: 52px; height: 52px; border-radius: 50%; border: 0; display: grid; place-items: center; background: var(--accent, #111111); color: var(--accent-contrast, #ffffff); box-shadow: 0 10px 22px var(--accent-shadow, rgba(17,17,17,0.16)); cursor: pointer; transition: transform 0.32s var(--ease-out, cubic-bezier(0.22,1,0.36,1)), opacity 0.32s var(--ease-out, cubic-bezier(0.22,1,0.36,1)); } .ds-btn-primary:hover { transform: scale(1.05); } .ds-btn-primary:focus-visible { outline: 2px solid var(--accent, #111111); outline-offset: 2px; }"
+    },
+    {
+      "name": "Nav Item",
+      "kind": "nav",
+      "refersTo": "nav-item",
+      "description": "Sidebar navigation row: thin Lucide icon plus a 13px label. Hover fills soft accent; active carries a 2px accent hairline.",
+      "html": "<nav class=\"ds-nav\"><button class=\"ds-nav-item is-active\" type=\"button\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x=\"3\" y=\"3\" width=\"7\" height=\"9\" rx=\"1\"/><rect x=\"14\" y=\"3\" width=\"7\" height=\"5\" rx=\"1\"/><rect x=\"14\" y=\"12\" width=\"7\" height=\"9\" rx=\"1\"/><rect x=\"3\" y=\"16\" width=\"7\" height=\"5\" rx=\"1\"/></svg><span>Dashboard</span></button></nav>",
+      "css": ".ds-nav { display: flex; flex-direction: column; gap: 4px; } .ds-nav-item { display: flex; align-items: center; gap: 12px; width: 100%; border: 0; background: transparent; color: var(--text-secondary, #71829e); border-radius: 8px; padding: 10px 11px; text-align: left; font-size: 13px; cursor: pointer; transition: background 0.28s var(--ease-out, cubic-bezier(0.22,1,0.36,1)), color 0.28s var(--ease-out, cubic-bezier(0.22,1,0.36,1)); } .ds-nav-item:hover { background: var(--accent-soft, #f1f1f1); color: var(--accent, #111111); } .ds-nav-item:hover svg { transform: rotate(-12deg) scale(1.18); } .ds-nav-item.is-active { background: var(--accent-soft, #f1f1f1); color: var(--accent, #111111); box-shadow: inset 2px 0 0 var(--accent, #111111); } .ds-nav-item svg { flex: none; transition: transform 0.28s var(--ease-out, cubic-bezier(0.22,1,0.36,1)); } .ds-nav-item:focus-visible { outline: 2px solid var(--accent, #111111); outline-offset: 2px; }"
+    },
+    {
+      "name": "Content Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "The workhorse: 13px radius, hairline border, 18px padding, flat at rest, small lift on hover.",
+      "html": "<article class=\"ds-card\"><div class=\"ds-card-top\"><span class=\"ds-card-icon\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M13 2 3 14h9l-1 8 10-12h-9l1-8z\"/></svg></span><span class=\"ds-chip-pill\">Full-Stack</span></div><h3 class=\"ds-card-title\">Disaster Monitoring Indonesia</h3><p class=\"ds-card-body\">Realtime Indonesian disaster monitoring with interactive maps, a REST API, and Socket.IO.</p><div class=\"ds-tags\"><span>Next.js</span><span>Express</span><span>Leaflet</span></div></article>",
+      "css": ".ds-card { background: var(--bg-surface, #ffffff); border: 1px solid var(--border-color, #dce5ef); border-radius: 13px; padding: 18px; display: flex; flex-direction: column; transition: border-color 0.28s var(--ease-out, cubic-bezier(0.22,1,0.36,1)), transform 0.28s var(--ease-out, cubic-bezier(0.22,1,0.36,1)), box-shadow 0.28s var(--ease-out, cubic-bezier(0.22,1,0.36,1)); } .ds-card:hover { border-color: var(--card-hover-border, #000000); transform: translateY(-4px) scale(1.008); box-shadow: 0 14px 28px rgba(15, 23, 42, 0.08); } .ds-card-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 14px; } .ds-card-icon { width: 40px; height: 40px; display: grid; place-items: center; border-radius: 10px; background: var(--accent-soft, #f1f1f1); color: var(--accent, #111111); } .ds-card-title { margin: 0 0 8px; font-size: 16px; font-weight: 600; color: var(--text-primary, #172036); } .ds-card-body { margin: 0; font-size: 14px; line-height: 1.65; color: var(--text-secondary, #71829e); } .ds-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; } .ds-tags span { background: var(--border-soft, #e2e8f0); border: 1px solid var(--border-soft, #e2e8f0); border-radius: 7px; padding: 5px 7px; font-size: 10px; color: var(--text-secondary, #71829e); } .ds-chip-pill { display: inline-flex; align-items: center; padding: 6px 10px; border: 1px solid var(--border-color, #dce5ef); border-radius: 999px; background: var(--bg-page, #f8fafc); font-size: 11px; font-weight: 600; line-height: 1; color: var(--text-muted-3, #36516f); white-space: nowrap; } .ds-card:focus-within { border-color: var(--card-hover-border, #000000); }"
+    },
+    {
+      "name": "Search Input",
+      "kind": "input",
+      "refersTo": "input-search",
+      "description": "Project search: bordered field with a leading search icon, transparent input, and a bordered kbd hint.",
+      "html": "<div class=\"ds-search\"><svg width=\"15\" height=\"15\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"11\" cy=\"11\" r=\"8\"/><path d=\"m21 21-4.35-4.35\"/></svg><input type=\"text\" placeholder=\"Search projects...\"/><kbd>/</kbd></div>",
+      "css": ".ds-search { width: 245px; display: flex; align-items: center; gap: 10px; border: 1px solid var(--border-color, #dce5ef); border-radius: 11px; padding: 6px 8px 6px 11px; background: var(--bg-surface, #ffffff); color: var(--text-tertiary, #91a3bf); } .ds-search input { border: 0; outline: 0; width: 100%; min-width: 0; font-size: 13px; color: var(--text-secondary, #71829e); background: transparent; } .ds-search input::placeholder { color: var(--text-tertiary, #91a3bf); } .ds-search kbd { border: 1px solid var(--border-color, #dce5ef); border-radius: 6px; padding: 4px 6px; font-size: 10px; white-space: nowrap; color: var(--text-tertiary, #91a3bf); } .ds-search:focus-within { border-color: var(--card-hover-border, #000000); }"
+    },
+    {
+      "name": "Assistant Quick Reply",
+      "kind": "chip",
+      "refersTo": "chip-pill",
+      "description": "Accent-tinted pill in the assistant's quick-reply row; fills soft accent and lifts 1px on hover.",
+      "html": "<div class=\"ds-chips\"><button class=\"ds-chip-pillbtn\" type=\"button\">Tentang Deni</button><button class=\"ds-chip-pillbtn\" type=\"button\">Proyek</button><button class=\"ds-chip-pillbtn\" type=\"button\">Pengalaman</button></div>",
+      "css": ".ds-chips { display: flex; flex-wrap: wrap; gap: 6px; } .ds-chip-pillbtn { border: 1px solid var(--border-color, #dce5ef); background: var(--bg-surface, #ffffff); color: var(--text-strong, #243b5a); border-radius: 999px; padding: 6px 12px; font-size: 12px; font-weight: 600; cursor: pointer; transition: border-color 0.24s var(--ease-out, cubic-bezier(0.22,1,0.36,1)), background 0.24s var(--ease-out, cubic-bezier(0.22,1,0.36,1)), transform 0.24s var(--ease-out, cubic-bezier(0.22,1,0.36,1)); } .ds-chip-pillbtn:hover { border-color: var(--card-hover-border, #000000); background: var(--accent-soft, #f1f1f1); transform: translateY(-1px); } .ds-chip-pillbtn:focus-visible { outline: 2px solid var(--accent, #111111); outline-offset: 2px; }"
+    },
+    {
+      "name": "Theme Toggle",
+      "kind": "custom",
+      "refersTo": "button-primary",
+      "description": "Sidebar control: label plus a 30x17px pill switch with a sliding knob. Beside the accent picker.",
+      "html": "<button class=\"ds-theme\" type=\"button\"><span class=\"ds-theme-icon\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z\"/></svg></span><span class=\"ds-theme-label\">Dark Mode</span><span class=\"ds-theme-switch\"><span class=\"ds-theme-knob\"></span></span></button>",
+      "css": ".ds-theme { display: flex; align-items: center; gap: 10px; width: 100%; margin: 4px 12px 0; border: 1px solid var(--border-soft, #e2e8f0); background: transparent; color: var(--text-secondary, #71829e); border-radius: 10px; padding: 9px 11px; text-align: left; font-size: 12px; cursor: pointer; transition: background 0.28s var(--ease-out, cubic-bezier(0.22,1,0.36,1)), color 0.28s var(--ease-out, cubic-bezier(0.22,1,0.36,1)); } .ds-theme:hover { background: var(--accent-soft, #f1f1f1); color: var(--accent, #111111); border-color: transparent; } .ds-theme-icon { display: grid; place-items: center; } .ds-theme-label { flex: 1 1 auto; } .ds-theme-switch { flex: 0 0 auto; width: 30px; height: 17px; border-radius: 999px; background: var(--border-color, #dce5ef); position: relative; transition: background 0.28s var(--ease-out, cubic-bezier(0.22,1,0.36,1)); } .ds-theme-knob { position: absolute; top: 2px; left: 2px; width: 13px; height: 13px; border-radius: 50%; background: var(--bg-surface, #ffffff); transition: transform 0.28s var(--ease-out, cubic-bezier(0.22,1,0.36,1)); } .ds-theme.is-dark .ds-theme-knob { transform: translateX(13px); } .ds-theme:focus-visible { outline: 2px solid var(--accent, #111111); outline-offset: 2px; }"
+    },
+    {
+      "name": "Page Panel",
+      "kind": "card",
+      "refersTo": "panel",
+      "description": "The five full-width page panels (Projects, Experience, Awards, Tech Stack, Contact): glass surface, 16px radius, 24px padding, quiet two-layer lift.",
+      "html": "<section class=\"ds-panel\"><div class=\"ds-panel-title\"><span class=\"ds-panel-icon\"><svg width=\"19\" height=\"19\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M4 22h16M6 18h12M8 14h8M10 10h4M12 6V2\"/></svg></span><div><h2>Tech Stack</h2><p>Tools used across the portfolio.</p></div></div><div class=\"ds-panel-body\"></div></section>",
+      "css": ".ds-panel { width: 100%; background: var(--bg-glass, rgba(255,255,255,0.97)); border: 1px solid var(--border-color, #dce5ef); border-radius: 16px; padding: 24px; box-shadow: 0 1px 2px rgba(15,23,42,0.06), 0 16px 40px rgba(15,23,42,0.10), inset 0 1px 0 rgba(255,255,255,0.7); } .ds-panel-title { display: flex; align-items: center; gap: 11px; margin: 0 0 21px; position: sticky; top: 14px; z-index: 6; padding: 10px 0; background: var(--bg-glass, rgba(255,255,255,0.97)); } .ds-panel-icon { color: var(--accent, #111111); display: grid; place-items: center; } .ds-panel-title h2 { font-size: 24px; margin: 0 0 4px; letter-spacing: -0.8px; color: var(--text-primary, #172036); } .ds-panel-title p { margin: 0; color: var(--text-secondary, #71829e); font-size: 12px; }"
+    },
+    {
+      "name": "Accent Picker",
+      "kind": "chip",
+      "refersTo": "chip",
+      "description": "Six 22px circular swatches under the theme toggle. Selecting one repoints every accent token on the document.",
+      "html": "<div class=\"ds-accent\"><button class=\"ds-accent-swatch is-active\" type=\"button\" style=\"--swatch: linear-gradient(135deg,#111111 50%,#ffffff 50%)\" aria-label=\"Default\"></button><button class=\"ds-accent-swatch\" type=\"button\" style=\"--swatch:#2563eb\" aria-label=\"Ocean\"></button><button class=\"ds-accent-swatch\" type=\"button\" style=\"--swatch:#059669\" aria-label=\"Emerald\"></button><button class=\"ds-accent-swatch\" type=\"button\" style=\"--swatch:#7c3aed\" aria-label=\"Violet\"></button><button class=\"ds-accent-swatch\" type=\"button\" style=\"--swatch:#ea580c\" aria-label=\"Orange\"></button><button class=\"ds-accent-swatch\" type=\"button\" style=\"--swatch:#e11d48\" aria-label=\"Rose\"></button></div>",
+      "css": ".ds-accent { display: flex; align-items: center; justify-content: center; gap: 8px; } .ds-accent-swatch { position: relative; width: 22px; height: 22px; border-radius: 50%; border: 2px solid transparent; outline: 2px solid var(--border-color, #dce5ef); outline-offset: 1px; background: var(--swatch); cursor: pointer; overflow: hidden; background-clip: padding-box; padding: 0; transition: transform 0.28s var(--ease-out, cubic-bezier(0.22,1,0.36,1)), outline-color 0.28s var(--ease-out, cubic-bezier(0.22,1,0.36,1)); } .ds-accent-swatch:hover { transform: scale(1.12); } .ds-accent-swatch.is-active { border-color: var(--swatch); outline-color: var(--text-primary, #172036); } .ds-accent-swatch:focus-visible { outline: 2px solid var(--accent, #111111); outline-offset: 2px; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Engine Room",
+    "overview": "An engine room is the part of a ship nobody photographs, and the part that decides whether the ship works. It is instrument-dense, hot-lit, and every panel is there because something depends on it. This system is built on that logic: no ornamental surface, no decorative gradient, no atmosphere for its own sake. What separates one surface from the next is a hairline and a tone step, the way a machine separates one plate from the next.\n\nThe default is monochrome and stays that way unless the visitor chooses otherwise. Ink black on white frost, one blue-grey hairline family, and a six-choice accent picker the reader controls. Colour is a dial, not a statement — a visitor who picks ocean blue gets a site that is still this site, only tuned. Density is the other load-bearing choice. Body copy sits at 14px, labels at 10px, card padding at 18px, and the base grid gap at 14px. This is a workbench that expects to be scanned, not a poster that expects to be admired.",
+    "keyCharacteristics": [
+      "Monochrome by default; the accent is a visitor-controlled dial, never a brand statement.",
+      "Depth comes from hairline borders and a single tone step, not from shadows. Shadows are reserved for genuinely floating things: the chat panel, the launcher button, the mobile drawer.",
+      "Small, tight type and small radii. Nothing is oversized for effect.",
+      "One font (Plus Jakarta Sans) at five weights; hierarchy is carried by size, weight, and letter-spacing, not by a second family.",
+      "Motion is short and eased-out; every animation has a prefers-reduced-motion off-switch."
+    ],
+    "rules": [
+      {
+        "name": "The Monochrome Default Rule",
+        "body": "No colour ships as the default state. Ink is the default accent; the five chromatic accents exist only as visitor choices, are applied identically in light and dark mode, and change nothing about layout, type, or density. Adding a sixth accent is a data edit plus a picker dot, not a redesign.",
+        "section": "colors"
+      },
+      {
+        "name": "The Accent Scarcity Rule",
+        "body": "The accent colour paints interactive and live elements only — active nav, focus outlines, the launcher, contribution level 4, the \"available\" dot. It is never a background for a large block of text.",
+        "section": "colors"
+      },
+      {
+        "name": "The One Family Rule",
+        "body": "There is no second typeface, and there is no monospace face. Hierarchy is built from the five weights of Plus Jakarta Sans plus size and letter-spacing. Introducing a second family changes the product's character, not just its styling.",
+        "section": "typography"
+      },
+      {
+        "name": "The Small-Label Rule",
+        "body": "Metadata is set small and quiet (10-13px, Slate Soft or Slate Faint). A label never competes with a body paragraph; when in doubt, drop it a step rather than colouring it.",
+        "section": "typography"
+      },
+      {
+        "name": "The No-Display-Inside-Mid-Page Rule",
+        "body": "The 47px display treatment belongs to the Dashboard hero name alone. Section titles cap at 24px.",
+        "section": "typography"
+      },
+      {
+        "name": "The Flat-By-Default Rule",
+        "body": "Surfaces are flat at rest. A shadow appears only as a response to state (hover, floating overlay, focus) or on the four genuinely floating surfaces named above. Never add a shadow to a static card to \"make it pop\" — that pass has been reverted here before.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Paired-Dark-Rule",
+        "section": "elevation",
+        "body": "Every light-mode shadow or border rule is written together with its [data-theme='dark'] counterpart in the same change. An unpaired shadow reads as a smudge on black."
+      },
+      {
+        "name": "The One Hairline Rule",
+        "body": "Every separable surface is separated by a 1px --border-color hairline and a tone step. Do not add a second separator to the same edge.",
+        "section": "colors"
+      },
+      {
+        "name": "The No-New-Spring Rule",
+        "section": "typography",
+        "body": "--ease-spring (cubic-bezier(0.34, 1.56, 0.64, 1)) overshoots and is documented in the sidecar for fidelity, not as a pattern. It is used in exactly two incumbent places - the sidebar nav icon tilt and the theme-toggle knob. Anything new uses --ease-out or --ease-out-soft."
+      }
+    ]
+  }
+}
