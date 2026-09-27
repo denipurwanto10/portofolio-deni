@@ -9743,3 +9743,64 @@ html {
   }
 
 }
+
+/* =========================================================
+   STATE MOTION - kartu GitHub (ANIMATE)
+
+   Tiga perpindahan state di kartu ini sebelumnya diam.
+   Shimmer skeleton berhenti lalu angka langsung muncul
+   tanpa jejak, dan kondisi gagal tidak pernah terasa
+   sebagai perubahan state sama sekali.
+
+   Material: opacity + translateY 4px saja, semuanya
+   compositor. Tidak menyentuh width/height/top/left,
+   tidak ada bounce, tidak ada shadow, tidak ada
+   will-change karena tidak ada animasi panjang yang perlu
+   dipromosikan. Flat-by-default DESIGN.md: perpindahan
+   state dibawakan tone dan jarak kecil, bukan bayangan.
+
+   Ketiga aturan memakai `backwards`, jadi elemen tetap
+   terlihat walau animasi gagal dimuat atau di-skip.
+========================================================= */
+
+/* 1. Data tiba. .github-content adalah cabang "berhasil",
+   bukan .github-loading. */
+.github-content {
+  animation: state-in 220ms var(--ease-out) backwards;
+}
+
+/* 2. Gagal. Jeda sangat pendek supaya terbaca sebagai
+   jawaban atas upaya memuat, bukan teks yang selalu ada. */
+.github-error {
+  animation: state-in 260ms var(--ease-out) 40ms backwards;
+}
+
+@keyframes state-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 3. Statistik. Nilai muncul sebagai acknowledge singkat
+   ketika skeleton (-> angka atau "—") ditukar. Satu kali
+   saat node di-mount, bukan mengikuti tick count-up, jadi
+   angka yang berubah tiap frame tidak memicu animasi. */
+.github-stats strong {
+  animation: stat-ack 300ms var(--ease-out-soft) backwards;
+}
+
+@keyframes stat-ack {
+  from {
+    opacity: 0.35;
+    transform: translateY(2px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
