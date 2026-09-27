@@ -1,23 +1,89 @@
 /* ==========================================================
-   Custom cursor hijau: panah navigasi modern + cipratan air
+   Custom cursor: panah navigasi + cipratan air.
+   Warna kursor & efek klik mengikuti --accent yang dipilih di
+   sidebar (default/ocean/emerald/violet/orange/rose). Di dark
+   mode tiap aksen memakai versi yang lebih terang supaya glow
+   tetap terbaca di atas latar hitam.
+   Nilai RGB ditulis eksplisit (bukan diturunkan) karena dipakai
+   sebagai rgba(var(--cc-color-rgb), a) di seluruh efek.
+   Sliver di dalam panah ikut otomatis karena diturunkan dari
+   --cc-color lewat color-mix.
    ========================================================== */
 
 :root {
-  --cc-color: #16a34a;
-  --cc-color-rgb: 22, 163, 74;
+  --cc-color: #111111;
+  --cc-color-rgb: 17, 17, 17;
+
   --cc-body: #05080c;
   --cc-outline: #ffffff;
-  --cc-sliver-top: #86efac;
-  --cc-sliver-bottom: #15803d;
+  --cc-sliver-top: color-mix(
+    in srgb,
+    var(--cc-color) 45%,
+    #ffffff
+  );
+  --cc-sliver-bottom: var(--cc-color);
   --cc-shadow: rgba(0, 0, 0, 0.35);
 }
 
+/* Aksen berwarna — light mode. Specificity (0,1,0) sama dengan
+   :root, tapi ditulis setelahnya sehingga menang. */
+[data-accent='ocean'] {
+  --cc-color: #2563eb;
+  --cc-color-rgb: 37, 99, 235;
+}
+
+[data-accent='emerald'] {
+  --cc-color: #059669;
+  --cc-color-rgb: 5, 150, 105;
+}
+
+[data-accent='violet'] {
+  --cc-color: #7c3aed;
+  --cc-color-rgb: 124, 58, 237;
+}
+
+[data-accent='orange'] {
+  --cc-color: #ea580c;
+  --cc-color-rgb: 234, 88, 12;
+}
+
+[data-accent='rose'] {
+  --cc-color: #e11d48;
+  --cc-color-rgb: 225, 29, 72;
+}
+
 :root[data-theme='dark'] {
-  --cc-color: #4ade80;
-  --cc-color-rgb: 74, 222, 128;
-  --cc-sliver-top: #bbf7d0;
-  --cc-sliver-bottom: #16a34a;
+  --cc-color: #ffffff;
+  --cc-color-rgb: 255, 255, 255;
   --cc-shadow: rgba(0, 0, 0, 0.7);
+}
+
+/* Dark + aksen. Butuh :root[data-theme='dark'][data-accent=...]
+   (0,3,0) supaya mengalahkan blok dark di atas (0,2,0) —
+   tanpa itu, dark default #ffffff menimpa semua aksen. */
+:root[data-theme='dark'][data-accent='ocean'] {
+  --cc-color: #60a5fa;
+  --cc-color-rgb: 96, 165, 250;
+}
+
+:root[data-theme='dark'][data-accent='emerald'] {
+  --cc-color: #34d399;
+  --cc-color-rgb: 52, 211, 153;
+}
+
+:root[data-theme='dark'][data-accent='violet'] {
+  --cc-color: #a78bfa;
+  --cc-color-rgb: 167, 139, 250;
+}
+
+:root[data-theme='dark'][data-accent='orange'] {
+  --cc-color: #fb923c;
+  --cc-color-rgb: 251, 146, 60;
+}
+
+:root[data-theme='dark'][data-accent='rose'] {
+  --cc-color: #fb7185;
+  --cc-color-rgb: 251, 113, 133;
 }
 
 /* Sembunyikan cursor bawaan HANYA setelah custom cursor aktif. */
