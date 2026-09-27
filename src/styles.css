@@ -9325,3 +9325,150 @@ font {
     transition: none;
   }
 }
+
+
+/* =========================================================
+   DEPTH - scoped, removable in one delete
+
+   Hanya mengisi yang kurang dari sistem yang sudah ada:
+   panel (projects/experience/awards/techstack/contact) masih
+   flat satu lapis + border yang keras, dan .nav-item.active
+   belum punya penanda hairline. Hover kartu dan .hero-card
+   TIDAK disentuh - sistemnya sudah bagus.
+
+   Aturan main blok ini:
+   - depth saja: shadow berlapis + hairline border;
+     TANPA radius/padding/font-size/gap/width,
+     TANPA warna hardcode baru, TANPA gradient.
+   - setiap aturan light selalu dipasangkan dengan
+     [data-theme='dark'] supaya tidak jadi noda di hitam.
+   ========================================================= */
+
+/* Panel: shadow dua lapis supaya tidak flat. */
+.page-section .projects-panel,
+.page-section .experience-panel,
+.page-section .awards-panel,
+.page-section .techstack-panel,
+.page-section .contact-panel {
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.06),
+    0 16px 40px rgba(15, 23, 42, 0.10),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+
+/* Panel di dark: hairline atas terang + bayangan hitam lembut. */
+[data-theme='dark'] .page-section .projects-panel,
+[data-theme='dark'] .page-section .experience-panel,
+[data-theme='dark'] .page-section .awards-panel,
+[data-theme='dark'] .page-section .techstack-panel,
+[data-theme='dark'] .page-section .contact-panel {
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.06),
+    0 16px 40px rgba(0, 0, 0, 0.50);
+}
+
+
+/* Permukaan terangkat lain di dashboard: .now-card, .time-card,
+   .github-card masih satu lapis, sama seperti panel di atas.
+   Diberi lapis kedua supaya semua permukaan punya
+   kedalaman yang sama. */
+.now-card,
+.time-card,
+.github-card {
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.06),
+    0 16px 40px rgba(15, 23, 42, 0.10),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+
+[data-theme='dark'] .now-card,
+[data-theme='dark'] .time-card,
+[data-theme='dark'] .github-card {
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.06),
+    0 16px 40px rgba(0, 0, 0, 0.50);
+}
+/* Sidebar aktif: hairline kiri accent 2px - mengikuti pola
+   .nav-item.active yang sudah ada, bukan hover baru. */
+.sidebar .nav-item.active {
+  box-shadow: inset 2px 0 0 var(--accent);
+}
+
+/* =========================================================
+   SCROLLBAR REFINEMENTS - scoped, removable in one delete
+
+   Tiga perbaikan untuk sistem scrollbar yang sudah ada
+   (blok @media (hover:hover) di atas, ~baris 8722):
+
+   1. Thumb menyusut saat idle, melebar saat hover/scroll
+      ala macOS - pakai border transparan yang bisa
+      ditransisikan, TANPA mengubah lebar track.
+   2. Transisi halus untuk thumb (warna + glow tidak
+      meloncat saat hover).
+   3. scrollbar-gutter di panel yang scrollable
+      (.chat-messages vertikal, .project-filters horizontal
+      di mobile) supaya konten tidak melompat.
+
+   TANPA radius/padding/font/width baru, TANPA warna baru,
+   TANPA menyentuh :root. Hanya yang ada di sini.
+   ========================================================= */
+
+/* 1+2. Idle tipis, hover penuh + transisi halus.
+   background-clip: padding-box dipertahankan supaya
+   border transparan jadi 'rel' thumb. */
+@media (hover: hover) and (pointer: fine) {
+  html::-webkit-scrollbar-thumb,
+  body::-webkit-scrollbar-thumb {
+    border-width: 5px;
+    transition:
+      border-width 0.22s var(--ease-out),
+      box-shadow 0.28s var(--ease-out);
+  }
+
+  html:hover::-webkit-scrollbar-thumb,
+  body:hover::-webkit-scrollbar-thumb,
+  html::-webkit-scrollbar-thumb:hover,
+  body::-webkit-scrollbar-thumb:hover {
+    border-width: 3px;
+  }
+
+  .sidebar::-webkit-scrollbar-thumb,
+  .nav::-webkit-scrollbar-thumb,
+  .chat-messages::-webkit-scrollbar-thumb,
+  .project-filters::-webkit-scrollbar-thumb {
+    transition:
+      background-color 0.28s var(--ease-out),
+      border-width 0.22s var(--ease-out);
+  }
+}
+
+/* 3. Ruang gutter supaya konten tidak melompat.
+   .sidebar/.nav tidak scroll (overflow hidden / tanpa
+   overflow) jadi tidak perlu. */
+.chat-messages {
+  scrollbar-gutter: stable;
+}
+
+@media (max-width: 760px) {
+  .project-filters {
+    scrollbar-gutter: stable;
+  }
+}
+
+
+/* =========================================================
+   SMOOTH SCROLL - scoped, removable in one delete
+
+   Lompatan anchor terasa mulus. Tabrakan dengan pola
+   reduced-motion yang sudah ada di file ini: dimatikan
+   total saat user minta gerakan minimal.
+   ========================================================= */
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
