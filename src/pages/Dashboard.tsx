@@ -1,4 +1,12 @@
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import {
+  memo,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type KeyboardEvent as ReactKeyboardEvent,
+} from 'react'
 import { createPortal } from 'react-dom'
 import {
   Github,
@@ -294,6 +302,10 @@ function Dashboard() {
             <div className="hero-main">
               <div className="hero-name">
                 <h1>Deni Purwanto</h1>
+
+                <span className="hero-location">
+                  Bandung, Indonesia &middot; GMT+7
+                </span>
               </div>
 
               <div className="hero-description">
@@ -347,7 +359,7 @@ function Dashboard() {
                   href="mailto:denipurwanto800@gmail.com"
                 >
                   <Mail size={17} />
-                  Gmail
+                  Email
                 </a>
 
                 <button
@@ -611,8 +623,7 @@ function NowCard() {
         Currently open to{' '}
 
         <a
-          href="#"
-          onClick={(e) => e.preventDefault()}
+          href="mailto:denipurwanto800@gmail.com?subject=Full-time%20role%20enquiry"
         >
           full-time roles
         </a>
@@ -1011,10 +1022,14 @@ async function fetchGithubContributions(
  */
 function ContributionDay({
   day,
+  tabIndex,
+  cellRef,
   onHover,
   onLeave,
 }: {
   day: GithubContribution
+  tabIndex: number
+  cellRef: (node: HTMLDivElement | null) => void
   onHover: (day: GithubContribution, rect: DOMRect) => void
   onLeave: () => void
 }) {
@@ -1022,9 +1037,10 @@ function ContributionDay({
 
   return (
     <div
+      ref={cellRef}
       className={`github-day level-${day.level}`}
-      tabIndex={0}
-      role="img"
+      tabIndex={tabIndex}
+      role="gridcell"
       aria-label={label}
       onMouseEnter={(event) =>
         onHover(
@@ -1081,6 +1097,178 @@ const ContributionCalendar = memo(function ContributionCalendar({
     setTip(null)
   }, [])
 
+    /*
+   * Akses keyboard: seluruh grid ini SATU tab stop, bukan 371.
+   * Setiap sel punya aria-label yang lengkap, jadi informasinya
+   * tetap terjangkau keyboard - hanya jumlah stop-nya yang
+   * berkurang dari 371 menjadi 1. Pola roving tabindex: satu
+   * sel yang bisa difokuskan (tabIndex 0), sisanya -1, dan
+   * satu handler keydown menggeser fokus dengan tombol panah.
+   *
+   * Kolom = indeks minggu (+/-1), baris = hari dalam minggu
+   * (+/-7). Home/End lompat ke tepi baris, PageUp/PageDown
+   * ke minggu pertama/terakhir.
+   */
+  /*
+   * Peta tanggal -> indeks rata, supaya tiap sel tahu posisinya
+   * di grid tanpa harus menghitung ulang saat render.
+   */
+  const cellIndexByDate = useMemo(() => {
+    const map = new Map<string, number>()
+
+    let index = 0
+
+    for (const week of weeks) {
+      for (const day of week) {
+        map.set(day.date, index)
+        index += 1
+      }
+    }
+
+    return map
+  }, [weeks])
+
+  const cellNodes = useRef<Array<HTMLDivElement | null>>([])
+
+  const [focusIndex, setFocusIndex] = useState(0)
+
+  const totalCells = useMemo(
+    () => weeks.reduce((n, week) => n + week.length, 0),
+    [weeks],
+  )
+
+  // Jaga indeks tetap sah saat data berubah (cache lalu refresh).
+  const activeIndex =
+    totalCells === 0
+      ? 0
+      : Math.min(focusIndex, totalCells - 1)
+
+  const focusCell = useCallback(
+    (index: number) => {
+      if (index < 0 || index >= totalCells) {
+        return
+      }
+
+      setFocusIndex(index)
+      cellNodes.current[index]?.focus()
+    },
+    [totalCells],
+  )
+
+  const handleGridKeyDown = useCallback(
+    (event: ReactKeyboardEvent<HTMLDivElement>) => {
+      const weekCount = weeks.length
+
+      if (weekCount === 0) {
+        return
+      }
+
+      // Petakan indeks rata -> (minggu, hari dalam minggu) dengan
+      // melewati panjang tiap minggu. Tidak bisa memakai
+      // findIndex terhadap tanggal: tanggal sel berada di tengah
+      // minggu, bukan selalu hari pertama.
+      let weekIndex = 0
+      let dayIndex = 0
+      let seen = 0
+
+      for (let w = 0; w < weeks.length; w += 1) {
+        const length = weeks[w].length
+
+        if (activeIndex < seen + length) {
+          weekIndex = w
+          dayIndex = activeIndex - seen
+          break
+        }
+
+        seen += length
+      }
+
+      // Kolom visual = minggu, baris visual = hari dalam minggu.
+      // Kartesius contribution graph memakai ini: panah kiri/kanan
+      // pindah minggu, panah atas/bawah pindah hari.
+      const moveToDay = (nextDay: number) => {
+        const week = weeks[weekIndex]
+        const clamped = Math.max(
+          0,
+          Math.min(week.length - 1, nextDay),
+        )
+
+        const before = weeks
+          .slice(0, weekIndex)
+          .reduce((n, w) => n + w.length, 0)
+
+        focusCell(before + clamped)
+      }
+
+      const moveToWeek = (nextWeek: number) => {
+        const clamped = Math.max(
+          0,
+          Math.min(weekCount - 1, nextWeek),
+        )
+
+        const targetWeek = weeks[clamped]
+        const targetDay = Math.min(
+          dayIndex,
+          targetWeek.length - 1,
+        )
+
+        const before = weeks
+          .slice(0, clamped)
+          .reduce((n, week) => n + week.length, 0)
+
+        focusCell(before + Math.max(0, targetDay))
+      }
+
+      switch (event.key) {
+        case 'ArrowRight':
+          event.preventDefault()
+          moveToWeek(weekIndex + 1)
+          break
+
+        case 'ArrowLeft':
+          event.preventDefault()
+          moveToWeek(weekIndex - 1)
+          break
+
+        case 'ArrowDown':
+          event.preventDefault()
+          moveToDay(dayIndex + 1)
+          break
+
+        case 'ArrowUp':
+          event.preventDefault()
+          moveToDay(dayIndex - 1)
+          break
+
+        case 'Home': {
+          event.preventDefault()
+          moveToDay(0)
+          break
+        }
+
+        case 'End': {
+          event.preventDefault()
+          moveToDay(weeks[weekIndex].length - 1)
+          break
+        }
+
+        case 'PageDown':
+          event.preventDefault()
+          moveToWeek(weeks.length - 1)
+          break
+
+        case 'PageUp':
+          event.preventDefault()
+          moveToWeek(0)
+          break
+
+        default:
+          break
+      }
+    },
+    [activeIndex, focusCell, totalCells, weeks],
+  )
+
   // Posisi bubble: di atas kotak; flip ke bawah bila mentok atas,
   // geser horizontal agar selalu di dalam viewport.
   const tipPlacement = useMemo(() => {
@@ -1110,6 +1298,13 @@ const ContributionCalendar = memo(function ContributionCalendar({
 
   return (
     <div className="github-calendar-wrapper">
+      <div
+        className="github-calendar-grid"
+        role="grid"
+        tabIndex={0}
+        aria-label="Contribution activity"
+        onKeyDown={handleGridKeyDown}
+      >
       <div className="github-months">
         {monthLabels.map(
           (month, index) => (
@@ -1131,20 +1326,38 @@ const ContributionCalendar = memo(function ContributionCalendar({
           (week, weekIndex) => (
             <div
               className="github-week"
+              role="row"
               key={weekIndex}
               style={{ ['--week-index' as string]: weekIndex }}
             >
-              {week.map((day) => (
-                <ContributionDay
-                  key={day.date}
-                  day={day}
-                  onHover={handleHover}
-                  onLeave={handleLeave}
-                />
-              ))}
+              {week.map((day) => {
+                const cellIndex = cellIndexByDate.get(
+                  day.date,
+                )
+
+                return (
+                  <ContributionDay
+                    key={day.date}
+                    day={day}
+                    tabIndex={
+                      cellIndex === activeIndex ? 0 : -1
+                    }
+                    cellRef={(node) => {
+                      if (cellIndex !== undefined) {
+                        cellNodes.current[
+                          cellIndex
+                        ] = node
+                      }
+                    }}
+                    onHover={handleHover}
+                    onLeave={handleLeave}
+                  />
+                )
+              })}
             </div>
           ),
         )}
+      </div>
       </div>
 
       {tip &&
@@ -1187,14 +1400,25 @@ const AnimatedTotalHeading = memo(function AnimatedTotalHeading({
   total,
   start,
   loading,
+  error,
 }: {
   total: number
   start: boolean
   loading: boolean
+  error: boolean
 }) {
   const value = useCountUp(total, 1400, start)
 
-  if (loading) {
+  /*
+   * Kegagalan fetch BUKAN nol. Menampilkan "0" di sini
+   * mengklaim tidak ada aktivitas sama sekali, padahal
+   * angkanya memang tidak diketahui - dan PRODUCT.md
+   * meletakkan "no invented numbers" sebagai constraint
+   * pertama. Tiga state: memuat (label), gagal (label
+   * yang sama karena tidak ada angka untuk disebut),
+   * sukses (angka).
+   */
+  if (loading || error) {
     return <>GitHub contributions</>
   }
 
@@ -1205,14 +1429,16 @@ const AnimatedTotalStat = memo(function AnimatedTotalStat({
   total,
   start,
   loading,
+  error,
 }: {
   total: number
   start: boolean
   loading: boolean
+  error: boolean
 }) {
   const value = useCountUp(total, 1400, start)
 
-  if (loading) {
+  if (loading || error) {
     return <>—</>
   }
 
@@ -1223,14 +1449,16 @@ const AnimatedStreakStat = memo(function AnimatedStreakStat({
   length,
   start,
   loading,
+  error,
 }: {
   length: number
   start: boolean
   loading: boolean
+  error: boolean
 }) {
   const value = useCountUp(length, 1100, start)
 
-  if (loading) {
+  if (loading || error) {
     return <>—</>
   }
 
@@ -1487,6 +1715,14 @@ function GithubContributions() {
    * diam-diam turun — padahal rekor aslinya masih berlaku.
    * File JSON itu ditulis dari riwayat penuh via GraphQL.
    */
+  /*
+   * Angka "0" pada state gagal bukan nol — itu klaim data
+   * yang salah, sedangkan yang sebenarnya adalah "tidak
+   * diketahui". Flag ini dipakai ketiga komponen stat agar
+   * merender tanda hubung, bukan angka.
+   */
+  const statsUnavailable = statsError && total === null
+
   const displayTotal = total ?? 0
 
   const displayStreak = streakRecord.allTimeLongestStreak
@@ -1560,6 +1796,7 @@ function GithubContributions() {
                 total={displayTotal}
                 start={countStart}
                 loading={loading}
+                error={statsUnavailable}
               />
             </h2>
 
@@ -1590,6 +1827,7 @@ function GithubContributions() {
                 total={displayTotal}
                 start={countStart}
                 loading={loading}
+                error={statsUnavailable}
               />
             </strong>
 
@@ -1609,6 +1847,7 @@ function GithubContributions() {
                 length={displayStreak.length}
                 start={countStart}
                 loading={loading}
+                error={statsUnavailable}
               />
             </strong>
 
@@ -1695,18 +1934,22 @@ function GithubContributions() {
 
           <div className="github-card-footer">
             <a
-              href="https://docs.github.com/en/account-and-profile/reference/profile-contributions-reference"
+              href={
+                statsUnavailable
+                  ? `https://github.com/${GITHUB_USERNAME}`
+                  : 'https://docs.github.com/en/account-and-profile/reference/profile-contributions-reference'
+              }
               target="_blank"
               rel="noreferrer"
             >
-              {calendarStale || calendarFailed
-                ? 'Showing cached contributions'
-                : 'Learn how we count contributions'}
-              {calendarFailed && graphAsOf
-                ? ` · as of ${graphAsOf}`
-                : calendarStale && graphAsOf
-                  ? ` · updated ${graphAsOf}`
-                  : ''}
+              {statsUnavailable
+                ? 'Could not reach GitHub'
+                : calendarStale || calendarFailed
+                  ? 'Showing cached contributions'
+                  : 'Learn how we count contributions'}
+              {calendarStale && graphAsOf
+                ? ` · updated ${graphAsOf}`
+                : ''}
             </a>
 
             <div className="github-legend">

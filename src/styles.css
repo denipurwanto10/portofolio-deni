@@ -571,6 +571,10 @@ a {
   display: flex;
   align-items: center;
   justify-content: center;
+  /* Jarak antar titik tetap 8px (22 + 8 = pitch 30px) supaya
+     baris tidak bergeser. Target sentuh 44px dibuat oleh ::after
+     (lihat blok TOUCH TARGETS di bawah file), bukan oleh ukuran
+     tombol: 6 x 44px = 264px tidak muat di sidebar 235px. */
   gap: 8px;
 }
 
@@ -583,9 +587,12 @@ a {
   outline: 2px solid var(--border-color);
   outline-offset: 1px;
   background: var(--swatch);
-  /* Potong isi (termasuk gradasi Default di ::before) mengikuti
-     lingkaran border — bukan kotak tombol. */
-  overflow: hidden;
+  /* `overflow: hidden` sengaja dihapus dari sini: yang perlu
+     dipotong hanya gradasi ::before (lihat
+     .accent-swatch-default::before), sedangkan ::after target
+     sentuh ikut terpotong ketika overflow aktif. Border-radius
+     50% + ::before inset sudah menghasilkan lingkaran sempurna
+     tanpa overflow. */
   background-clip: padding-box;
   padding: 0;
   cursor: pointer;
@@ -598,17 +605,17 @@ a {
 }
 
 /*
- * Ikon Default: belahan hitam/putih digambar di ::before (area
- * ISI saja, di dalam border transparan) supaya lingkaran
- * dalamnya bulat sempurna — gradasi tidak meluber ke area
- * border seperti sebelumnya.
+ * Ikon Default: belahan hitam/putih digambar di ::before, di dalam
+ * area isi saja (inset 2px) supaya lingkaran dalamnya bulat
+ * sempurna dan gradasi tidak meluber ke area border.
  */
 .accent-swatch-default::before {
   content: '';
   position: absolute;
   inset: 2px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #111111 50%, #ffffff 50%);
+  background:
+    linear-gradient(135deg, #111111 50%, #ffffff 50%);
   pointer-events: none;
 }
 
@@ -3576,6 +3583,23 @@ a {
   .github-calendar-wrapper {
     padding: 8px;
     overflow-x: auto;
+    /* Grid 560px di dalam wrapper yang lebih sempit -> bisa
+       digeser. Fade di tepi kanan memberi tahu ada sisa kolom
+       tanpa perlu menambah elemen atau arrow baru. */
+    -webkit-mask-image:
+      linear-gradient(
+        to right,
+        #000 0,
+        #000 calc(100% - 28px),
+        transparent 100%
+      );
+    mask-image:
+      linear-gradient(
+        to right,
+        #000 0,
+        #000 calc(100% - 28px),
+        transparent 100%
+      );
   }
 
   .github-months,
@@ -6757,6 +6781,22 @@ a {
     max-width: 100%;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
+    /* Fade di tepi kanan: memberi tahu grid 560px masih punya
+       kolom yang belum terlihat, tanpa menambah elemen baru. */
+    -webkit-mask-image:
+      linear-gradient(
+        to right,
+        #000 0,
+        #000 calc(100% - 28px),
+        transparent 100%
+      );
+    mask-image:
+      linear-gradient(
+        to right,
+        #000 0,
+        #000 calc(100% - 28px),
+        transparent 100%
+      );
   }
 
   /* Heatmap memang membutuhkan lebar minimum agar sel tidak rusak;
@@ -9645,8 +9685,8 @@ html {
 
 @media (hover: none), (pointer: coarse) {
 
-  /* 22px -> 44px. Swatch bulat tidak bisa diberi padding tanpa
-     merusak outline, jadi ::after. Induknya sudah relative. */
+  /* Swatch: target 44px lewat ::after, bukan dengan memperbesar
+     tombolnya — 6 x 44px tidak muat di sidebar 235px. */
   .accent-swatch::after,
   .lang-toggle-btn::after,
   .project-filter::after,

@@ -107,6 +107,8 @@ const translations: Record<string, string> = {
 
   // Additional UI translations
   'Currently open to': 'Saat ini terbuka untuk',
+  'Bandung, Indonesia · GMT+7': 'Bandung, Indonesia · GMT+7',
+  'Could not reach GitHub': 'Tidak bisa menghubungi GitHub',
   'Open for freelance, part-time, and collaboration opportunities in Web Development.': 'Terbuka untuk kesempatan freelance, paruh waktu, dan kolaborasi dalam Pengembangan Web.',
   'full-time roles': 'posisi penuh waktu',
   'Ministry of Manpower of the Republic of Indonesia': 'Kementerian Ketenagakerjaan Republik Indonesia',
