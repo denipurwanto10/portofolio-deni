@@ -9472,3 +9472,68 @@ html {
     scroll-behavior: auto;
   }
 }
+
+/* =========================================================
+   LANG TOGGLE PILL - scoped, removable in one delete
+
+   Latar aktif ID/EN yang BERGESER, bukan kedip.
+   Satu <span class="lang-toggle-pill"> meluncur di bawah
+   tombol (lihat LanguageToggle.tsx: is-id / is-en).
+   Lebar 50% karena ID & EN sama-sama 2 huruf.
+   ========================================================= */
+.lang-toggle {
+  position: relative;
+}
+
+.lang-toggle-pill {
+  position: absolute;
+  top: 3px;
+  bottom: 3px;
+  left: 3px;
+  width: calc(50% - 4px);
+  border-radius: 999px;
+  background: var(--accent);
+  transition: transform 0.32s var(--ease-out);
+}
+
+.lang-toggle.is-en .lang-toggle-pill {
+  transform: translateX(calc(100% + 2px));
+}
+
+/* Tombol naik di atas pill; latar aktif lama dimatikan
+   supaya tidak dobel dengan pill (warna teks tetap). */
+.lang-toggle-btn {
+  position: relative;
+  z-index: 1;
+}
+
+.lang-toggle-btn.active {
+  background: transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lang-toggle-pill {
+    transition: none;
+  }
+}
+
+/* =========================================================
+   AWARD MODAL POLISH - scoped, removable in one delete
+
+   Tanpa mengubah ukuran/radius/padding/font yang sudah
+   disepakati. Hanya: backdrop masuk lebih mulus, bingkai
+   cahaya di sekeliling stage, shadow gambar berlapis.
+   ========================================================= */
+.award-modal {
+  animation: modal-backdrop-in 0.3s var(--ease-out) both;
+}
+
+.award-modal-stage {
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.12);
+}
+
+.award-modal-image {
+  box-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.3),
+    0 24px 80px rgba(0, 0, 0, 0.45);
+}

@@ -22,11 +22,15 @@ function LanguageToggle() {
 
   return (
     <div
-      className="lang-toggle notranslate"
+      className={`lang-toggle notranslate ${isIndonesian ? 'is-id' : 'is-en'}`}
       role="group"
       aria-label="Pilih bahasa situs"
       translate="no"
     >
+      <span
+        className="lang-toggle-pill"
+        aria-hidden="true"
+      />
       <button
         type="button"
         className={
