@@ -660,6 +660,29 @@ function TimeCard() {
         ? [ipCity, ipCountry].filter(Boolean).join(', ')
         : visitorCountry
 
+  // Sufiks kota di cabang zona-sama: Jakarta vs Bandung (zona sama,
+  // negara sama) tetap tampil "· Jakarta, Indonesia". Sembunyi hanya
+  // bila tak ada info beda — kota sama (redundan) atau negara sama
+  // tanpa kota (mode timezone / fallback IP tanpa kota).
+  const homeCityNorm = homeBase.city.trim().toLowerCase()
+  const homeCountryNorm = homeBase.country.trim().toLowerCase()
+  const visitorCityNorm = ipCity.toLowerCase()
+  const visitorCountryEnNorm = getZoneCountry(
+    visitorTimeZone,
+    'en',
+  )
+    .trim()
+    .toLowerCase()
+  const isSameCity =
+    !!visitorCityNorm &&
+    visitorCityNorm === homeCityNorm
+  const isSameCountry =
+    !!visitorCountryEnNorm &&
+    visitorCountryEnNorm === homeCountryNorm
+  const showSameZonePlace =
+    !!visitorPlace &&
+    (visitorCityNorm ? !isSameCity : !isSameCountry)
+
   // Layout: pengunjung yang zonanya sama dengan rumah melihat waktu
   // yang sama dua kali — blok kedua runtuh jadi catatan satu baris.
   const isVisitorSameZone =
@@ -707,6 +730,7 @@ function TimeCard() {
             {language === 'id'
               ? 'Sama seperti waktumu'
               : 'Same as your time'}
+            {showSameZonePlace ? ` · ${visitorPlace}` : ''}
           </div>
         </>
       ) : (
