@@ -2141,26 +2141,6 @@ function GithubContributions() {
       ? `${formatGithubDate(displayStreak.start)} – ${formatGithubDate(displayStreak.end)}`
       : null
 
-  /* Label pendek untuk caption di bawah stat Streak: periode
-     rekor (16-27 Sep '25), bukan tanggal penuh seperti tooltip. */
-  const streakPeriod = (() => {
-    if (!displayStreak.start || !displayStreak.end) {
-      return null
-    }
-
-    const s = parseGithubDate(displayStreak.start)
-    const e = parseGithubDate(displayStreak.end)
-    const month = (d: Date) =>
-      d.toLocaleDateString('en-US', {
-        month: 'short',
-        timeZone: 'UTC',
-      })
-    const yy = e.getUTCFullYear().toString().slice(-2)
-
-    return `${month(s)} ${s.getUTCDate()}–${
-      month(e)
-    } ${e.getUTCDate()} '${yy}`
-  })()
 
   const asOfLabel = cacheLabel
   const showAsOf = isStale && Boolean(asOfLabel)
@@ -2283,16 +2263,6 @@ function GithubContributions() {
 
             <span>Streak</span>
 
-            {streakPeriod &&
-              !loading &&
-              !statsUnavailable && (
-              <span
-                className="github-streak-period"
-                translate="no"
-              >
-                {streakPeriod}
-              </span>
-            )}
           </div>
         </div>
       </div>
