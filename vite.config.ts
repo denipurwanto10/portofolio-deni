@@ -14,14 +14,17 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks(id) {
-          if (id.includes('node_modules/firebase/firestore')) {
-            return 'firebase-firestore'
-          }
-          if (id.includes('node_modules/firebase/auth')) {
-            return 'firebase-auth'
-          }
-          if (id.includes('node_modules/firebase/app')) {
-            return 'firebase-app'
+          // Perf: SDK Firebase yang sebenarnya ada di paket scoped
+          // node_modules/@firebase/*; node_modules/firebase/* hanyalah
+          // shim re-export. Aturan lama (path node_modules/firebase/...)
+          // meleset sehingga seluruh SDK jatuh ke vendor dan ikut
+          // di-preload saat first paint. Satu chunk 'firebase' sekarang
+          // hanya dimuat lewat graph LiveChat (lazy, intent-based).
+          if (
+            id.includes('node_modules/@firebase/') ||
+            id.includes('node_modules/firebase/')
+          ) {
+            return 'firebase'
           }
           if (id.includes('node_modules/react-dom')) {
             return 'react-dom'

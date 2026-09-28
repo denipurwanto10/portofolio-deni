@@ -9747,6 +9747,15 @@ html {
     padding-bottom: 14px;
   }
 
+  /* iOS Safari auto-zoom saat input <16px difokuskan dan tidak
+     zoom balik. 3 input situs (search Projects, 2 composer chat)
+     hanya 13-15px - naikkan ke 16px HANYA di layar sentuh,
+     desktop tidak berubah. Tinggi composer 48px tetap muat. */
+  .project-search input,
+  .chat-composer input {
+    font-size: 16px;
+  }
+
 }
 
 /* =========================================================
