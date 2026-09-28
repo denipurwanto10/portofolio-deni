@@ -301,6 +301,19 @@ export const homeBase = {
 }
 
 /*
+ * Sumber lokasi blok YOUR TIME:
+ * - 'ip' (default): kota+negara dari IP geolocation — akurat untuk
+ *   pengunjung asli, tapi ganti zona OS tanpa VPN tidak mengubahnya
+ *   (IP-nya memang tidak pindah).
+ * - 'timezone': negara dari zona IANA OS — ganti region di OS lalu
+ *   refresh langsung berubah, tanpa VPN. Kota tidak ditampilkan
+ *   (satu zona mencakup banyak kota, jadi kota dari zona tebakan).
+ * Ganti 1 baris ini saja untuk pindah mode.
+ */
+export const visitorLocationSource: 'ip' | 'timezone' =
+  'ip'
+
+/*
  * Offset zona rumah untuk tanggal yang sama, dihitung lewat Intl
  * supaya DST ikut benar (mis. America/New_York geser -5/-4).
  * Dipakai Dashboard (MY TIME + hero) dan Contact (kartu lokasi).
@@ -379,4 +392,276 @@ export function getHomeContactSubLabel(
   }
 
   return gmt
+}
+
+/*
+ * Negara pengunjung dari zona IANA browser
+ * (Intl.DateTimeFormat().resolvedOptions().timeZone).
+ * Browser tidak memberi negara secara langsung — yang tersedia
+ * hanya nama zona seperti "Asia/Tokyo", jadi kota diambil dari
+ * segmen terakhir dan negara dicocokkan ke tabel umum di bawah.
+ * Format nilai: 'English|Indonesia'; tanpa pipa = sama di
+ * kedua bahasa. Zona di luar tabel tetap tampil kotanya saja.
+ */
+const ZONE_COUNTRY: Record<string, string> = {
+  'Asia/Jakarta': 'Indonesia',
+  'Asia/Pontianak': 'Indonesia',
+  'Asia/Makassar': 'Indonesia',
+  'Asia/Jayapura': 'Indonesia',
+  'Asia/Singapore': 'Singapore|Singapura',
+  'Asia/Kuala_Lumpur': 'Malaysia',
+  'Asia/Kuching': 'Malaysia',
+  'Asia/Brunei': 'Brunei',
+  'Asia/Bangkok': 'Thailand',
+  'Asia/Phnom_Penh': 'Cambodia|Kamboja',
+  'Asia/Vientiane': 'Laos',
+  'Asia/Yangon': 'Myanmar',
+  'Asia/Ho_Chi_Minh': 'Vietnam',
+  'Asia/Manila': 'Philippines|Filipina',
+  'Asia/Taipei': 'Taiwan',
+  'Asia/Hong_Kong': 'Hong Kong',
+  'Asia/Shanghai': 'China|Tiongkok',
+  'Asia/Seoul': 'South Korea|Korea Selatan',
+  'Asia/Tokyo': 'Japan|Jepang',
+  'Asia/Pyongyang': 'North Korea|Korea Utara',
+  'Asia/Ulaanbaatar': 'Mongolia',
+  'Asia/Dubai': 'United Arab Emirates|Uni Emirat Arab',
+  'Asia/Qatar': 'Qatar',
+  'Asia/Kuwait': 'Kuwait',
+  'Asia/Riyadh': 'Saudi Arabia|Arab Saudi',
+  'Asia/Jerusalem': 'Israel',
+  'Asia/Amman': 'Jordan|Yordania',
+  'Asia/Beirut': 'Lebanon',
+  'Asia/Istanbul': 'Turkey|Turki',
+  'Asia/Tehran': 'Iran',
+  'Asia/Karachi': 'Pakistan',
+  'Asia/Kolkata': 'India',
+  'Asia/Colombo': 'Sri Lanka',
+  'Asia/Dhaka': 'Bangladesh',
+  'Asia/Kathmandu': 'Nepal',
+  'Asia/Almaty': 'Kazakhstan',
+  'Asia/Tashkent': 'Uzbekistan',
+  'Asia/Baku': 'Azerbaijan',
+  'Asia/Tbilisi': 'Georgia',
+  'Asia/Yerevan': 'Armenia',
+  'Asia/Nicosia': 'Cyprus|Siprus',
+  'Europe/London': 'United Kingdom|Inggris',
+  'Europe/Dublin': 'Ireland|Irlandia',
+  'Europe/Lisbon': 'Portugal',
+  'Europe/Madrid': 'Spain|Spanyol',
+  'Europe/Paris': 'France|Prancis',
+  'Europe/Brussels': 'Belgium|Belgia',
+  'Europe/Amsterdam': 'Netherlands|Belanda',
+  'Europe/Berlin': 'Germany|Jerman',
+  'Europe/Zurich': 'Switzerland|Swiss',
+  'Europe/Vienna': 'Austria',
+  'Europe/Rome': 'Italy|Italia',
+  'Europe/Prague': 'Czechia|Ceko',
+  'Europe/Warsaw': 'Poland|Polandia',
+  'Europe/Budapest': 'Hungary|Hungaria',
+  'Europe/Bucharest': 'Romania|Rumania',
+  'Europe/Athens': 'Greece|Yunani',
+  'Europe/Helsinki': 'Finland|Finlandia',
+  'Europe/Stockholm': 'Sweden|Swedia',
+  'Europe/Oslo': 'Norway|Norwegia',
+  'Europe/Copenhagen': 'Denmark',
+  'Europe/Moscow': 'Russia|Rusia',
+  'Europe/Kyiv': 'Ukraine|Ukraina',
+  'Europe/Belgrade': 'Serbia',
+  'Europe/Zagreb': 'Croatia|Kroasia',
+  'Europe/Sofia': 'Bulgaria',
+  'Europe/Riga': 'Latvia',
+  'Europe/Vilnius': 'Lithuania|Lituania',
+  'Europe/Tallinn': 'Estonia',
+  'Atlantic/Reykjavik': 'Iceland|Islandia',
+  'Atlantic/Azores': 'Portugal',
+  'Atlantic/Cape_Verde': 'Cape Verde|Tanjung Verde',
+  'America/New_York': 'United States|Amerika Serikat',
+  'America/Chicago': 'United States|Amerika Serikat',
+  'America/Denver': 'United States|Amerika Serikat',
+  'America/Los_Angeles': 'United States|Amerika Serikat',
+  'America/Anchorage': 'United States|Amerika Serikat',
+  'America/Phoenix': 'United States|Amerika Serikat',
+  'America/Detroit': 'United States|Amerika Serikat',
+  'Pacific/Honolulu': 'United States|Amerika Serikat',
+  'America/Toronto': 'Canada|Kanada',
+  'America/Vancouver': 'Canada|Kanada',
+  'America/Edmonton': 'Canada|Kanada',
+  'America/Winnipeg': 'Canada|Kanada',
+  'America/Halifax': 'Canada|Kanada',
+  'America/St_Johns': 'Canada|Kanada',
+  'America/Mexico_City': 'Mexico|Meksiko',
+  'America/Bogota': 'Colombia',
+  'America/Lima': 'Peru',
+  'America/Santiago': 'Chile',
+  'America/Sao_Paulo': 'Brazil',
+  'America/Buenos_Aires': 'Argentina',
+  'America/Caracas': 'Venezuela',
+  'America/Havana': 'Cuba|Kuba',
+  'America/Jamaica': 'Jamaica',
+  'America/Panama': 'Panama',
+  'America/Costa_Rica': 'Costa Rica|Kosta Rika',
+  'America/El_Salvador': 'El Salvador',
+  'America/Managua': 'Nicaragua|Nikaragua',
+  'America/Santo_Domingo': 'Dominican Republic|Republik Dominika',
+  'America/La_Paz': 'Bolivia',
+  'America/Asuncion': 'Paraguay',
+  'America/Montevideo': 'Uruguay',
+  'America/Paramaribo': 'Suriname',
+  'America/Cayenne': 'French Guiana|Guyana Prancis',
+  'America/Guyana': 'Guyana',
+  'America/Nuuk': 'Greenland|Greenland',
+  'Africa/Cairo': 'Egypt|Mesir',
+  'Africa/Lagos': 'Nigeria',
+  'Africa/Nairobi': 'Kenya',
+  'Africa/Johannesburg': 'South Africa|Afrika Selatan',
+  'Africa/Accra': 'Ghana',
+  'Africa/Addis_Ababa': 'Ethiopia',
+  'Africa/Casablanca': 'Morocco|Maroko',
+  'Africa/Algiers': 'Algeria|Aljazair',
+  'Africa/Tunis': 'Tunisia',
+  'Africa/Tripoli': 'Libya',
+  'Africa/Dakar': 'Senegal',
+  'Africa/Abidjan': 'Ivory Coast|Pantai Gading',
+  'Africa/Dar_es_Salaam': 'Tanzania',
+  'Africa/Kampala': 'Uganda',
+  'Africa/Kigali': 'Rwanda',
+  'Africa/Luanda': 'Angola',
+  'Africa/Maputo': 'Mozambique|Mozambik',
+  'Africa/Windhoek': 'Namibia',
+  'Africa/Gaborone': 'Botswana',
+  'Africa/Harare': 'Zimbabwe',
+  'Australia/Sydney': 'Australia',
+  'Australia/Melbourne': 'Australia',
+  'Australia/Brisbane': 'Australia',
+  'Australia/Perth': 'Australia',
+  'Australia/Adelaide': 'Australia',
+  'Australia/Darwin': 'Australia',
+  'Pacific/Auckland': 'New Zealand|Selandia Baru',
+  'Pacific/Fiji': 'Fiji',
+  'Pacific/Guam': 'Guam',
+  'Pacific/Port_Moresby': 'Papua New Guinea|Papua Nugini',
+  'Pacific/Noumea': 'New Caledonia|Kaledonia Baru',
+  'Pacific/Papeete': 'French Polynesia|Polinesia Prancis',
+  'Pacific/Apia': 'Samoa',
+  'Pacific/Tongatapu': 'Tonga',
+  'Pacific/Majuro': 'Marshall Islands|Kepulauan Marshall',
+}
+
+export function getVisitorTimeZone(): string {
+  try {
+    return (
+      Intl.DateTimeFormat().resolvedOptions().timeZone ||
+      'UTC'
+    )
+  } catch {
+    return 'UTC'
+  }
+}
+
+/*
+ * Lokasi pengunjung dari IP — "kota, negara" bila lengkap, cukup
+ * "negara" bila kota kosong. Primer: BigDataCloud (tanpa key,
+ * terbukti akurat level kota); cadangan: ipwho.is bila primer
+ * gagal; terakhir: negara dari zona OS. Selalu fetch segar tiap
+ * mount (tanpa cache) supaya pindah region/VPN langsung berubah.
+ * Satu-dua request ringan per buka halaman, timeout 8 detik tiap
+ * sumber, gagal diam-diam. Tanpa izin GPS (tanpa prompt).
+ */
+export type VisitorPlace = {
+  city: string
+  country: string
+}
+
+async function fetchWithTimeout(
+  url: string,
+  timeoutMs = 8000,
+): Promise<Response> {
+  const controller = new AbortController()
+  const timer = window.setTimeout(() => {
+    controller.abort()
+  }, timeoutMs)
+
+  try {
+    return await fetch(url, { signal: controller.signal })
+  } finally {
+    window.clearTimeout(timer)
+  }
+}
+
+export async function fetchVisitorPlace(
+  language: 'en' | 'id' = 'en',
+): Promise<VisitorPlace | null> {
+  // Primer: BigDataCloud.
+  try {
+    const response = await fetchWithTimeout(
+      `https://api.bigdatacloud.net/data/reverse-geocode-client?localityLanguage=${
+        language === 'id' ? 'id' : 'en'
+      }`,
+    )
+
+    if (response.ok) {
+      const data = (await response.json()) as {
+        city?: string
+        locality?: string
+        countryName?: string
+      }
+      const city = data.city || data.locality || ''
+      const country = data.countryName || ''
+
+      if (city || country) {
+        return { city, country }
+      }
+    }
+  } catch {
+    // Lanjut ke cadangan.
+  }
+
+  // Cadangan: ipwho.is (tanpa key).
+  try {
+    const response = await fetchWithTimeout(
+      'https://ipwho.is/?lang=en',
+    )
+
+    if (response.ok) {
+      const data = (await response.json()) as {
+        success?: boolean
+        city?: string
+        country?: string
+      }
+
+      if (data.success !== false) {
+        const city = data.city || ''
+        const country = data.country || ''
+
+        if (city || country) {
+          return { city, country }
+        }
+      }
+    }
+  } catch {
+    return null
+  }
+
+  return null
+}
+
+/* "Japan" / "Jepang" — negara dari zona IANA. Kota dari nama
+   zona TIDAK dipakai: satu zona mencakup banyak kota (mis.
+   Asia/Jakarta = Jakarta, Bandung, Surabaya sekaligus), jadi
+   kota dari zona selalu tebakan. Zona hanya boleh memberi
+   negara; kota harus dari IP geolocation atau tidak sama sekali. */
+export function getZoneCountry(
+  timeZone: string,
+  language: 'en' | 'id' = 'en',
+): string {
+  const entry = ZONE_COUNTRY[timeZone]
+
+  if (!entry) {
+    return ''
+  }
+
+  const [en, id] = entry.split('|')
+
+  return language === 'id' ? id || en : en
 }

@@ -23,10 +23,14 @@ import {
 } from '../hooks/useMotion'
 import streakRecordData from '../data/streakRecord.json'
 import {
+  fetchVisitorPlace,
   formatGmt,
-  getHomeGmtLabel,
   getHomeOffsetMinutes,
+  getVisitorTimeZone,
+  getZoneCountry,
   homeBase,
+  visitorLocationSource,
+  type VisitorPlace,
 } from '../data'
 import {
   getStoredLanguage,
@@ -611,6 +615,51 @@ function TimeCard() {
   const visitorOffsetMinutes = -time.getTimezoneOffset()
   const visitorLabel = formatGmt(visitorOffsetMinutes)
 
+  // Lokasi pengunjung — sumber dipilih via visitorLocationSource
+  // di src/data.ts:
+  // - 'ip': "kota, negara" dari IP (cukup "negara" bila kota kosong).
+  // - 'timezone': negara dari zona OS — ganti region lalu refresh
+  //   langsung berubah, tanpa VPN. Kota tak ditampilkan (tebakan).
+  // Zona IANA juga fallback bila fetch IP gagal.
+  const [visitorPlaceIp, setVisitorPlaceIp] =
+    useState<VisitorPlace | null>(null)
+
+  const visitorTimeZone = getVisitorTimeZone()
+  const visitorCountry = getZoneCountry(
+    visitorTimeZone,
+    language,
+  )
+
+  useEffect(() => {
+    if (visitorLocationSource !== 'ip') {
+      return
+    }
+
+    let cancelled = false
+
+    fetchVisitorPlace(language).then(
+      (place) => {
+        if (!cancelled && place) {
+          setVisitorPlaceIp(place)
+        }
+      },
+    )
+
+    return () => {
+      cancelled = true
+    }
+  }, [language, visitorTimeZone])
+
+  const ipCity = (visitorPlaceIp?.city || '').trim()
+  const ipCountry = (visitorPlaceIp?.country || '').trim()
+
+  const visitorPlace =
+    visitorLocationSource === 'timezone'
+      ? visitorCountry
+      : ipCity || ipCountry
+        ? [ipCity, ipCountry].filter(Boolean).join(', ')
+        : visitorCountry
+
   // Layout: pengunjung yang zonanya sama dengan rumah melihat waktu
   // yang sama dua kali — blok kedua runtuh jadi catatan satu baris.
   const isVisitorSameZone =
@@ -673,7 +722,9 @@ function TimeCard() {
           </div>
 
           <div className="time-location">
-            {visitorLabel}
+            {visitorPlace
+              ? `${visitorLabel} · ${visitorPlace}`
+              : visitorLabel}
           </div>
         </>
       )}
