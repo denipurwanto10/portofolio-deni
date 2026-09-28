@@ -2262,7 +2262,6 @@ function GithubContributions() {
             </strong>
 
             <span>Streak</span>
-
           </div>
         </div>
       </div>
