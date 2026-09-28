@@ -10152,3 +10152,24 @@ html {
     white-space: nowrap;
   }
 }
+
+/* =========================================================
+   LIVE DOTS - titik indikator ikut warna aksen yang dipilih.
+   Empat titik: .status-dot (profil), .time-status (jam),
+   .now-dot (Now), .availability-dot (contact).
+   Semua jadi --accent, termasuk aksen 'default' (hitam di
+   light, putih di dark) - persis 'sesuai warna yang dipilih'.
+   Berlaku di kedua tema karena aksen non-default identik.
+   Satu blok: hapus sampai EOF untuk revert.
+========================================================= */
+.status-dot,
+.time-status,
+.now-dot,
+.availability-dot {
+  background: var(--accent);
+}
+
+/* Halo now-dot ikut warna yang sama, bukan hijau tetap. */
+.now-dot {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 15%, transparent);
+}
