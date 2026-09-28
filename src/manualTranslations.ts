@@ -35,6 +35,11 @@ const translations: Record<string, string> = {
   'Search projects...': 'Cari proyek...',
   'Filter projects by category': 'Filter proyek berdasarkan kategori',
   'No projects found': 'Proyek tidak ditemukan',
+  'Try a different keyword or category.': 'Coba kata kunci atau kategori lain.',
+  'Reset filters': 'Atur ulang filter',
+  'Loading GitHub contributions...': 'Memuat kontribusi GitHub...',
+  'Unable to load GitHub contributions.': 'Gagal memuat kontribusi GitHub.',
+  'View GitHub profile': 'Lihat profil GitHub',
   'Awards and Certification.': 'Penghargaan dan Sertifikasi.',
   'Technologies and tools I use to build performant and scalable digital products.':
     'Teknologi dan alat yang saya gunakan untuk membangun produk digital yang cepat dan mudah dikembangkan.',
