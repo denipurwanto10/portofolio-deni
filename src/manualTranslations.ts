@@ -3,7 +3,7 @@ import { useEffect } from 'react'
 export type SiteLanguage = 'en' | 'id'
 
 const LANGUAGE_STORAGE_KEY = 'portfolio-language'
-const LANGUAGE_EVENT = 'portfolio-language-change'
+export const LANGUAGE_EVENT = 'portfolio-language-change'
 
 /**
  * Kamus terjemahan manual.
@@ -25,8 +25,8 @@ const translations: Record<string, string> = {
   'DESIGNED & BUILT BY': 'DIRANCANG & DIBUAT OLEH',
   'All Rights Reserved.': 'Hak Cipta Dilindungi.',
   'Full Stack Developer': 'Pengembang Full Stack',
-  'Full Stack Developer with 2+ year of experience building web applications and geospatial information systems for government agencies and educational institutions. Experienced in using Next.js, Laravel, Node.js, Leaflet.js, and QGIS, as well as integrating REST APIs and developing interactive data visualizations. Focused on building efficient, scalable, and user-friendly solutions, with experience improving data management efficiency by up to 40%. Familiar with AI-assisted coding tools to accelerate development, improve productivity, and support problem-solving throughout the software development process.':
-    'Pengembang Full Stack dengan pengalaman lebih dari 2 tahun dalam membangun aplikasi web dan sistem informasi geospasial untuk instansi pemerintah dan lembaga pendidikan. Berpengalaman menggunakan Next.js, Laravel, Node.js, Leaflet.js, dan QGIS, serta mengintegrasikan REST API dan mengembangkan visualisasi data interaktif. Berfokus pada pembangunan solusi yang efisien, skalabel, dan mudah digunakan, dengan pengalaman meningkatkan efisiensi pengelolaan data hingga 40%. Terbiasa menggunakan alat bantu coding berbasis AI untuk mempercepat pengembangan, meningkatkan produktivitas, dan mendukung pemecahan masalah selama proses pengembangan perangkat lunak.',
+  'Full Stack Developer with 2+ years of experience building geospatial information systems and web applications for government agencies and educational institutions — improving data management efficiency by up to 40%. Experienced in Next.js, Laravel, Node.js, Leaflet.js, and QGIS, with REST API integration and interactive data visualizations.':
+    'Pengembang Full Stack dengan pengalaman lebih dari 2 tahun membangun sistem informasi geospasial dan aplikasi web untuk instansi pemerintah dan lembaga pendidikan — meningkatkan efisiensi pengelolaan data hingga 40%. Berpengalaman dengan Next.js, Laravel, Node.js, Leaflet.js, dan QGIS, plus integrasi REST API dan visualisasi data interaktif.',
   'Switch to English': 'Beralih ke Bahasa Inggris',
   'Ganti ke Bahasa Indonesia': 'Ganti ke Bahasa Indonesia',
 
@@ -89,8 +89,7 @@ const translations: Record<string, string> = {
   'Close preview': 'Tutup pratinjau',
   'MY TIME': 'WAKTU SAYA',
   Now: 'Sekarang',
-  "What's this?": 'Apa ini?',
-  "what's this?": 'apa ini?',
+
   Total: 'Total',
   Less: 'Lebih sedikit',
   More: 'Lebih banyak',
@@ -107,7 +106,6 @@ const translations: Record<string, string> = {
 
   // Additional UI translations
   'Currently open to': 'Saat ini terbuka untuk',
-  'Bandung, Indonesia · GMT+7': 'Bandung, Indonesia · GMT+7',
   'Could not reach GitHub': 'Tidak bisa menghubungi GitHub',
   'Open for freelance, part-time, and collaboration opportunities in Web Development.': 'Terbuka untuk kesempatan freelance, paruh waktu, dan kolaborasi dalam Pengembangan Web.',
   'full-time roles': 'posisi penuh waktu',
@@ -116,6 +114,8 @@ const translations: Record<string, string> = {
   'Muhammadiyah University of Sukabumi': 'Universitas Muhammadiyah Sukabumi',
   'Open to work': 'Terbuka untuk bekerja',
   'YOUR TIME': 'WAKTU ANDA',
+  'Switch to 12-hour format': 'Ganti ke format 12 jam',
+  'Switch to 24-hour format': 'Ganti ke format 24 jam',
   'Close theme picker': 'Tutup pemilih tema',
   'Open theme picker': 'Buka pemilih tema',
   'Switch to dark mode': 'Beralih ke mode gelap',

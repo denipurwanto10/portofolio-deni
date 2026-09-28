@@ -22,6 +22,17 @@ import {
   useInView,
 } from '../hooks/useMotion'
 import streakRecordData from '../data/streakRecord.json'
+import {
+  formatGmt,
+  getHomeGmtLabel,
+  getHomeOffsetMinutes,
+  homeBase,
+} from '../data'
+import {
+  getStoredLanguage,
+  LANGUAGE_EVENT,
+  type SiteLanguage,
+} from '../manualTranslations'
 
 /*
  * Rekor streak sepanjang masa — lihat catatan di dekat
@@ -247,12 +258,18 @@ function Dashboard() {
   // A5: dependensi HANYA [resumeOpen] — sebelumnya closeResume ikut
   // jadi dep sehingga cleanup (buka kunci + scrollTo) jalan terlalu
   // dini saat animasi tutup dimulai (resumeLeaving=true).
+  // Harden: dialog mengurung fokus (Tab) + autofocus tombol tutup
+  // saat dibuka + fokus kembali ke tombol Resume saat ditutup.
   useEffect(() => {
     if (!resumeOpen) {
       return
     }
 
     const scrollY = window.scrollY
+    const trigger =
+      document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : null
 
     document.documentElement.style.overflow = 'hidden'
     document.body.style.overflow = 'hidden'
@@ -265,10 +282,59 @@ function Dashboard() {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         closeResume()
+        return
+      }
+
+      if (event.key !== 'Tab') {
+        return
+      }
+
+      const panel = document.querySelector(
+        '.resume-modal-panel',
+      )
+
+      if (!panel) {
+        return
+      }
+
+      const items = Array.from(
+        panel.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled])',
+        ),
+      ).filter(
+        (item) => item.tabIndex >= 0,
+      )
+
+      if (items.length === 0) {
+        event.preventDefault()
+        return
+      }
+
+      const first = items[0]
+      const last = items[items.length - 1]
+
+      if (
+        event.shiftKey &&
+        document.activeElement === first
+      ) {
+        event.preventDefault()
+        last.focus()
+      } else if (
+        !event.shiftKey &&
+        document.activeElement === last
+      ) {
+        event.preventDefault()
+        first.focus()
       }
     }
 
     document.addEventListener('keydown', handleKeyDown)
+
+    document
+      .querySelector<HTMLButtonElement>(
+        '.resume-modal-close',
+      )
+      ?.focus()
 
     return () => {
       document.documentElement.style.overflow = ''
@@ -281,6 +347,10 @@ function Dashboard() {
 
       window.scrollTo(0, scrollY)
       document.removeEventListener('keydown', handleKeyDown)
+
+      if (trigger && document.contains(trigger)) {
+        trigger.focus()
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [resumeOpen])
@@ -304,32 +374,24 @@ function Dashboard() {
                 <h1>Deni Purwanto</h1>
 
                 <span className="hero-location">
-                  Bandung, Indonesia &middot; GMT+7
+                  {homeBase.city}, {homeBase.country}
                 </span>
               </div>
 
               <div className="hero-description">
                 <p>
                   Full Stack Developer with 2+
-                  year of experience building web
-                  applications and geospatial
-                  information systems for government
-                  agencies and educational
-                  institutions. Experienced in using
-                  Next.js, Laravel, Node.js,
-                  Leaflet.js, and QGIS, as well as
-                  integrating REST APIs and developing
+                  years of experience building
+                  geospatial information systems
+                  and web applications for
+                  government agencies and
+                  educational institutions —
+                  improving data management
+                  efficiency by up to 40%.
+                  Experienced in Next.js, Laravel,
+                  Node.js, Leaflet.js, and QGIS,
+                  with REST API integration and
                   interactive data visualizations.
-                  Focused on building efficient,
-                  scalable, and user-friendly
-                  solutions, with experience improving
-                  data management efficiency by up to
-                  40%. Familiar with AI-assisted
-                  coding tools to accelerate
-                  development, improve productivity,
-                  and support problem-solving
-                  throughout the software development
-                  process.
                 </p>
               </div>
 
@@ -458,9 +520,39 @@ function Dashboard() {
   )
 }
 
+// Helper zona rumah (formatGmt, getHomeOffsetMinutes,
+// getHomeGmtLabel) tinggal di src/data.ts — dipakai bersama
+// Dashboard + Contact supaya satu sumber.
+
 function TimeCard() {
   const [time, setTime] = useState(new Date())
   const [is24Hour, setIs24Hour] = useState(false)
+
+  // Bahasa aktif: label "Same as your time" dirender langsung dalam
+  // bahasa aktif — komponen ini me-render ulang tiap detik, jadi
+  // tidak diandalkan ke DOM walker kamus.
+  const [language, setLanguage] =
+    useState<SiteLanguage>(() => getStoredLanguage())
+
+  useEffect(() => {
+    const onLanguageChange = (event: Event) => {
+      setLanguage(
+        (event as CustomEvent<SiteLanguage>).detail,
+      )
+    }
+
+    window.addEventListener(
+      LANGUAGE_EVENT,
+      onLanguageChange,
+    )
+
+    return () => {
+      window.removeEventListener(
+        LANGUAGE_EVENT,
+        onLanguageChange,
+      )
+    }
+  }, [])
 
   // Perf: interval dijeda saat tab disembunyikan — sebelumnya
   // membangunkan main thread tiap detik walau tab tidak terlihat.
@@ -493,39 +585,36 @@ function TimeCard() {
     }
   }, [])
 
-  const jakartaTime =
-    time.toLocaleTimeString('en-US', {
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: !is24Hour,
-      timeZone: 'Asia/Jakarta',
-    })
+  // Basis rumah dari src/data.ts: ganti 1 baris tiap pindah kota,
+  // MY TIME + label GMT ngikut otomatis (WIB/WITA/WIT/luar negeri).
+  const homeTime = time.toLocaleTimeString('en-US', {
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: !is24Hour,
+    timeZone: homeBase.timeZone,
+  })
+
+  // Offset zona rumah pada tanggal yang sama — bukan offset lokal.
+  const homeOffsetMinutes = getHomeOffsetMinutes(time)
+
+  const homeLabel = formatGmt(homeOffsetMinutes)
 
   // BUG FIX: "YOUR TIME" sebelumnya ikut memakai zona Asia/Jakarta
   // sehingga selalu sama dengan "MY TIME". Sekarang memakai zona
   // lokal pengunjung (tanpa timeZone) + label GMT dinamis.
-  const visitorTime =
-    time.toLocaleTimeString('en-US', {
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: !is24Hour,
-    })
+  const visitorTime = time.toLocaleTimeString('en-US', {
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: !is24Hour,
+  })
 
-  const visitorOffsetMinutes =
-    -time.getTimezoneOffset()
-  const visitorSign =
-    visitorOffsetMinutes >= 0 ? '+' : '-'
-  const visitorAbs =
-    Math.abs(visitorOffsetMinutes)
-  const visitorLabel = `GMT${visitorSign}${Math.floor(
-    visitorAbs / 60,
-  )}${
-    visitorAbs % 60
-      ? `:${String(
-          visitorAbs % 60,
-        ).padStart(2, '0')}`
-      : ''
-  }`
+  const visitorOffsetMinutes = -time.getTimezoneOffset()
+  const visitorLabel = formatGmt(visitorOffsetMinutes)
+
+  // Layout: pengunjung yang zonanya sama dengan rumah melihat waktu
+  // yang sama dua kali — blok kedua runtuh jadi catatan satu baris.
+  const isVisitorSameZone =
+    visitorOffsetMinutes === homeOffsetMinutes
 
   return (
     <aside className="time-card">
@@ -545,32 +634,49 @@ function TimeCard() {
           aria-label={`Switch to ${
             is24Hour ? '12-hour' : '24-hour'
           } format`}
+          title={`Switch to ${
+            is24Hour ? '12-hour' : '24-hour'
+          } format`}
         >
           {is24Hour ? '12H' : '24H'}
         </button>
       </div>
 
       <div className="time-main">
-        {jakartaTime}
+        {homeTime}
       </div>
 
       <div className="time-location">
-        GMT+7 · Indonesia
+        {homeLabel} · {homeBase.city}
       </div>
 
-      <div className="time-divider" />
+      {isVisitorSameZone ? (
+        <>
+          <div className="time-divider" />
 
-      <div className="your-time-label">
-        YOUR TIME
-      </div>
+          <div className="time-location" translate="no">
+            {language === 'id'
+              ? 'Sama seperti waktumu'
+              : 'Same as your time'}
+          </div>
+        </>
+      ) : (
+        <>
+          <div className="time-divider" />
 
-      <div className="your-time">
-        {visitorTime}
-      </div>
+          <div className="your-time-label">
+            YOUR TIME
+          </div>
 
-      <div className="time-location">
-        {visitorLabel}
-      </div>
+          <div className="your-time">
+            {visitorTime}
+          </div>
+
+          <div className="time-location">
+            {visitorLabel}
+          </div>
+        </>
+      )}
     </aside>
   )
 }
@@ -600,7 +706,7 @@ function NowCard() {
       month: 'short',
       day: 'numeric',
       year: 'numeric',
-      timeZone: 'Asia/Jakarta',
+      timeZone: homeBase.timeZone,
     })
 
   return (
@@ -608,8 +714,6 @@ function NowCard() {
       <div className="now-header">
         <div className="now-title">
           <strong>Now</strong>
-
-          <span className="now-whats-this">What's this?</span>
         </div>
 
         <div className="now-date">
@@ -1068,6 +1172,7 @@ function ContributionDay({
           event.currentTarget.getBoundingClientRect(),
         )
       }
+      onTouchEnd={onLeave}
     />
   )
 }

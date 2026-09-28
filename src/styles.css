@@ -982,6 +982,12 @@ a {
   margin-top: 23px;
 }
 
+/* Polish: CTA hero setinggi lantai sentuh 44px di semua lebar —
+   mobile sudah 44px via aturan breakpoint, ini menutup desktop. */
+.hero-actions .button {
+  min-height: 44px;
+}
+
 .button {
   display: inline-flex;
   align-items: center;
@@ -1095,10 +1101,10 @@ a {
 .time-main {
   margin-top: 11px;
   color: var(--text-primary);
-  font-size: 37px;
+  font-size: 32px;
   line-height: 1;
   font-weight: 700;
-  letter-spacing: -1.8px;
+  letter-spacing: -1.5px;
 }
 
 .time-location {
@@ -1122,9 +1128,9 @@ a {
 
 .your-time {
   margin-top: 7px;
-  font-size: 28px;
+  font-size: 24px;
   font-weight: 700;
-  letter-spacing: -1px;
+  letter-spacing: -0.8px;
   color: var(--text-primary);
 }
 
@@ -8711,12 +8717,7 @@ font {
 }
 
 
-/* Desktop dashboard: hide the "What's this?" helper text. */
-@media (min-width: 769px) {
-  .now-whats-this {
-    display: none !important;
-  }
-}
+
 
 /* Live Chat composer — dark mode */
 [data-theme='dark'] .chat-composer {

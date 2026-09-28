@@ -286,3 +286,97 @@ export const stack = [
   'Git',
   'Figma',
 ]
+
+/*
+ * Basis rumah: 1 baris ini yang diganti tiap pindah kota.
+ * MY TIME + lokasi hero ngikut otomatis — tanpa backend, tanpa GPS.
+ * Contoh: 'Asia/Makassar' (WITA), 'Asia/Jayapura' (WIT),
+ * 'America/New_York', 'Europe/London'.
+ */
+export const homeBase = {
+  city: 'Bandung',
+  province: 'West Java',
+  country: 'Indonesia',
+  timeZone: 'Asia/Jakarta',
+}
+
+/*
+ * Offset zona rumah untuk tanggal yang sama, dihitung lewat Intl
+ * supaya DST ikut benar (mis. America/New_York geser -5/-4).
+ * Dipakai Dashboard (MY TIME + hero) dan Contact (kartu lokasi).
+ */
+export function getHomeOffsetMinutes(
+  at: Date = new Date(),
+) {
+  const parts: Record<string, string> = {}
+
+  for (const part of new Intl.DateTimeFormat('en-US', {
+    timeZone: homeBase.timeZone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false,
+  }).formatToParts(at)) {
+    parts[part.type] = part.value
+  }
+
+  const asUtc = Date.UTC(
+    Number(parts.year),
+    Number(parts.month) - 1,
+    Number(parts.day),
+    Number(parts.hour),
+    Number(parts.minute),
+    Number(parts.second),
+  )
+
+  return Math.round((asUtc - at.getTime()) / 60000)
+}
+
+export function formatGmt(offsetMinutes: number) {
+  const sign = offsetMinutes >= 0 ? '+' : '-'
+  const abs = Math.abs(offsetMinutes)
+
+  return `GMT${sign}${Math.floor(abs / 60)}${
+    abs % 60
+      ? `:${String(abs % 60).padStart(2, '0')}`
+      : ''
+  }`
+}
+
+export function getHomeGmtLabel(at: Date = new Date()) {
+  return formatGmt(getHomeOffsetMinutes(at))
+}
+
+/*
+ * Singkatan zona Indonesia (WIB/WITA/WIT). Zona lain → null,
+ * pemanggil cukup tampilkan label GMT apa adanya.
+ */
+export function getHomeZoneShort(): string | null {
+  switch (homeBase.timeZone) {
+    case 'Asia/Jakarta':
+      return 'WIB'
+    case 'Asia/Makassar':
+      return 'WITA'
+    case 'Asia/Jayapura':
+      return 'WIT'
+    default:
+      return null
+  }
+}
+
+/* Sub-label kartu lokasi Contact: "UTC+7 (WIB)" / "GMT-5". */
+export function getHomeContactSubLabel(
+  at: Date = new Date(),
+) {
+  const short = getHomeZoneShort()
+  const gmt = getHomeGmtLabel(at)
+
+  if (short) {
+    return `UTC${gmt.slice(3)} (${short})`
+  }
+
+  return gmt
+}

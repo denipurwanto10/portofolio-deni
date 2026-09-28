@@ -6,6 +6,10 @@ import {
   MapPin,
 } from 'lucide-react'
 import SectionTitle from '../components/SectionTitle'
+import {
+  getHomeContactSubLabel,
+  homeBase,
+} from '../data'
 
 function Contact() {
   return (
@@ -41,8 +45,8 @@ function Contact() {
             </span>
 
             <span className="contact-info-text">
-              <strong>Bandung, West Java</strong>
-              <small>UTC+7 (WIB)</small>
+              <strong>{`${homeBase.city}, ${homeBase.province}`}</strong>
+              <small translate="no">{getHomeContactSubLabel()}</small>
             </span>
           </div>
         </div>
