@@ -9934,7 +9934,7 @@ html {
 .tech-marquee-track {
   display: flex;
   width: max-content;
-  animation: tech-marquee-scroll 32s linear infinite;
+  animation: tech-marquee-scroll 84s linear infinite;
 }
 
 .tech-marquee:hover .tech-marquee-track {
@@ -9970,6 +9970,30 @@ html {
   width: 34px;
   height: 34px;
   object-fit: contain;
+}
+
+.tech-chip-logo {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+}
+
+.tech-chip-logo img {
+  grid-area: 1 / 1;
+}
+
+.tech-chip-logo-dark {
+  opacity: 0;
+  transition: opacity 150ms ease;
+}
+
+[data-theme='dark'] .tech-chip-logo-light {
+  opacity: 0;
+}
+
+[data-theme='dark'] .tech-chip-logo-dark {
+  opacity: 1;
 }
 
 [data-theme='dark'] .tech-chip img.logo-dark-adapt {

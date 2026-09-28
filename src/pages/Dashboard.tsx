@@ -244,20 +244,41 @@ function buildMonthLabels(
 const SHOWCASE_TECH: {
   name: string
   logo: string
+  logoDark?: string
   darkAdapt?: boolean
 }[] = [
   { name: 'React', logo: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg' },
   { name: 'TypeScript', logo: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg' },
   { name: 'Next.js', logo: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nextjs/nextjs-original.svg', darkAdapt: true },
+  { name: 'Astro', logo: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/astro/astro-original.svg' },
+  { name: 'Vue.js', logo: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/vuejs/vuejs-original.svg' },
+  { name: 'Vite', logo: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/vitejs/vitejs-original.svg' },
   { name: 'Tailwind CSS', logo: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/tailwindcss/tailwindcss-original.svg' },
+  { name: 'JavaScript', logo: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg' },
+  { name: 'Bootstrap', logo: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/bootstrap/bootstrap-original.svg' },
+  { name: 'Leaflet.js', logo: 'https://cdn.jsdelivr.net/npm/leaflet@1.9.4/src/images/logo.svg' },
   { name: 'Node.js', logo: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nodejs/nodejs-original.svg' },
+  { name: 'Supabase', logo: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/supabase/supabase-original.svg' },
   { name: 'PostgreSQL', logo: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/postgresql/postgresql-original.svg' },
-  { name: 'Python', logo: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg' },
+  { name: 'MySQL', logo: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mysql/mysql-original.svg' },
   { name: 'Laravel', logo: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/laravel/laravel-original.svg' },
+  { name: 'CodeIgniter', logo: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/codeigniter/codeigniter-plain.svg' },
+  { name: 'Firebase', logo: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/firebase/firebase-plain.svg' },
+  { name: 'Python', logo: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg' },
+  { name: 'Pandas', logo: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/pandas/pandas-original.svg' },
+  { name: 'Scikit-Learn', logo: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/scikitlearn/scikitlearn-original.svg' },
+  { name: 'Jupyter', logo: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/jupyter/jupyter-original.svg' },
   { name: 'Figma', logo: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/figma/figma-original.svg' },
   { name: 'Git', logo: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/git/git-original.svg' },
+  { name: 'GitHub', logo: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg', darkAdapt: true },
+  { name: 'VS Code', logo: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/vscode/vscode-original.svg' },
+  { name: 'Postman', logo: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/postman/postman-original.svg' },
   { name: 'Docker', logo: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/docker/docker-original.svg' },
+  { name: 'Vercel', logo: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/vercel/vercel-original.svg', darkAdapt: true },
+  { name: 'Cloudflare', logo: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/cloudflare/cloudflare-original.svg' },
   { name: 'QGIS', logo: 'https://upload.wikimedia.org/wikipedia/commons/9/91/QGIS_logo_new.svg' },
+  { name: '9Router', logo: 'https://cdn.jsdelivr.net/gh/selfhst/icons/svg/9router.svg' },
+  { name: 'Hermes Agent', logo: '/images/nous-girl-dark.png', logoDark: '/images/nous-girl.png' },
 ]
 
 /*
@@ -314,19 +335,35 @@ function TechShowcase() {
                   className="tech-chip"
                   key={item.name}
                 >
-                  <img
-                    src={item.logo}
-                    alt=""
-                    loading="lazy"
-                    decoding="async"
-                    width={34}
-                    height={34}
-                    className={
-                      item.darkAdapt
-                        ? 'logo-dark-adapt'
-                        : undefined
-                    }
-                  />
+                  <div className="tech-chip-logo">
+                    <img
+                      src={item.logo}
+                      alt=""
+                      loading="lazy"
+                      decoding="async"
+                      width={34}
+                      height={34}
+                      className={
+                        item.logoDark
+                          ? 'tech-chip-logo-light'
+                          : item.darkAdapt
+                            ? 'logo-dark-adapt'
+                            : undefined
+                      }
+                    />
+
+                    {item.logoDark && (
+                      <img
+                        className="tech-chip-logo-dark"
+                        src={item.logoDark}
+                        alt=""
+                        loading="lazy"
+                        decoding="async"
+                        width={34}
+                        height={34}
+                      />
+                    )}
+                  </div>
 
                   <span>{item.name}</span>
                 </div>
