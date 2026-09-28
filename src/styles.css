@@ -10211,3 +10211,19 @@ input,
 textarea {
   caret-color: var(--accent);
 }
+
+/* =========================================================
+   STREAK PERIOD CAPTION - delight: bukti rekor di bawah angka.
+   Periode streak ('16-27 Sep) sebelumnya cuma ada di tooltip
+   title yang tak terlihat di layar sentuh. Sekian kecil supaya
+   label 'Streak' tetap yang memimpin (accent scarcity).
+   Satu blok: hapus sampai EOF untuk revert.
+========================================================= */
+.github-streak-period {
+  margin-top: 4px;
+  color: var(--text-tertiary);
+  font-size: 10px;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
