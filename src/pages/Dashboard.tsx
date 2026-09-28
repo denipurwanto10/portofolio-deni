@@ -16,6 +16,9 @@ import {
   FileText,
   Download,
   X,
+  CodeXml,
+  GraduationCap,
+  ChevronRight,
 } from 'lucide-react'
 import {
   useCountUp,
@@ -189,6 +192,7 @@ function buildMonthLabels(
   const labels: MonthLabel[] = []
 
   let previousMonth = ''
+  let lastColumn = -10
 
   weeks.forEach((week, index) => {
     const firstDay = week[0]
@@ -205,6 +209,22 @@ function buildMonthLabels(
       `${date.getUTCFullYear()}-${date.getUTCMonth()}`
 
     if (monthKey !== previousMonth) {
+      previousMonth = monthKey
+
+      /*
+       * Kartu kini setengah lebar: dua pergantian bulan bisa jatuh
+       * di minggu bersebelahan (mis. Sep → Oct) sehingga labelnya
+       * bertumpuk ("Saoct"). Lewati label yang terlalu dekat dengan
+       * label sebelumnya — satu label butuh ±3 kolom.
+       */
+      const column = index + 1
+
+      if (column - lastColumn < 3) {
+        return
+      }
+
+      lastColumn = column
+
       labels.push({
         label: date.toLocaleDateString(
           'en-US',
@@ -213,14 +233,143 @@ function buildMonthLabels(
             timeZone: 'UTC',
           },
         ),
-        column: index + 1,
+        column,
       })
-
-      previousMonth = monthKey
     }
   })
 
   return labels
+}
+
+const SHOWCASE_TECH: {
+  name: string
+  logo: string
+  darkAdapt?: boolean
+}[] = [
+  { name: 'React', logo: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg' },
+  { name: 'TypeScript', logo: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg' },
+  { name: 'Next.js', logo: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nextjs/nextjs-original.svg', darkAdapt: true },
+  { name: 'Tailwind CSS', logo: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/tailwindcss/tailwindcss-original.svg' },
+  { name: 'Node.js', logo: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nodejs/nodejs-original.svg' },
+  { name: 'PostgreSQL', logo: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/postgresql/postgresql-original.svg' },
+  { name: 'Python', logo: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg' },
+  { name: 'Laravel', logo: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/laravel/laravel-original.svg' },
+  { name: 'Figma', logo: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/figma/figma-original.svg' },
+  { name: 'Git', logo: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/git/git-original.svg' },
+  { name: 'Docker', logo: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/docker/docker-original.svg' },
+  { name: 'QGIS', logo: 'https://upload.wikimedia.org/wikipedia/commons/9/91/QGIS_logo_new.svg' },
+]
+
+/*
+ * Pindah halaman dari dalam Dashboard. App hanya mendengar
+ * popstate, jadi dispatch event itu setelah pushState supaya
+ * tidak reload penuh seperti <a href> biasa.
+ */
+function goToPath(path: string) {
+  if (window.location.pathname !== path) {
+    window.history.pushState({}, '', path)
+    window.dispatchEvent(new PopStateEvent('popstate'))
+  } else {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+}
+
+function TechShowcase() {
+  return (
+    <section
+      className="tech-marquee-card"
+      aria-label="Tech Stack"
+    >
+      <div className="tech-marquee-head">
+        <div className="tech-marquee-title">
+          <CodeXml
+            size={18}
+            className="tech-marquee-icon"
+          />
+
+          <h2>Tech Stack</h2>
+        </div>
+
+        <button
+          type="button"
+          className="tech-marquee-all"
+          onClick={() => goToPath('/tech-stack')}
+        >
+          <span>View all</span>
+
+          <ChevronRight size={14} />
+        </button>
+      </div>
+
+      <div className="tech-marquee">
+        <div className="tech-marquee-track">
+          {[0, 1].map((copy) => (
+            <div
+              className="tech-marquee-group"
+              key={copy}
+              aria-hidden={copy === 1 ? true : undefined}
+            >
+              {SHOWCASE_TECH.map((item) => (
+                <div
+                  className="tech-chip"
+                  key={item.name}
+                >
+                  <img
+                    src={item.logo}
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
+                    width={34}
+                    height={34}
+                    className={
+                      item.darkAdapt
+                        ? 'logo-dark-adapt'
+                        : undefined
+                    }
+                  />
+
+                  <span>{item.name}</span>
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function EducationMini() {
+  return (
+    <article className="mini-card education-narrow">
+      <div className="mini-head">
+        <GraduationCap
+          size={17}
+          className="mini-icon"
+        />
+
+        <span>Education</span>
+      </div>
+
+      <div className="mini-body">
+        <div className="mini-value">S1</div>
+
+        <div className="mini-side">
+          <p className="mini-caption">
+            Informatics Engineering
+          </p>
+
+          <p className="mini-meta">
+            <span>Langlangbuana University</span>
+            {' · '}
+            <span>Graduated Jun 2025</span>
+            {' · '}
+            <span>GPA: 3.46</span>
+          </p>
+        </div>
+      </div>
+    </article>
+  )
 }
 
 function Dashboard() {
@@ -452,7 +601,17 @@ function Dashboard() {
         </div>
       </div>
 
-      <GithubContributions />
+      <div className="dashboard-showcase">
+        <div className="dashboard-showcase-left">
+          <EducationMini />
+
+          <TechShowcase />
+        </div>
+
+        <div className="dashboard-showcase-right">
+          <GithubContributions />
+        </div>
+      </div>
 
     {resumeOpen &&
   createPortal(

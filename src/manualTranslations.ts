@@ -103,6 +103,11 @@ const translations: Record<string, string> = {
   'GitHub returned no contribution data': 'GitHub tidak mengembalikan data kontribusi',
   'Contribution activity': 'Aktivitas kontribusi',
   'contributions on': 'kontribusi pada',
+  'View all': 'Lihat semua',
+  Education: 'Pendidikan',
+  'Informatics Engineering': 'Teknik Informatika',
+  'Graduated Jun 2025': 'Lulus Jun 2025',
+  'GPA: 3.46': 'IPK: 3,46',
 
   // Additional UI translations
   'Currently open to': 'Saat ini terbuka untuk',
