@@ -617,9 +617,9 @@ function TimeCard() {
 
   // Lokasi pengunjung — sumber dipilih via visitorLocationSource
   // di src/data.ts:
-  // - 'ip': "kota, negara" dari IP (cukup "negara" bila kota kosong).
+  // - 'ip': negara dari IP (kota tidak ditampilkan — hanya negara).
   // - 'timezone': negara dari zona OS — ganti region lalu refresh
-  //   langsung berubah, tanpa VPN. Kota tak ditampilkan (tebakan).
+  //   langsung berubah, tanpa VPN.
   // Zona IANA juga fallback bila fetch IP gagal.
   const [visitorPlaceIp, setVisitorPlaceIp] =
     useState<VisitorPlace | null>(null)
@@ -650,15 +650,12 @@ function TimeCard() {
     }
   }, [language, visitorTimeZone])
 
-  const ipCity = (visitorPlaceIp?.city || '').trim()
   const ipCountry = (visitorPlaceIp?.country || '').trim()
 
   const visitorPlace =
     visitorLocationSource === 'timezone'
       ? visitorCountry
-      : ipCity || ipCountry
-        ? [ipCity, ipCountry].filter(Boolean).join(', ')
-        : visitorCountry
+      : ipCountry || visitorCountry
 
   // Layout: pengunjung yang zonanya sama dengan rumah melihat waktu
   // yang sama dua kali — blok kedua runtuh jadi catatan satu baris
@@ -697,7 +694,7 @@ function TimeCard() {
       </div>
 
       <div className="time-location">
-        {homeLabel} · {homeBase.city}
+        {homeLabel} · {homeBase.country}
       </div>
 
       {isVisitorSameZone ? (
