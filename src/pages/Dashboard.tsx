@@ -296,6 +296,65 @@ function goToPath(path: string) {
 }
 
 function TechShowcase() {
+  const marqueeRef = useRef<HTMLDivElement | null>(null)
+
+  /* Loop marquee 84s berjalan tanpa henti. Jeda saat kartu keluar
+     viewport atau tab disembunyikan supaya tidak ada compositing
+     sia-sia (pola classList langsung, tanpa re-render). */
+  useEffect(() => {
+    const el = marqueeRef.current
+
+    if (!el) {
+      return
+    }
+
+    let onScreen = true
+
+    const apply = () => {
+      el.classList.toggle(
+        'is-idle',
+        !onScreen || document.hidden,
+      )
+    }
+
+    const onVisibility = () => apply()
+    document.addEventListener(
+      'visibilitychange',
+      onVisibility,
+    )
+
+    if (typeof IntersectionObserver === 'undefined') {
+      return () => {
+        document.removeEventListener(
+          'visibilitychange',
+          onVisibility,
+        )
+      }
+    }
+
+    const observer = new IntersectionObserver((entries) => {
+      const entry = entries[0]
+
+      if (!entry) {
+        return
+      }
+
+      onScreen = entry.isIntersecting
+      apply()
+    })
+
+    observer.observe(el)
+    apply()
+
+    return () => {
+      observer.disconnect()
+      document.removeEventListener(
+        'visibilitychange',
+        onVisibility,
+      )
+    }
+  }, [])
+
   return (
     <section
       className="tech-marquee-card"
@@ -322,7 +381,7 @@ function TechShowcase() {
         </button>
       </div>
 
-      <div className="tech-marquee">
+      <div className="tech-marquee" ref={marqueeRef}>
         <div className="tech-marquee-track">
           {[0, 1].map((copy) => (
             <div
