@@ -10096,3 +10096,23 @@ html {
     animation: none;
   }
 }
+
+/* =========================================================
+   CONTACT ICONS — email + location tone-on-tone ikut aksen
+   (ikon --accent solid di atas background --accent-soft muda),
+   seperti contoh gambar tapi warnanya ngikut pilihan user.
+   Satu blok: hapus sampai EOF untuk revert.
+========================================================= */
+.contact-icon-email,
+.contact-icon-location {
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+/* Aksen non-default di dark mode: pastel light diganti campuran
+   solid dari --accent + --bg-surface, konsisten dengan
+   .contact-availability. */
+[data-theme='dark']:not([data-accent='default']) .contact-icon-email,
+[data-theme='dark']:not([data-accent='default']) .contact-icon-location {
+  background: color-mix(in srgb, var(--accent) 22%, var(--bg-surface));
+}
