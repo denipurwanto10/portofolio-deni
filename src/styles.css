@@ -10116,3 +10116,39 @@ html {
 [data-theme='dark']:not([data-accent='default']) .contact-icon-location {
   background: color-mix(in srgb, var(--accent) 22%, var(--bg-surface));
 }
+
+/* =========================================================
+   EDUCATION MINI — mobile: tetap sejajar, anti-jepit.
+   S1 diperkecil + kolom teks dikasih ruang penuh, tanggal
+   dan IPK dikunci nowrap supaya wrap hanya di "·" atau di
+   dalam nama universitas — "Jun 2025" tidak kepotong lagi.
+   Satu blok: hapus sampai EOF untuk revert.
+========================================================= */
+@media (max-width: 560px) {
+  .education-narrow .mini-body {
+    gap: 10px;
+  }
+
+  .education-narrow .mini-value {
+    font-size: 26px;
+    flex: 0 0 auto;
+  }
+
+  .education-narrow .mini-side {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .education-narrow .mini-caption {
+    font-size: 12.5px;
+  }
+
+  .education-narrow .mini-meta {
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  .education-narrow .mini-meta .mini-nowrap {
+    white-space: nowrap;
+  }
+}

@@ -399,9 +399,9 @@ function EducationMini() {
           <p className="mini-meta">
             <span>Langlangbuana University</span>
             {' · '}
-            <span>Graduated Jun 2025</span>
+            <span className="mini-nowrap">Graduated Jun 2025</span>
             {' · '}
-            <span>GPA: 3.46</span>
+            <span className="mini-nowrap">GPA: 3.46</span>
           </p>
         </div>
       </div>
