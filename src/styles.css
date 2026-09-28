@@ -10054,3 +10054,21 @@ html {
     animation: none;
   }
 }
+
+/* =========================================================
+   LIVE DOTS — now-dot (Now) + time-status (MY TIME)
+   Berkedip sama seperti global chat (.chat-status-dot):
+   pulse-soft 1.8s yang sama, bukan keyframes baru.
+   Satu blok: hapus sampai EOF untuk revert.
+========================================================= */
+.now-dot,
+.time-status {
+  animation: pulse-soft 1.8s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .now-dot,
+  .time-status {
+    animation: none;
+  }
+}
