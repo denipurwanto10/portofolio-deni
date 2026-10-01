@@ -183,6 +183,10 @@ const translations: Record<string, string> = {
   Search: 'Cari',
   'View Demo': 'Lihat Demo',
   Code: 'Kode',
+  Repository: 'Repositori',
+  'Close project details': 'Tutup detail proyek',
+  'Previous screenshot': 'Screenshot sebelumnya',
+  'Next screenshot': 'Screenshot berikutnya',
 
   // Tech descriptions/categories
   'Building interactive user interfaces': 'Membangun antarmuka pengguna interaktif',
@@ -211,8 +215,8 @@ const translations: Record<string, string> = {
   'Interface design and prototyping': 'Desain antarmuka dan pembuatan prototipe',
   'Version control and collaboration': 'Kontrol versi dan kolaborasi',
   'Code hosting and collaboration platform': 'Platform hosting kode dan kolaborasi',
-  'Code editor for modern application development':
-    'Editor kode untuk pengembangan aplikasi modern',
+  'Agentic AI IDE for modern development':
+    'IDE AI agen untuk pengembangan modern',
   'API testing and development platform': 'Platform pengujian dan pengembangan API',
   'Containerization platform for application deployment':
     'Platform containerization untuk deployment aplikasi',

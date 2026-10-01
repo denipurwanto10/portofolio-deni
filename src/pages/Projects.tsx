@@ -1,30 +1,18 @@
-import { useMemo, useState } from 'react'
-import type { ElementType } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { createPortal } from 'react-dom'
 import {
-  Cpu,
-  Database,
+  ChevronLeft,
+  ChevronRight,
   ExternalLink,
   FolderKanban,
   Github,
-  Globe,
-  Layers3,
-  Rocket,
   Search,
-  Smartphone,
   X,
 } from 'lucide-react'
 import SectionTitle from '../components/SectionTitle'
 import { projects } from '../data'
+import type { Project } from '../data'
 import { useHeaderStuck } from '../hooks/useHeaderStuck'
-
-const categoryIcons: Record<string, ElementType> = {
-  'Web App': Globe,
-  'Full-Stack': Layers3,
-  'Desktop & AI': Cpu,
-  Frontend: FolderKanban,
-  Backend: Database,
-  Mobile: Smartphone,
-}
 
 const languageColors: Record<string, string> = {
   JavaScript: '#eab308',
@@ -32,6 +20,16 @@ const languageColors: Record<string, string> = {
   Python: '#3572A5',
   PHP: '#777bb4',
   Kotlin: '#A97BFF',
+  Dart: '#00B4AB',
+  Java: '#b07219',
+}
+
+/** Fallback preview: kartu sosial GitHub repo (gambar OG). */
+function githubShot(link: string): string {
+  const match = link.match(/github\.com\/([^/]+\/[^/?#]+)/)
+  return match
+    ? `https://opengraph.githubassets.com/1/${match[1]}`
+    : ''
 }
 
 function Projects({
@@ -41,8 +39,19 @@ function Projects({
   search: string
   setSearch: (value: string) => void
 }) {
+  /* Hanya proyek yang punya foto preview (8 repo pilihan)
+     yang tampil di halaman ini. */
+  const featured = useMemo(
+    () => projects.filter((project) => project.images?.length),
+    [],
+  )
+
   const [activeCategory, setActiveCategory] =
     useState('All')
+  const [selected, setSelected] =
+    useState<Project | null>(null)
+  const [shotIndex, setShotIndex] = useState(0)
+  const [leaving, setLeaving] = useState(false)
 
   const { sentinelRef, stuck } =
     useHeaderStuck()
@@ -52,16 +61,16 @@ function Projects({
       'All',
       ...Array.from(
         new Set(
-          projects.map(
+          featured.map(
             (project) => project.category,
           ),
         ),
       ),
     ],
-    [],
+    [featured],
   )
 
-  const filtered = projects.filter((project) => {
+  const filtered = featured.filter((project) => {
     const matchesCategory =
       activeCategory === 'All' ||
       project.category === activeCategory
@@ -76,6 +85,52 @@ function Projects({
       .toLowerCase()
       .includes(keyword)
   })
+
+  const openProject = (project: Project) => {
+    setSelected(project)
+    setShotIndex(0)
+    setLeaving(false)
+  }
+
+  const closeProject = () => {
+    setLeaving(true)
+    window.setTimeout(() => {
+      setSelected(null)
+      setLeaving(false)
+    }, 180)
+  }
+
+  /* Kunci scroll halaman saat modal terbuka + tutup via
+     Escape (pola yang sama dengan modal Awards). */
+  useEffect(() => {
+    if (!selected) return
+
+    document.documentElement.style.overflow =
+      'hidden'
+    document.body.style.overflow = 'hidden'
+
+    const onKey = (
+      event: globalThis.KeyboardEvent,
+    ) => {
+      if (event.key === 'Escape') {
+        closeProject()
+      }
+    }
+
+    window.addEventListener('keydown', onKey)
+
+    return () => {
+      document.documentElement.style.overflow = ''
+      document.body.style.overflow = ''
+      window.removeEventListener('keydown', onKey)
+    }
+  }, [selected])
+
+  const shots = selected
+    ? selected.images?.length
+      ? selected.images
+      : [githubShot(selected.link)]
+    : []
 
   return (
     <section className="page-section projects-page">
@@ -93,7 +148,7 @@ function Projects({
           <SectionTitle
             icon={<FolderKanban />}
             title="Projects"
-            subtitle={`A collection of work from GitHub — ${projects.length} projects.`}
+            subtitle={`A collection of work from GitHub — ${featured.length} projects.`}
           />
 
           <a
@@ -168,7 +223,7 @@ function Projects({
 
         <p className="projects-count">
           Showing {filtered.length} of{' '}
-          {projects.length} projects
+          {featured.length} projects
           {activeCategory !== 'All' &&
             ` · ${activeCategory}`}
         </p>
@@ -180,44 +235,63 @@ function Projects({
             className="projects-grid"
             key={activeCategory}
           >
-            {filtered.map((project, index) => {
-              const Icon =
-                categoryIcons[
-                  project.category
-                ] ?? FolderKanban
+            {filtered.map((project, index) => (
+              <article
+                className="project-card reveal"
+                key={project.title}
+                style={{
+                  ['--reveal-index' as string]:
+                    Math.min(index, 11),
+                }}
+                onClick={() =>
+                  openProject(project)
+                }
+              >
+                <div className="project-shot-wrap">
+                  <img
+                    className="project-shot"
+                    src={
+                      project.images?.[0] ??
+                      githubShot(project.link)
+                    }
+                    alt={project.title}
+                    loading="lazy"
+                    decoding="async"
+                    onError={(event) => {
+                      const img =
+                        event.currentTarget
+                      const fallback =
+                        githubShot(project.link)
+                      if (
+                        fallback &&
+                        !img.src.endsWith(
+                          fallback,
+                        )
+                      ) {
+                        img.src = fallback
+                      }
+                    }}
+                  />
 
-              return (
-                <article
-                  className="project-card reveal"
-                  key={project.title}
-                  style={{
-                    ['--reveal-index' as string]:
-                      Math.min(index, 11),
-                  }}
-                >
-                  <div className="project-card-top">
-                    <span className="project-icon">
-                      <Icon size={19} />
-                    </span>
+                  <span className="project-category">
+                    {project.category}
+                  </span>
+                </div>
 
-                    <span className="project-category">
-                      {project.category}
-                    </span>
-                  </div>
-
+                <div className="project-card-body">
                   <h3>{project.title}</h3>
 
                   <p>{project.description}</p>
 
                   <div className="tags">
-                    {project.tags.map((tag) => (
-                      <span key={tag}>
-                        {tag}
-                      </span>
-                    ))}
+                    {project.tags
+                      .slice(0, 4)
+                      .map((tag) => (
+                        <span key={tag}>
+                          {tag}
+                        </span>
+                      ))}
                   </div>
-
-                  <div className="project-divider" />
 
                   <div className="project-footer">
                     <span className="project-lang">
@@ -232,36 +306,22 @@ function Projects({
                       {project.language}
                     </span>
 
-                    <span className="project-links">
-                      {project.demo && (
-                        <a
-                          href={project.demo}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="project-link demo"
-                        >
-                          <Rocket size={13} />
-                          Live Demo
-                        </a>
-                      )}
-
-                      <a
-                        href={project.link}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="project-link"
-                      >
-                        <Github size={13} />
-                        GitHub
-                        <ExternalLink
-                          size={12}
-                        />
-                      </a>
-                    </span>
+                    <a
+                      className="project-open"
+                      href={project.link}
+                      target="_blank"
+                      rel="noreferrer"
+                      onClick={(event) =>
+                        event.stopPropagation()
+                      }
+                    >
+                      <Github size={13} />
+                      Repository
+                    </a>
                   </div>
-                </article>
-              )
-            })}
+                </div>
+              </article>
+            ))}
           </div>
         ) : (
           <div className="projects-empty">
@@ -286,6 +346,163 @@ function Projects({
           </div>
         )}
       </div>
+
+      {/* PROJECT DETAIL MODAL — portal ke body supaya
+          position:fixed tidak terjebak containing block
+          ancestor (pola yang sama dengan modal Awards). */}
+      {selected &&
+        createPortal(
+          <div
+            className={
+              leaving
+                ? 'project-modal is-leaving'
+                : 'project-modal'
+            }
+            onClick={closeProject}
+            role="dialog"
+            aria-modal="true"
+            aria-label={`${selected.title} details`}
+          >
+            <button
+              type="button"
+              className="project-modal-close"
+              onClick={closeProject}
+              aria-label="Close project details"
+            >
+              <X size={19} />
+            </button>
+
+            <div
+              className={
+                leaving
+                  ? 'project-modal-panel is-leaving'
+                  : 'project-modal-panel'
+              }
+              onClick={(event) =>
+                event.stopPropagation()
+              }
+            >
+              <div className="project-modal-stage">
+                {shots.length > 1 && (
+                  <button
+                    type="button"
+                    className="project-modal-nav prev"
+                    onClick={() =>
+                      setShotIndex(
+                        (shotIndex -
+                          1 +
+                          shots.length) %
+                          shots.length,
+                      )
+                    }
+                    aria-label="Previous screenshot"
+                  >
+                    <ChevronLeft size={20} />
+                  </button>
+                )}
+
+                <img
+                  key={shots[shotIndex]}
+                  className="project-modal-image"
+                  src={shots[shotIndex]}
+                  alt={`${selected.title} — screenshot ${shotIndex + 1}`}
+                  decoding="async"
+                />
+
+                {shots.length > 1 && (
+                  <button
+                    type="button"
+                    className="project-modal-nav next"
+                    onClick={() =>
+                      setShotIndex(
+                        (shotIndex + 1) %
+                          shots.length,
+                      )
+                    }
+                    aria-label="Next screenshot"
+                  >
+                    <ChevronRight size={20} />
+                  </button>
+                )}
+              </div>
+
+              {shots.length > 1 && (
+                <div className="project-modal-thumbs">
+                  {shots.map((shot, index) => (
+                    <button
+                      key={shot}
+                      type="button"
+                      className={
+                        index === shotIndex
+                          ? 'project-modal-thumb active'
+                          : 'project-modal-thumb'
+                      }
+                      onClick={() =>
+                        setShotIndex(index)
+                      }
+                      aria-label={`View screenshot ${index + 1}`}
+                    >
+                      <img
+                        src={shot}
+                        alt=""
+                        loading="lazy"
+                        decoding="async"
+                      />
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              <div className="project-modal-info">
+                <div className="project-modal-top">
+                  <span className="project-category">
+                    {selected.category}
+                  </span>
+
+                  <span className="project-lang">
+                    <i
+                      style={{
+                        background:
+                          languageColors[
+                            selected.language
+                          ] ?? '#94a3b8',
+                      }}
+                    />
+                    {selected.language}
+                  </span>
+                </div>
+
+                <h3>{selected.title}</h3>
+
+                <p>{selected.description}</p>
+
+                <div className="tags">
+                  {selected.tags.map((tag) => (
+                    <span key={tag}>
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+
+                <div className="project-divider" />
+
+                <div className="project-modal-foot">
+                  <a
+                    className="project-link demo"
+                    href={selected.link}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    <Github size={14} />
+                    Repository
+                    <ExternalLink size={12} />
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>,
+          document.body,
+        )}
     </section>
   )
 }

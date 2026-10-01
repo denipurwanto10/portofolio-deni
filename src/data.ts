@@ -6,6 +6,7 @@ export type Project = {
   demo?: string
   language: string
   category: string
+  images?: string[]
 }
 
 export type ExperienceItem = {
@@ -30,6 +31,7 @@ export const projects: Project[] = [
     demo: 'https://formatraa.vercel.app/',
     language: 'JavaScript',
     category: 'Web App',
+    images: ['/projects/formatra1.png', '/projects/formatra2.png', '/projects/formatra3.png'],
   },
   {
     title: 'Disaster Monitoring Indonesia',
@@ -39,6 +41,7 @@ export const projects: Project[] = [
     link: 'https://github.com/denipurwanto10/Disaster-Monitoring',
     language: 'TypeScript',
     category: 'Full-Stack',
+    images: ['/projects/disaster1.png', '/projects/disaster2.png', '/projects/disaster3.png'],
   },
   {
     title: 'PC Control — Multimodal Desktop Controller',
@@ -57,6 +60,7 @@ export const projects: Project[] = [
     link: 'https://github.com/denipurwanto10/Website-UMKM-V2',
     language: 'JavaScript',
     category: 'Full-Stack',
+    images: ['/projects/umkm1.png', '/projects/umkm2.png', '/projects/umkm3.png'],
   },
   {
     title: 'Placement Test Engine',
@@ -76,6 +80,7 @@ export const projects: Project[] = [
     link: 'https://github.com/denipurwanto10/inventaris_app',
     language: 'PHP',
     category: 'Backend',
+    images: ['/projects/gudang1.png', '/projects/gudang2.png', '/projects/gudang3.png'],
   },
   {
     title: 'Wisma Reservasi — Hotel Management System',
@@ -85,6 +90,7 @@ export const projects: Project[] = [
     link: 'https://github.com/denipurwanto10/reservasi_hotel',
     language: 'JavaScript',
     category: 'Full-Stack',
+    images: ['/projects/hotel1.png', '/projects/hotel2.png', '/projects/hotel3.png'],
   },
   {
     title: 'Pasarku — Multi-Vendor E-Commerce',
@@ -94,6 +100,7 @@ export const projects: Project[] = [
     link: 'https://github.com/denipurwanto10/Pasarku_Ecommerce',
     language: 'PHP',
     category: 'Backend',
+    images: ['/projects/toko1.png', '/projects/toko2.png', '/projects/toko3.png'],
   },
   {
     title: 'Attendance App',
@@ -103,6 +110,7 @@ export const projects: Project[] = [
     link: 'https://github.com/denipurwanto10/absensi-app',
     language: 'PHP',
     category: 'Backend',
+    images: ['/projects/absen1.png', '/projects/absen2.png', '/projects/absen3.png'],
   },
   {
     title: 'MandiriNewsApps',
@@ -195,6 +203,7 @@ export const projects: Project[] = [
     link: 'https://github.com/denipurwanto10/MenuRestoran',
     language: 'Java',
     category: 'Desktop & AI',
+    images: ['/projects/resto1.png', '/projects/resto2.png', '/projects/resto3.png'],
   },
 ]
 

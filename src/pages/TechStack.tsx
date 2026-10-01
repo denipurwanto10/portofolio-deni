@@ -122,7 +122,7 @@ const categories: Category[] = [
     { name: 'Figma', description: 'Interface design and prototyping', mark: 'Fi', markClass: 'figma', logo: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/figma/figma-original.svg' },
 { name: 'Git', description: 'Version control and collaboration', mark: 'git', markClass: 'git', logo: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/git/git-original.svg' },
 { name: 'GitHub', description: 'Code hosting and collaboration platform', mark: 'GH', markClass: 'github', logo: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg' },
-{ name: 'VS Code', description: 'Code editor for modern application development', mark: 'VS', markClass: 'vscode', logo: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/vscode/vscode-original.svg' },
+{ name: 'Antigravity', description: 'Agentic AI IDE for modern development', mark: 'A', markClass: 'antigravity', logo: 'https://cdn.jsdelivr.net/gh/selfhst/icons/png/google-antigravity.png' },
 { name: 'Postman', description: 'API testing and development platform', mark: 'P', markClass: 'postman', logo: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/postman/postman-original.svg' },
 { name: 'Docker', description: 'Containerization platform for application deployment', mark: 'D', markClass: 'docker', logo: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/docker/docker-original.svg' },
 { name: 'Vercel', description: 'Cloud platform for frontend deployment', mark: '▲', markClass: 'vercel', logo: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/vercel/vercel-original.svg' },

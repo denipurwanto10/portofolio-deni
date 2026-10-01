@@ -901,11 +901,34 @@ const PROJECT_ALIASES: Record<string, string[]> = {
   Menu: ['menu restoran', 'menurestoran', 'restoran', 'restaurant'],
 }
 
+/**
+ * Kecocokan kunci alias -> judul yang toleran. startsWith saja
+ * tidak cukup: 'Menu' vs 'Restaurant Menu', 'Petclinic' vs
+ * 'PetClinic' (kapital beda), 'GIS Penduduk' vs 'Population GIS',
+ * 'Visualisasi' vs 'Borewell Pipe Visualization', 'Deteksi' vs
+ * 'Diabetes Detection ML'. Petanya memetakan key ke fragmen
+ * judul (lowercase) yang pasti ada.
+ */
+const ALIAS_TITLE_HINTS: Record<string, string> = {
+  Menu: 'restaurant',
+  Petclinic: 'petclinic',
+  'GIS Penduduk': 'population',
+  Visualisasi: 'borewell',
+  Deteksi: 'diabetes',
+}
+
+function titleMatchesAliasKey(title: string, key: string): boolean {
+  const t = title.toLowerCase()
+  if (t.startsWith(key.toLowerCase())) return true
+  const hint = ALIAS_TITLE_HINTS[key]
+  return hint ? t.includes(hint) : false
+}
+
 function findProjectByName(input: string) {
   return projects.find((item) => {
     const base = item.title.split('—')[0].trim().toLowerCase()
     const aliasKey = Object.keys(PROJECT_ALIASES).find((key) =>
-      item.title.startsWith(key),
+      titleMatchesAliasKey(item.title, key),
     )
     const words = [
       base,
@@ -1006,7 +1029,7 @@ const PROJECT_SUMMARIES_ID: Record<string, string> = {
 function projectAliasKey(title: string): string | null {
   return (
     Object.keys(PROJECT_ALIASES).find((key) =>
-      title.startsWith(key),
+      titleMatchesAliasKey(title, key),
     ) ?? null
   )
 }
@@ -1040,7 +1063,7 @@ function formatProjectReply(
 
   const lines = [
     `${project.title} — ${summary ?? project.category}.`,
-    project.demo ?? project.link,
+    project.link,
     'Selengkapnya di halaman Proyek ya.',
   ]
 
@@ -1556,11 +1579,7 @@ function answerFromContext(
           'lihat',
         ])
       ) {
-        if (project.demo) {
-          return `Nih link demonya, bisa langsung dicoba: ${project.demo}`
-        }
-
-        return `Belum ada demo publiknya, tapi kodenya bisa dilihat di sini: ${project.link}`
+        return `Kode dan preview lengkapnya bisa dilihat di GitHub: ${project.link}`
       }
 
       if (
