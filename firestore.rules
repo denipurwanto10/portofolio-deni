@@ -1,0 +1,163 @@
+rules_version = '2';
+
+// Firestore Security Rules — LiveChat portfolio.
+// Koleksi aktual (dari src/components/LiveChat.tsx, bukan tebakan):
+//   messages/{id}      — chat publik realtime
+//   userProfiles/{uid} — direktori nama/foto/email publik per UID
+//
+// Desain yang dipertahankan: read PUBLIK untuk kedua koleksi
+// (tamu logout ikut membaca). Email di userProfiles memang publik
+// by design pemilik project — bukan bug, jangan "diperbaiki".
+// Yang dikunci: kepemilikan tulis via request.auth.uid.
+//
+// DEPLOY: via Firebase CLI dari repo ini —
+//   firebase deploy --only firestore:rules
+// (firebase.json menunjuk ke file ini; .firebaserc = webportofolio-cfc01.)
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default deny: path yang tidak dikenal tertutup total.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // ---------------- helpers ----------------
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    // Field tidak berubah antara before/after image (aman bila absen).
+    function unchanged(field) {
+      return request.resource.data.get(field, '__missing__')
+        == resource.data.get(field, '__missing__');
+    }
+
+    function validText(t) {
+      // Client tidak trim sebelum addDoc (LiveChat.tsx:3792 hanya slice),
+      // jadi rules yang menolak whitespace-only anti pesan "kosong".
+      return t is string && t.size() >= 1 && t.size() <= 500
+        && t.trim().size() >= 1;
+    }
+
+    function validName(n) {
+      return n is string && n.size() >= 1 && n.size() <= 200;
+    }
+
+    function validPhotoURL(p) {
+      return p == null || (p is string && p.size() <= 2048);
+    }
+
+    function validReplyTo(r) {
+      return r == null || (
+        r is map
+        && r.keys().hasAll(['id', 'text', 'name'])
+        && r.keys().hasOnly(['id', 'text', 'name', 'uid'])
+        && r.id is string
+        && r.text is string && r.text.size() <= 140
+        && r.name is string
+        && (!('uid' in r) || r.uid is string)
+      );
+    }
+
+    // KETERBATASAN rules: tidak ada iterasi atas nilai map, jadi isi
+    // array per-emoji tidak bisa dicek elemen per elemen. Dibatasi
+    // map-ness + jumlah key; kebersihan elemen mengandalkan client
+    // (parseReactions + toggleReaction yang memang hanya tulis UID).
+    function validReactions(r) {
+      return r == null || (r is map && r.size() <= 20);
+    }
+
+    // Bentuk after-image message yang sah (dipakai create + update).
+    // displayName = field LEGACY dari versi lama (ada di 1 dokumen
+    // production); dipertahankan read-only agar heal/reaction pada
+    // dokumen lama tidak patah. Dokumen baru tidak perlu mengisinya.
+    function validMessage(doc) {
+      return doc.keys().hasAll(['text', 'uid', 'name', 'createdAt'])
+        && doc.keys().hasOnly(
+          ['text', 'uid', 'name', 'photoURL', 'createdAt', 'replyTo', 'reactions', 'displayName']
+        )
+        && validText(doc.text)
+        && doc.uid is string && doc.uid.size() >= 1
+        && validName(doc.name)
+        && validPhotoURL(doc.get('photoURL', null))
+        && doc.createdAt is timestamp
+        && validReplyTo(doc.get('replyTo', null))
+        && validReactions(doc.get('reactions', null))
+        && (doc.get('displayName', null) == null
+          || (doc.displayName is string && doc.displayName.size() <= 200));
+    }
+
+    // ---------------- messages ----------------
+
+    match /messages/{messageId} {
+      // Read publik by design (tamu logout ikut membaca via onSnapshot).
+      allow read: if true;
+
+      // Create: login wajib, UID dokumen = UID auth (anti-pemalsuan),
+      // text 1-500, createdAt server-side, tanpa reactions awal.
+      allow create: if isSignedIn()
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.createdAt == request.time
+        && !('reactions' in request.resource.data)
+        && validMessage(request.resource.data);
+
+      // Update — tepat DUA jalur, keduanya butuh login:
+      // (a) Heal pemilik: hanya name/photoURL yang boleh berubah
+      //     (LiveChat.tsx:3305 updateDoc).
+      // (b) Reaction: user login mana pun boleh ubah HANYA reactions
+      //     (LiveChat.tsx:3893 runTransaction + update dotted
+      //     `reactions.<emoji>`; deleteField() = hapus nested key,
+      //     tetap kategori update sehingga lolos jalur ini).
+      // uid + createdAt immutable di kedua jalur.
+      allow update: if isSignedIn()
+        && validMessage(request.resource.data)
+        && request.resource.data.uid == resource.data.uid
+        && request.resource.data.createdAt == resource.data.createdAt
+        && (
+          (resource.data.uid == request.auth.uid
+            && unchanged('text')
+            && unchanged('replyTo')
+            && unchanged('reactions')
+            && unchanged('displayName'))
+          ||
+          (unchanged('text')
+            && unchanged('name')
+            && unchanged('photoURL')
+            && unchanged('replyTo')
+            && unchanged('displayName')
+            && request.resource.data.get('reactions', null)
+              != resource.data.get('reactions', null))
+        );
+
+      // Client tidak punya deleteDoc — tolak delete dari client.
+      allow delete: if false;
+    }
+
+    // ---------------- userProfiles ----------------
+
+    match /userProfiles/{uid} {
+      // Read publik by design (nama/foto/email tampil saat logout).
+      allow read: if true;
+
+      // Tulis hanya pemilik UID (LiveChat.tsx:351 setDoc merge).
+      allow create, update: if isOwner(uid)
+        && request.resource.data.keys().hasOnly(
+          ['name', 'photoURL', 'email', 'updatedAt']
+        )
+        && validName(request.resource.data.get('name', ''))
+        && validPhotoURL(request.resource.data.get('photoURL', null))
+        && (request.resource.data.get('email', null) == null
+          || (request.resource.data.email is string
+            && request.resource.data.email.size() <= 320))
+        && request.resource.data.get('updatedAt', null) is timestamp;
+
+      allow delete: if false;
+    }
+  }
+}
