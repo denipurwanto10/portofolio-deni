@@ -10,7 +10,7 @@ import {
   X,
 } from 'lucide-react'
 import SectionTitle from '../components/SectionTitle'
-import { projects } from '../data'
+import { featuredProjects } from '../data'
 import type { Project } from '../data'
 import { useHeaderStuck } from '../hooks/useHeaderStuck'
 
@@ -39,10 +39,10 @@ function Projects({
   search: string
   setSearch: (value: string) => void
 }) {
-  /* Hanya proyek yang punya foto preview (8 repo pilihan)
-     yang tampil di halaman ini. */
+  /* Hanya proyek berfoto yang tampil — sumbernya sama dengan
+     yang dipakai asisten (featuredProjects di data.ts). */
   const featured = useMemo(
-    () => projects.filter((project) => project.images?.length),
+    () => featuredProjects,
     [],
   )
 

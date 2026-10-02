@@ -157,7 +157,7 @@ export const projects: Project[] = [
     tags: ['Python', 'scikit-learn', 'Pandas', 'NumPy', 'Jupyter'],
     link: 'https://github.com/denipurwanto10/Tugas-ML-Deteksi-Diabetes',
     language: 'Python',
-    category: 'Desktop & AI',
+    category: 'Machine Learning',
   },
   {
     title: 'PPDB Flutter — Student Admissions',
@@ -202,10 +202,17 @@ export const projects: Project[] = [
     tags: ['Java', 'Swing', 'MySQL', 'JDBC'],
     link: 'https://github.com/denipurwanto10/MenuRestoran',
     language: 'Java',
-    category: 'Desktop & AI',
+    category: 'Desktop',
     images: ['/projects/resto1.png', '/projects/resto2.png', '/projects/resto3.png'],
   },
 ]
+
+/* Hanya proyek yang punya foto preview yang tampil di halaman
+   Projects. Sumber tunggal — dipakai halaman dan asisten, jadi
+   jawaban bot tidak pernah beda dengan yang terlihat di menu. */
+export const featuredProjects: Project[] = projects.filter(
+  (project) => project.images?.length,
+)
 
 export const experiences: ExperienceItem[] = [
   {

@@ -40,7 +40,7 @@ import {
   loginWithGoogle,
   logout,
 } from '../firebase'
-import { experiences, projects, stack } from '../data'
+import { experiences, featuredProjects, projects, stack } from '../data'
 
 type ChatReplyTo = {
   id: string
@@ -895,10 +895,11 @@ const PROJECT_ALIASES: Record<string, string[]> = {
   Visualisasi: ['visualisasi pipa', 'pipa sumur', 'sumur bor', 'borewell', 'pipa'],
   Deteksi: ['deteksi diabetes', 'diabetes', 'machine learning', 'ml diabetes', 'logistic regression'],
   PPDB: ['ppdb', 'penerimaan siswa', 'flutter ppdb'],
-  'GIS Penduduk': ['gis penduduk', 'gispenduduk', 'penduduk', 'data warga'],
+  'GIS Penduduk': ['gis', 'gis penduduk', 'gispenduduk', 'penduduk', 'data warga'],
   Petclinic: ['petclinic', 'pet clinic', 'klinik hewan', 'hewan'],
   Catshop: ['catshop', 'cat shop', 'toko kucing', 'kucing'],
   Menu: ['menu restoran', 'menurestoran', 'restoran', 'restaurant'],
+  Measurement: ['measurement', 'lintasan', 'pengukuran', 'lintasan pengukuran', 'survey route', 'survei'],
 }
 
 /**
@@ -924,18 +925,50 @@ function titleMatchesAliasKey(title: string, key: string): boolean {
   return hint ? t.includes(hint) : false
 }
 
+function projectSearchWords(item: (typeof projects)[number]): string[] {
+  const base = item.title.split('—')[0].trim().toLowerCase()
+  const aliasKey = Object.keys(PROJECT_ALIASES).find((key) =>
+    titleMatchesAliasKey(item.title, key),
+  )
+  const slugMatch = item.link.match(
+    /github\.com\/[^/]+\/([^/?#]+)/,
+  )
+  const slug = slugMatch
+    ? slugMatch[1].toLowerCase()
+    : null
+  return [
+    base,
+    ...(aliasKey ? PROJECT_ALIASES[aliasKey] : []),
+    ...(slug
+      ? [slug, slug.replace(/[-_]/g, ' ')]
+      : []),
+  ].filter(Boolean)
+}
+
+/**
+ * Cocokkan input ke proyek. Yang menang = kata kunci TERPANJANG
+ * yang muncul di input, bukan proyek pertama di array — jadi
+ * 'sumur bor' (Visualisasi) mengalahkan 'bencana' (Disaster)
+ * kalau dua-duanya ada, dan nama repo GitHub (absensi-app,
+ * inventaris_app) ikut dikenali.
+ */
 function findProjectByName(input: string) {
-  return projects.find((item) => {
-    const base = item.title.split('—')[0].trim().toLowerCase()
-    const aliasKey = Object.keys(PROJECT_ALIASES).find((key) =>
-      titleMatchesAliasKey(item.title, key),
-    )
-    const words = [
-      base,
-      ...(aliasKey ? PROJECT_ALIASES[aliasKey] : []),
-    ]
-    return includesAnyKeyword(input, words)
-  })
+  let best: (typeof projects)[number] | undefined
+  let bestLength = 0
+
+  for (const item of projects) {
+    for (const word of projectSearchWords(item)) {
+      if (
+        word.length > bestLength &&
+        includesAnyKeyword(input, [word])
+      ) {
+        best = item
+        bestLength = word.length
+      }
+    }
+  }
+
+  return best
 }
 
 /** Semua nama teknologi yang muncul di data portofolio. */
@@ -1024,6 +1057,8 @@ const PROJECT_SUMMARIES_ID: Record<string, string> = {
     'toko online produk kucing — katalog, keranjang, checkout, dan kelola produk.',
   Menu:
     'aplikasi desktop Java buat kelola menu restoran — login, CRUD kategori dan menu, database MySQL via JDBC.',
+  Measurement:
+    'perencana rute pengukuran survei — gambar rute di peta interaktif, statistik jarak, dan ekspor hasil pengukuran.',
 }
 
 function projectAliasKey(title: string): string | null {
@@ -1063,6 +1098,9 @@ function formatProjectReply(
 
   const lines = [
     `${project.title} — ${summary ?? project.category}.`,
+    ...(project.demo
+      ? [`Coba demonya: ${project.demo}`]
+      : []),
     project.link,
     'Selengkapnya di halaman Proyek ya.',
   ]
@@ -1075,7 +1113,8 @@ function formatProjectReply(
 }
 
 /**
- * Daftar proyek: tiap item judul + link, maks 3 item.
+ * Daftar proyek: semua item ditampilkan (daftar ini pendek —
+ * 8 proyek berfoto dari menu Projects), tiap item judul + link.
  */
 function formatProjectListReply(
   items: { title: string; link: string }[],
@@ -1084,19 +1123,11 @@ function formatProjectListReply(
 ): string {
   const lines = [
     opener,
-    ...items
-      .slice(0, 3)
-      .map(
-        (item) =>
-          `• ${item.title}\n  ${item.link}`,
-      ),
+    ...items.map(
+      (item) =>
+        `• ${item.title}\n  ${item.link}`,
+    ),
   ]
-
-  if (items.length > 3) {
-    lines.push(
-      `...dan ${items.length - 3} lainnya.`,
-    )
-  }
 
   lines.push(invite)
   return lines.join('\n')
@@ -1579,7 +1610,9 @@ function answerFromContext(
           'lihat',
         ])
       ) {
-        return `Kode dan preview lengkapnya bisa dilihat di GitHub: ${project.link}`
+        return project.demo
+          ? `Bisa dicoba langsung: ${project.demo}\nKodenya di GitHub: ${project.link}`
+          : `Kode dan preview lengkapnya bisa dilihat di GitHub: ${project.link}`
       }
 
       if (
@@ -1674,7 +1707,7 @@ function answerFromContext(
     includesAnyKeyword(input, ['berapa'])
   ) {
     if (ctx.topic === 'projects') {
-      return `Total ada ${projects.length} proyek di portfolio ini.`
+      return `Total ada ${featuredProjects.length} proyek di halaman Proyek — semuanya ada fotonya, tinggal klik.`
     }
 
     if (ctx.topic === 'experience') {
@@ -1713,8 +1746,8 @@ function answerFromContext(
           )}`
       case 'projects':
         return formatProjectListReply(
-          projects,
-          'Misal nih:',
+          featuredProjects,
+          'Nih daftar di halaman Proyek:',
           'Sebut namanya buat detail.',
         )
       case 'skills':
@@ -2351,13 +2384,13 @@ function buildAssistantReply(
         'total',
       ])
     ) {
-      return `Total ada ${projects.length} proyek di portfolio ini.`
+      return `Total ada ${featuredProjects.length} proyek di halaman Proyek — semuanya ada fotonya, tinggal klik.`
     }
 
     return formatProjectListReply(
-      projects,
-      'Nih yang terbaru:',
-      `Total ${projects.length} — detail di halaman Proyek.`,
+      featuredProjects,
+      'Nih daftar di halaman Proyek:',
+      'Klik salah satu buat lihat detail + fotonya.',
     )
   }
 
@@ -2395,8 +2428,8 @@ function buildAssistantReply(
     ]) &&
     !findProjectByName(input)
   ) {
-    const matched = projects.filter((item) =>
-      item.title.startsWith('Deteksi'),
+    const matched = projects.filter(
+      (item) => item.category === 'Machine Learning',
     )
 
     if (matched.length) {
@@ -2451,6 +2484,30 @@ function buildAssistantReply(
 
   if (
     includesAnyKeyword(input, [
+      'desktop',
+      'aplikasi desktop',
+    ]) &&
+    !findProjectByName(input) &&
+    !findTechInInput(input)
+  ) {
+    // Semua proyek desktop (termasuk yang tidak berfoto).
+    const matched = projects.filter(
+      (item) =>
+        item.category === 'Desktop' ||
+        item.category === 'Desktop & AI',
+    )
+
+    if (matched.length) {
+      return formatProjectListReply(
+        matched,
+        'Desktop-nya:',
+        'Sebut namanya buat detail.',
+      )
+    }
+  }
+
+  if (
+    includesAnyKeyword(input, [
       'mobile',
       'android',
       'kotlin',
@@ -2499,13 +2556,21 @@ function buildAssistantReply(
       'suara',
     ])
   ) {
-    const pcControl = projects.find((item) =>
-      item.title.startsWith('PC Control'),
+    // Semua proyek AI/ML (termasuk yang tidak berfoto) —
+    // cabang ini untuk menemukan, bukan menampilkan menu.
+    const aiProjects = projects.filter(
+      (item) =>
+        item.category === 'Machine Learning' ||
+        item.category === 'Desktop & AI',
     )
 
-    return pcControl
-      ? formatProjectReply(pcControl.title)
-      : 'Ada, PC Control. Kontrol PC pakai gestur + suara + bot Telegram.'
+    return aiProjects.length
+      ? formatProjectListReply(
+          aiProjects,
+          'AI-nya:',
+          'Sebut namanya buat detail.',
+        )
+      : 'Belum ada proyek AI di halaman Proyek. Cek halaman Teknologi aja.'
   }
 
   // Pengalaman — termasuk "Deni kerja di mana?"
