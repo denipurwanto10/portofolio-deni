@@ -153,8 +153,8 @@ export const projects: Project[] = [
   {
     title: 'Diabetes Detection ML',
     description:
-      'A simple machine learning model for diabetes prediction — Logistic Regression on medical parameters (glucose, blood pressure, BMI, age) with positive/negative prediction output.',
-    tags: ['Python', 'scikit-learn', 'Pandas', 'NumPy', 'Jupyter'],
+      'A Flask web app for diabetes prediction — KNN model on medical parameters (pregnancies, glucose, blood pressure, BMI, age) with a form input and result page.',
+    tags: ['Python', 'Flask', 'scikit-learn', 'NumPy'],
     link: 'https://github.com/denipurwanto10/Tugas-ML-Deteksi-Diabetes',
     language: 'Python',
     category: 'Machine Learning',

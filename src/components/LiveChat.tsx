@@ -1046,7 +1046,7 @@ const PROJECT_SUMMARIES_ID: Record<string, string> = {
   Visualisasi:
     'visualisasi konstruksi sumur bor — pipa, saringan, open hole, dan muka air tanah di kanvas proporsional, plus dokumentasi foto.',
   Deteksi:
-    'prediksi diabetes pakai machine learning (Logistic Regression) — input data medis, output positif/negatif.',
+    'prediksi diabetes pakai machine learning (KNN) — isi form data medis di web, langsung keluar hasilnya.',
   PPDB:
     'aplikasi PPDB mobile pakai Flutter — auth, dashboard admin/siswa, kelola data siswa dan nilai, sampai seleksi otomatis.',
   'GIS Penduduk':
@@ -1113,8 +1113,9 @@ function formatProjectReply(
 }
 
 /**
- * Daftar proyek: semua item ditampilkan (daftar ini pendek —
- * 8 proyek berfoto dari menu Projects), tiap item judul + link.
+ * Daftar proyek: judul saja per baris (tanpa link) supaya bubble
+ * chat tetap pendek. Link menyusul saat user memilih satu proyek
+ * lewat formatProjectReply.
  */
 function formatProjectListReply(
   items: { title: string; link: string }[],
@@ -1124,8 +1125,7 @@ function formatProjectListReply(
   const lines = [
     opener,
     ...items.map(
-      (item) =>
-        `• ${item.title}\n  ${item.link}`,
+      (item) => `• ${item.title}`,
     ),
   ]
 
@@ -2390,7 +2390,7 @@ function buildAssistantReply(
     return formatProjectListReply(
       featuredProjects,
       'Nih daftar di halaman Proyek:',
-      'Klik salah satu buat lihat detail + fotonya.',
+      'Sebut judulnya buat link + detail.',
     )
   }
 
