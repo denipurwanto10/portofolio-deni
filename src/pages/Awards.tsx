@@ -187,32 +187,90 @@ function Awards() {
     }
   }, [selectedIndex === null])
 
-  // Close the modal with the Escape key, navigate with arrows
+  // Close the modal with the Escape key, navigate with arrows.
+  // Fokus dikurung di dalam dialog (pola yang sama dengan
+  // modal Projects). Tanpa capture/restore di sini — itu
+  // diurus effect terpisah supaya navigasi panah (yang
+  // mengganti selectedIndex selagi modal tetap terbuka)
+  // tidak ikut memicu restore + autofocus ulang.
   useEffect(() => {
+    if (!selectedAward) {
+      return
+    }
+
     const handleKeyDown = (
       event: KeyboardEvent,
     ) => {
       if (event.key === 'Escape') {
         closeModal()
-      } else if (
+        return
+      }
+
+      if (
         selectedIndex !== null &&
         event.key === 'ArrowRight'
       ) {
         step(1)
-      } else if (
+        return
+      }
+
+      if (
         selectedIndex !== null &&
         event.key === 'ArrowLeft'
       ) {
         step(-1)
+        return
+      }
+
+      if (event.key !== 'Tab') {
+        return
+      }
+
+      /* Tombol tutup adalah sibling panel, jadi kurung mencakup
+         seluruh dialog (.award-modal), bukan hanya panel. */
+      const dialog = document.querySelector(
+        '.award-modal',
+      )
+
+      if (!dialog) {
+        return
+      }
+
+      const items = Array.from(
+        dialog.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled])',
+        ),
+      ).filter(
+        (item) => item.tabIndex >= 0,
+      )
+
+      if (items.length === 0) {
+        event.preventDefault()
+        return
+      }
+
+      const first = items[0]
+      const last = items[items.length - 1]
+
+      if (
+        event.shiftKey &&
+        document.activeElement === first
+      ) {
+        event.preventDefault()
+        last.focus()
+      } else if (
+        !event.shiftKey &&
+        document.activeElement === last
+      ) {
+        event.preventDefault()
+        first.focus()
       }
     }
 
-    if (selectedAward) {
-      document.addEventListener(
-        'keydown',
-        handleKeyDown,
-      )
-    }
+    document.addEventListener(
+      'keydown',
+      handleKeyDown,
+    )
 
     return () => {
       document.removeEventListener(
@@ -221,6 +279,33 @@ function Awards() {
       )
     }
   }, [selectedAward, selectedIndex, closeModal, step])
+
+  // Capture pemicu + autofocus tutup + restore fokus — effect
+  // terpisah yang hanya jalan saat modal dibuka/ditutup penuh
+  // (selectedIndex === null), bukan saat navigasi panah di
+  // dalam modal yang masih terbuka.
+  useEffect(() => {
+    if (selectedIndex === null) {
+      return
+    }
+
+    const trigger =
+      document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : null
+
+    document
+      .querySelector<HTMLButtonElement>(
+        '.award-modal-close',
+      )
+      ?.focus()
+
+    return () => {
+      if (trigger && document.contains(trigger)) {
+        trigger.focus()
+      }
+    }
+  }, [selectedIndex === null])
 
   useEffect(
     () => () => {

@@ -38,12 +38,15 @@ const translations: Record<string, string> = {
   'Try a different keyword or category.': 'Coba kata kunci atau kategori lain.',
   'Reset filters': 'Atur ulang filter',
   'Loading GitHub contributions...': 'Memuat kontribusi GitHub...',
+  'Refreshing contributions...': 'Memuat ulang kontribusi...',
   'Unable to load GitHub contributions.': 'Gagal memuat kontribusi GitHub.',
   'View GitHub profile': 'Lihat profil GitHub',
   'Awards and Certification.': 'Penghargaan dan Sertifikasi.',
   'Technologies and tools I use to build performant and scalable digital products.':
     'Teknologi dan alat yang saya gunakan untuk membangun produk digital yang cepat dan mudah dikembangkan.',
   'Technology categories': 'Kategori teknologi',
+  'Click a category to explore different skills':
+    'Klik kategori untuk menjelajahi skill lainnya',
   'Get in touch for collaboration.': 'Hubungi saya untuk kolaborasi.',
   'Learning notes and technology insights.': 'Catatan pembelajaran dan wawasan teknologi.',
   'Organizations and community contributions.':
@@ -86,6 +89,7 @@ const translations: Record<string, string> = {
   'October 2023': 'Oktober 2023',
   'July 2024': 'Juli 2024',
   'July 2023': 'Juli 2023',
+  'December 2025': 'Desember 2025',
 
   // Dashboard
   'Secure Document Viewer': 'Penampil Dokumen Aman',
@@ -268,10 +272,26 @@ const translations: Record<string, string> = {
     'Aplikasi web interaktif untuk memvisualisasikan konstruksi sumur bor — pipa, saringan, open hole, dan muka air tanah pada kanvas proporsional, lengkap formulir data teknis dan dokumentasi foto.',
   'A geospatial web app for planning and recording survey measurement tracks — route drawing on an interactive map, distance and track statistics, and export of measurement results.':
     'Aplikasi web geospasial untuk merencanakan dan merekam jalur pengukuran survei — penggambaran rute pada peta interaktif, statistik jarak dan lintasan, serta ekspor hasil pengukuran.',
+  'A Flask web app for diabetes prediction — KNN model on medical parameters (pregnancies, glucose, blood pressure, BMI, age) with a form input and result page.':
+    'Aplikasi web Flask untuk prediksi diabetes — model KNN dari parameter medis (kehamilan, glukosa, tekanan darah, BMI, usia) dengan formulir input dan halaman hasil.',
+  'A modern interactive developer portfolio — responsive project showcase, experience timeline, skills overview, animations (Framer Motion, GSAP), 3D elements (Three.js), and a contact section.':
+    'Portofolio developer interaktif modern — galeri proyek responsif, timeline pengalaman, ringkasan skill, animasi (Framer Motion, GSAP), elemen 3D (Three.js), dan bagian kontak.',
+  'A Flutter mobile app for new student admissions (PPDB) — auth, role-based dashboards, student data management with search/filter, grade input, and automatic selection.':
+    'Aplikasi mobile Flutter untuk penerimaan siswa baru (PPDB) — autentikasi, dasbor berbasis peran, pengelolaan data siswa dengan pencarian/filter, input nilai, dan seleksi otomatis.',
+  'A web-based geospatial population information system — interactive Leaflet.js maps, resident CRUD, dynamic filters (RT/RW, gender, status), statistics, and a MySQL database.':
+    'Sistem informasi penduduk geospasial berbasis web — peta interaktif Leaflet.js, CRUD penduduk, filter dinamis (RT/RW, jenis kelamin, status), statistik, dan database MySQL.',
+  'A web-based veterinary clinic management app — pet, doctor, and owner data management, visit scheduling, fast search, and a responsive Bootstrap interface.':
+    'Aplikasi manajemen klinik hewan berbasis web — pengelolaan data hewan, dokter, dan pemilik, penjadwalan kunjungan, pencarian cepat, dan antarmuka Bootstrap yang responsif.',
+  'A PHP-based online shop web app for cat products — catalog, cart, checkout, and product management with a MySQL database.':
+    'Aplikasi toko online berbasis web untuk produk kucing berbasis PHP — katalog, keranjang, checkout, dan pengelolaan produk dengan database MySQL.',
+  'A Java desktop app for restaurant menu management — secure login/registration, category and menu CRUD, and MySQL integration via JDBC with a Swing interface.':
+    'Aplikasi desktop Java untuk pengelolaan menu restoran — login/registrasi aman, CRUD kategori dan menu, serta integrasi MySQL via JDBC dengan antarmuka Swing.',
 
   // Experience descriptions
   'Developed digital solutions for laboratory management, equipment borrowing services, and geospatial data visualization to support operational and technical teams':
     'Mengembangkan solusi digital untuk manajemen laboratorium, layanan peminjaman peralatan, dan visualisasi data geospasial untuk mendukung tim operasional dan teknis',
+  'Developed an MSME information system with interactive geospatial mapping to improve data management and presentation for the trade and industry office':
+    'Mengembangkan sistem informasi UMKM dengan pemetaan geospasial interaktif untuk meningkatkan pengelolaan dan penyajian data bagi dinas perdagangan dan perindustrian',
   'Developed an Android application as part of the Bank Mandiri x Rakamin Academy Virtual Internship Experience, focusing on API integration, data handling, and mobile UI/UX implementation':
     'Mengembangkan aplikasi Android sebagai bagian dari Virtual Internship Experience Bank Mandiri x Rakamin Academy, dengan fokus pada integrasi API, pengolahan data, dan implementasi UI/UX mobile',
   'Supported programming and database laboratory activities by guiding students, developing practicum materials, and maintaining laboratory infrastructure':
@@ -330,6 +350,7 @@ const translations: Record<string, string> = {
     'Pengembang Aplikasi Mobile Bank Mandiri',
   'UNLA Anniversary • May 2024':
     'Dies Natalis UNLA • Mei 2024',
+  'UNLA Anniversary': 'Dies Natalis UNLA',
   'Hartik Competition 2023 • October 2023':
     'Kompetisi Hartik 2023 • Oktober 2023',
   'Informatics Engineering Study Program • July 2024':
@@ -343,6 +364,9 @@ const translations: Record<string, string> = {
     'Mahasiswa Berprestasi Terbaik dalam Prestasi Akademik',
   'Laboratory Assistant and Teaching Instructor':
     'Asisten Laboratorium dan Pengajar',
+  '2nd Place Award – UI/UX Design Competition':
+    'Penghargaan Juara 2 – Kompetisi Desain UI/UX',
+  'Hartik Competition 2023': 'Kompetisi Hartik 2023',
   'View University Graduate Internship Program image':
     'Lihat gambar Program Magang Lulusan Universitas',
   'View Bank Mandiri Mobile Apps Developer Certificate image':

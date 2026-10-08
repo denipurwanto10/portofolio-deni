@@ -101,7 +101,9 @@ function Projects({
   }
 
   /* Kunci scroll halaman saat modal terbuka + tutup via
-     Escape (pola yang sama dengan modal Awards). */
+     Escape (pola yang sama dengan modal Awards). Fokus dikurung
+     di dalam dialog + dikembalikan ke pemicu saat ditutup
+     (pola yang sama dengan modal Resume di Dashboard). */
   useEffect(() => {
     if (!selected) return
 
@@ -109,11 +111,67 @@ function Projects({
       'hidden'
     document.body.style.overflow = 'hidden'
 
+    const trigger =
+      document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : null
+
+    document
+      .querySelector<HTMLButtonElement>(
+        '.project-modal-close',
+      )
+      ?.focus()
+
     const onKey = (
       event: globalThis.KeyboardEvent,
     ) => {
       if (event.key === 'Escape') {
         closeProject()
+        return
+      }
+
+      if (event.key !== 'Tab') {
+        return
+      }
+
+      /* Tombol tutup adalah sibling panel, jadi kurung mencakup
+         seluruh dialog (.project-modal), bukan hanya panel. */
+      const dialog = document.querySelector(
+        '.project-modal',
+      )
+
+      if (!dialog) {
+        return
+      }
+
+      const items = Array.from(
+        dialog.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled])',
+        ),
+      ).filter(
+        (item) => item.tabIndex >= 0,
+      )
+
+      if (items.length === 0) {
+        event.preventDefault()
+        return
+      }
+
+      const first = items[0]
+      const last = items[items.length - 1]
+
+      if (
+        event.shiftKey &&
+        document.activeElement === first
+      ) {
+        event.preventDefault()
+        last.focus()
+      } else if (
+        !event.shiftKey &&
+        document.activeElement === last
+      ) {
+        event.preventDefault()
+        first.focus()
       }
     }
 
@@ -123,6 +181,10 @@ function Projects({
       document.documentElement.style.overflow = ''
       document.body.style.overflow = ''
       window.removeEventListener('keydown', onKey)
+
+      if (trigger && document.contains(trigger)) {
+        trigger.focus()
+      }
     }
   }, [selected])
 
@@ -246,6 +308,25 @@ function Projects({
                 onClick={() =>
                   openProject(project)
                 }
+                onKeyDown={(event) => {
+                  if (
+                    event.key !== 'Enter' &&
+                    event.key !== ' '
+                  ) {
+                    return
+                  }
+                  /* Fokus di link/button dalam kartu (mis. Repository):
+                     biarkan aksi aslinya jalan, jangan ikut buka modal. */
+                  const target =
+                    event.target as HTMLElement | null
+                  if (target?.closest('a,button')) {
+                    return
+                  }
+                  event.preventDefault()
+                  openProject(project)
+                }}
+                tabIndex={0}
+                role="button"
               >
                 <div className="project-shot-wrap">
                   <img
@@ -487,6 +568,17 @@ function Projects({
                 <div className="project-divider" />
 
                 <div className="project-modal-foot">
+                  {selected.demo && (
+                    <a
+                      className="project-link demo"
+                      href={selected.demo}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      <ExternalLink size={14} />
+                      View Demo
+                    </a>
+                  )}
                   <a
                     className="project-link demo"
                     href={selected.link}
