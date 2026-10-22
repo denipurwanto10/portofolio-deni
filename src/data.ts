@@ -7,6 +7,9 @@ export type Project = {
   language: string
   category: string
   images?: string[]
+  /** Cara gambar ditampilkan: 'cover' (potong, default) atau 'contain'
+      (tampilkan utuh) untuk screenshot dasbor yang lebar. */
+  shotFit?: 'cover' | 'contain'
 }
 
 export type ExperienceItem = {
@@ -42,6 +45,17 @@ export const projects: Project[] = [
     language: 'TypeScript',
     category: 'Full-Stack',
     images: ['/projects/disaster1.png', '/projects/disaster2.png', '/projects/disaster3.png'],
+  },
+  {
+    title: 'Groundwork — Field Operations, Mapped',
+    description:
+      'A field operations platform where the map is the interface — asset points, administrative boundaries and operational zones on PostGIS, live fleet tracking over WebSocket, multi-stop OSRM routing with distance and ETA, per-stop arrival proof, service reminders, and a dedicated driver view.',
+    tags: ['Go', 'Gin', 'PostgreSQL', 'PostGIS', 'React', 'Leaflet'],
+    link: 'https://github.com/denipurwanto10/Groundwork',
+    language: 'Go',
+    category: 'Full-Stack',
+    images: ['/projects/01-overview.png', '/projects/02-places.png', '/projects/03-fleet-red-route.png'],
+    shotFit: 'contain',
   },
   {
     title: 'PC Control — Multimodal Desktop Controller',

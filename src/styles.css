@@ -10547,3 +10547,30 @@ textarea {
   border-color: var(--border-soft);
   color: var(--text-secondary);
 }
+
+/* =========================================================
+   SHOT FIT 'contain' - screenshot dasbor lebar (Groundwork)
+   ditampilkan utuh: kartu, modal, dan thumbnail tidak
+   memotong gambar. One block: hapus sampai EOF untuk revert.
+   ========================================================= */
+.project-shot.is-contain {
+  object-fit: contain;
+}
+
+.project-modal-stage.is-contain {
+  aspect-ratio: auto;
+  /* Jangan ikut menyusut oleh flex parent: gambar penuh 16:10
+     utuh, panel yang scroll kalau layar pendek. */
+  flex: 0 0 auto;
+}
+
+.project-modal-image.is-contain {
+  width: 100%;
+  height: auto;
+  max-height: 62vh;
+  object-fit: contain;
+}
+
+.project-modal-thumb.is-contain img {
+  object-fit: contain;
+}

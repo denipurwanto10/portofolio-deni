@@ -59,6 +59,8 @@ const translations: Record<string, string> = {
   'Bandung Regency MSME Portal': 'Portal UMKM Kabupaten Bandung',
   'Formatra Convert': 'Formatra Convert',
   'Disaster Monitoring Indonesia': 'Disaster Monitoring Indonesia',
+  'Groundwork — Field Operations, Mapped':
+    'Groundwork — Operasi Lapangan, Termeta',
   'Gudang.in — Office Inventory & Assets': 'Gudang.in — Inventaris & Aset Kantor',
   'PC Control — Multimodal Desktop Controller': 'PC Control — Multimodal Desktop Controller',
   'Placement Test Engine': 'Placement Test Engine',
@@ -252,6 +254,8 @@ const translations: Record<string, string> = {
     'Aplikasi web toolkit dokumen serbaguna — mengonversi, menggabungkan, memisahkan, mengompres, melindungi, dan mengedit PDF, Word, Excel, PowerPoint, serta gambar, semuanya berjalan di browser dengan backend LibreOffice opsional.',
   'Realtime Indonesian disaster monitoring — BMKG earthquakes, MAGMA volcanic activity, weather and InaTEWS tsunami alerts with interactive maps, an Express REST API plus realtime Socket.IO and a MySQL database.':
     'Pemantauan bencana Indonesia secara realtime — gempa BMKG, aktivitas vulkanik MAGMA, cuaca, dan peringatan tsunami InaTEWS dengan peta interaktif, Express REST API, Socket.IO realtime, serta database MySQL.',
+  'A field operations platform where the map is the interface — asset points, administrative boundaries and operational zones on PostGIS, live fleet tracking over WebSocket, multi-stop OSRM routing with distance and ETA, per-stop arrival proof, service reminders, and a dedicated driver view.':
+    'Platform operasi lapangan dengan peta sebagai antarmuka utama — titik aset, batas wilayah administratif, dan zona operasional di PostGIS, pelacakan armada realtime lewat WebSocket, rute multi-tujuan via OSRM lengkap dengan jarak tempuh dan ETA, bukti kedatangan per stop, pengingat servis, serta tampilan khusus driver.',
   'Control a Windows PC with hand gestures (webcam), Indonesian/English voice commands, and a Telegram bot — mouse, keyboard, screenshots, and workflow automation through one safe Command Processor.':
     'Mengendalikan PC Windows dengan gestur tangan (webcam), perintah suara Bahasa Indonesia/Inggris, dan bot Telegram — mouse, keyboard, tangkapan layar, serta otomatisasi alur kerja melalui satu Command Processor yang aman.',
   'An MSME census app with an interactive map across 31 districts — catalog with filters, MSME details, Owner/Admin dashboards, verification, PDF export, and JWT login with Admin/Owner RBAC.':
@@ -401,8 +405,11 @@ const patterns: Array<[RegExp, (match: RegExpExecArray) => string]> = [
     (m) => `${m[1]} proyek`,
   ],
   [
-    /^Showing (\d+) projects$/,
-    (m) => `Menampilkan ${m[1]} proyek`,
+    /^Showing (\d+) of (\d+) projects(?: · (.+))?$/,
+    (m) =>
+      `Menampilkan ${m[1]} dari ${m[2]} proyek${
+        m[3] ? ` · ${translateText(m[3])}` : ''
+      }`,
   ],
   [
     /^(\d+) contributions on (.+)$/,

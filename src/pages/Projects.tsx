@@ -22,6 +22,7 @@ const languageColors: Record<string, string> = {
   Kotlin: '#A97BFF',
   Dart: '#00B4AB',
   Java: '#b07219',
+  Go: '#00ADD8',
 }
 
 /** Fallback preview: kartu sosial GitHub repo (gambar OG). */
@@ -283,11 +284,20 @@ function Projects({
           })}
         </div>
 
-        <p className="projects-count">
-          Showing {filtered.length} of{' '}
-          {featured.length} projects
-          {activeCategory !== 'All' &&
-            ` · ${activeCategory}`}
+        {/* Satu text node utuh supaya penerjemah bisa
+            mencocokkan pola "Showing N of M projects". Key-nya
+            memaksa remount saat isi berubah — tanpa itu React
+            hanya mengubah node teks dan DOM walker tidak
+            pernah melihat teks baru itu. */}
+        <p
+          className="projects-count"
+          key={`${filtered.length}-${featured.length}-${activeCategory}`}
+        >
+          {`Showing ${filtered.length} of ${featured.length} projects${
+            activeCategory !== 'All'
+              ? ` · ${activeCategory}`
+              : ''
+          }`}
         </p>
 
         {/* PROJECTS */}
@@ -330,7 +340,11 @@ function Projects({
               >
                 <div className="project-shot-wrap">
                   <img
-                    className="project-shot"
+                    className={
+                      project.shotFit === 'contain'
+                        ? 'project-shot is-contain'
+                        : 'project-shot'
+                    }
                     src={
                       project.images?.[0] ??
                       githubShot(project.link)
@@ -463,7 +477,13 @@ function Projects({
                 event.stopPropagation()
               }
             >
-              <div className="project-modal-stage">
+              <div
+                className={
+                  selected.shotFit === 'contain'
+                    ? 'project-modal-stage is-contain'
+                    : 'project-modal-stage'
+                }
+              >
                 {shots.length > 1 && (
                   <button
                     type="button"
@@ -484,7 +504,11 @@ function Projects({
 
                 <img
                   key={shots[shotIndex]}
-                  className="project-modal-image"
+                  className={
+                    selected.shotFit === 'contain'
+                      ? 'project-modal-image is-contain'
+                      : 'project-modal-image'
+                  }
                   src={shots[shotIndex]}
                   alt={`${selected.title} — screenshot ${shotIndex + 1}`}
                   decoding="async"
@@ -513,11 +537,13 @@ function Projects({
                     <button
                       key={shot}
                       type="button"
-                      className={
-                        index === shotIndex
-                          ? 'project-modal-thumb active'
-                          : 'project-modal-thumb'
-                      }
+                      className={`project-modal-thumb${
+                        index === shotIndex ? ' active' : ''
+                      }${
+                        selected.shotFit === 'contain'
+                          ? ' is-contain'
+                          : ''
+                      }`}
                       onClick={() =>
                         setShotIndex(index)
                       }
