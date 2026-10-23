@@ -1,0 +1,1094 @@
+/* =========================================================
+   PREMIUM FLAT — lapisan desain modern
+   Diimpor SETELAH styles.css (lihat main.tsx), jadi cukup
+   menimpa token + komponen tanpa mengubah markup/logika.
+   Hapus import './premium.css' untuk kembali ke tampilan lama.
+
+   Prinsip:
+   - FLAT   : tanpa bayangan, tanpa glass/blur, tanpa gradient.
+              Kedalaman dibangun dari permukaan solid + hairline.
+   - PREMIUM: palet netral (zinc), tipografi rapat & tegas,
+              radius konsisten, ritme spasi lega, aksen hemat.
+   - RESPONSIVE: desktop (>1100) · tablet (761–1100) · mobile (≤760).
+   Semua warna tetap lewat token, jadi light/dark + 6 aksen
+   tetap bekerja.
+   ========================================================= */
+
+/* ---------------------------------------------------------
+   1. TOKEN
+--------------------------------------------------------- */
+:root {
+  --r-lg: 18px; /* panel / kartu besar */
+  --r-md: 14px; /* kartu isi */
+  --r-sm: 10px; /* kontrol, tombol */
+  --gap: 16px;
+
+  --bg-page: #f5f5f6;
+  --bg-surface: #ffffff;
+  --bg-glass: #ffffff;
+  --border-color: #e4e4e8;
+  --border-soft: #ececef;
+  --text-primary: #0e0f13;
+  --text-strong: #1b1d24;
+  --text-muted-3: #2c2f38;
+  --text-muted-2: #454956;
+  --text-secondary: #5a5f6d;
+  --text-tertiary: #6b7080;
+  --heat-0: #eeeef1;
+  --grid-line: transparent;
+  --grid-fade-to: #f5f5f6;
+  --hairline: color-mix(in srgb, var(--text-primary) 8%, transparent);
+  --hover-border: color-mix(in srgb, var(--text-primary) 26%, var(--border-color));
+}
+
+[data-theme='dark'] {
+  --bg-page: #09090b;
+  --bg-surface: #111114;
+  --bg-glass: #111114;
+  --border-color: #232329;
+  --border-soft: #1b1b20;
+  --text-primary: #f6f6f8;
+  --text-strong: #ececf0;
+  --text-muted-3: #dcdce2;
+  --text-muted-2: #c3c3cc;
+  --text-secondary: #a1a1ab;
+  --text-tertiary: #8d8d98;
+  --heat-0: #1a1a1f;
+  --grid-fade-to: #09090b;
+  --accent-soft: #1c1c21;
+  --hairline: color-mix(in srgb, var(--text-primary) 9%, transparent);
+  --hover-border: color-mix(in srgb, var(--text-primary) 30%, var(--border-color));
+}
+
+/* Aksen berwarna: pastel dibuat lebih halus & modern */
+[data-accent='ocean'] { --accent-soft: #e8f0ff; }
+[data-accent='emerald'] { --accent-soft: #e3f6ec; }
+[data-accent='violet'] { --accent-soft: #f0eaff; }
+[data-accent='orange'] { --accent-soft: #fff0e3; }
+[data-accent='rose'] { --accent-soft: #ffe9ee; }
+
+:root {
+  font-feature-settings: 'ss01' 1, 'cv11' 1;
+  letter-spacing: -0.005em;
+}
+
+h1, h2, h3, h4 {
+  letter-spacing: -0.025em;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--accent-contrast);
+}
+
+/* Fokus keyboard yang jelas & seragam */
+:where(a, button, input, textarea, select, [tabindex]):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ---------------------------------------------------------
+   2. FLAT — buang grid, blur, bayangan
+--------------------------------------------------------- */
+.app::before {
+  display: none;
+}
+
+.sidebar,
+.mobile-header,
+.mobile-header-menu,
+.topbar,
+.hero-card,
+.time-card,
+.now-card,
+.github-card,
+.tech-marquee-card,
+.mini-card,
+.panel,
+.page-section .projects-panel,
+.page-section .experience-panel,
+.page-section .awards-panel,
+.page-section .techstack-panel,
+.page-section .contact-panel,
+.project-card,
+.project-card:hover,
+.experience-card,
+.experience-card:hover,
+.award-card,
+.award-card:hover,
+.certification-card,
+.certification-card:hover,
+.techstack-card,
+.techstack-card:hover,
+.contact-info-card,
+.contact-social-card,
+.button,
+.button.primary,
+.button.primary:hover,
+.theme-toggle,
+.chat-button,
+.chat-panel,
+.chat-bubble,
+.chat-react-popup,
+.chat-composer-field,
+.github-tip,
+.award-badge,
+.award-modal-stage,
+.resume-modal-panel,
+.error-boundary-card,
+[data-theme='dark'] .page-section .projects-panel,
+[data-theme='dark'] .page-section .experience-panel,
+[data-theme='dark'] .page-section .awards-panel,
+[data-theme='dark'] .page-section .techstack-panel,
+[data-theme='dark'] .page-section .contact-panel,
+[data-theme='dark'] .now-card,
+[data-theme='dark'] .time-card,
+[data-theme='dark'] .github-card,
+[data-theme='dark'] .tech-marquee-card,
+[data-theme='dark'] .mini-card,
+[data-theme='dark'] .chat-panel {
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+/* ---------------------------------------------------------
+   3. SHELL — sidebar & layout (desktop)
+--------------------------------------------------------- */
+@media (min-width: 1101px) {
+  .sidebar {
+    width: 248px;
+    inset: 16px auto 16px 16px;
+    left: max(16px, calc((100vw - 1713px) / 2 + 16px));
+    height: calc(100vh - 32px);
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--r-lg);
+  }
+
+  .main {
+    margin-left: max(280px, calc((100vw - 1713px) / 2 + 280px));
+  }
+
+  .content {
+    padding: 16px calc(2% + 44px) 72px 2%;
+  }
+}
+
+.profile {
+  padding: 28px 18px 20px;
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.avatar {
+  border-radius: 20px;
+  border: 1px solid var(--border-color);
+}
+
+.avatar-wrap {
+  width: 84px;
+  height: 84px;
+}
+
+.status-dot {
+  width: 14px;
+  height: 14px;
+  bottom: -3px;
+  right: -3px;
+  border-width: 3px;
+}
+
+.profile h2 {
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+.profile p {
+  font-size: 12.5px;
+  color: var(--text-secondary);
+}
+
+.menu-label {
+  padding: 22px 26px 8px;
+  font-size: 10.5px;
+  letter-spacing: 0.12em;
+  font-weight: 700;
+  color: var(--text-tertiary);
+}
+
+.nav {
+  padding: 0 14px;
+  gap: 2px;
+}
+
+.nav-item {
+  border-radius: var(--r-sm);
+  padding: 10px 12px;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  transition:
+    background 0.2s var(--ease-out),
+    color 0.2s var(--ease-out);
+}
+
+.nav-item:hover {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.nav-item svg,
+.nav-item:hover svg {
+  transform: none;
+}
+
+.nav-item:active {
+  transform: none;
+}
+
+.nav-item.active {
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.sidebar .nav-item.active {
+  box-shadow: inset 2px 0 0 var(--accent);
+}
+
+[data-theme='dark'] .nav-item:hover {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+[data-theme='dark']:not([data-accent='default']) .nav-item:hover {
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+  color: var(--accent);
+}
+
+[data-theme='dark']:not([data-accent='default']) .nav-item.active {
+  background: color-mix(in srgb, var(--accent) 20%, transparent);
+  color: var(--accent);
+}
+
+.theme-toggle,
+.accent-picker {
+  width: calc(100% - 28px);
+  margin-left: 14px;
+  margin-right: 14px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--r-sm);
+  background: var(--bg-surface);
+}
+
+.theme-toggle {
+  margin-top: 10px;
+  padding: 10px 12px;
+}
+
+.theme-toggle:hover,
+[data-theme='dark']:not([data-accent='default']) .theme-toggle:hover {
+  background: var(--accent-soft);
+  color: var(--text-primary);
+  border-color: var(--border-color);
+}
+
+.accent-picker {
+  margin-top: 8px;
+  margin-bottom: 14px;
+  padding: 10px 12px;
+}
+
+.accent-swatch {
+  outline-width: 1.5px;
+}
+
+.accent-swatch:hover {
+  transform: none;
+}
+
+.sidebar-footer {
+  padding: 16px 12px 18px;
+  border-top: 1px solid var(--border-soft);
+}
+
+.sidebar-footer strong {
+  letter-spacing: 0.12em;
+}
+
+/* Language toggle: segmented control flat */
+.lang-toggle {
+  box-shadow: none;
+  border: 1px solid var(--border-color);
+  background: var(--bg-page);
+}
+
+/* ---------------------------------------------------------
+   4. HALAMAN — buang "kartu dalam kartu"
+   Panel luar dilepas (tanpa bingkai); kartu isi yang tampil
+   langsung di atas latar halaman.
+--------------------------------------------------------- */
+.page-section,
+.dashboard {
+  max-width: 1120px;
+}
+
+.projects-panel,
+.experience-panel,
+.awards-panel,
+.techstack-panel,
+.contact-panel,
+.page-section .projects-panel,
+.page-section .experience-panel,
+.page-section .awards-panel,
+.page-section .techstack-panel,
+.page-section .contact-panel {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--r-lg);
+  padding: 24px;
+}
+
+.projects-page,
+.experience-page,
+.awards-page,
+.techstack-page,
+.contact-page {
+  padding-top: 0;
+}
+
+/* Judul halaman: bagian atas kartu panel yang menyatu.
+   Desktop & tablet: menempel (sticky) saat scroll, lebar penuh
+   panel dengan latar solid. Mobile: statis. */
+.section-title,
+.projects-head {
+  position: sticky;
+  top: 16px;
+  z-index: 8;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  /* Geometri SAMA saat menempel maupun tidak: hanya garis & sudut
+     yang muncul, jadi lebar/posisi tidak berubah ketika di-scroll. */
+  margin: -8px -12px 16px;
+  padding: 18px 12px;
+  background: var(--bg-surface);
+  border: 1px solid transparent;
+  border-bottom-color: var(--border-soft);
+  border-radius: var(--r-md);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+/* Tutup celah 16px di atas header yang menempel */
+.section-title::before,
+.projects-head::before {
+  content: none;
+  position: absolute;
+  left: -13px;
+  right: -13px;
+  top: -17px;
+  height: 17px;
+  background: var(--bg-surface);
+  pointer-events: none;
+}
+
+/* Menempel (desktop & tablet): hanya tambah garis tepi penuh. */
+@media (min-width: 761px) {
+  .section-title[data-stuck='true'],
+  .projects-head[data-stuck='true'],
+  [data-theme='dark'] .section-title[data-stuck='true'],
+  [data-theme='dark'] .projects-head[data-stuck='true'] {
+    background: var(--bg-surface);
+    border-color: var(--border-color);
+  }
+
+  .section-title[data-stuck='true']::before,
+  .projects-head[data-stuck='true']::before {
+    content: '';
+    z-index: -1;
+  }
+}
+
+.projects-head {
+  justify-content: space-between;
+}
+
+/* Projects: .section-title berada di dalam .projects-head */
+.projects-panel .section-title,
+.projects-head .section-title {
+  position: static;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.projects-panel .section-title::before,
+.projects-head .section-title::before {
+  display: none;
+}
+
+.section-title > span {
+  flex: 0 0 auto;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  border: 1px solid var(--border-color);
+}
+
+[data-accent='default'] .section-title > span,
+:root:not([data-accent]) .section-title > span {
+  color: var(--text-primary);
+}
+
+.section-title > span svg {
+  width: 20px;
+  height: 20px;
+}
+
+.section-title h2 {
+  font-size: clamp(24px, 2.6vw, 30px);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1.1;
+  margin: 0 0 6px;
+}
+
+.section-title p {
+  font-size: 13.5px;
+  color: var(--text-secondary);
+}
+
+/* ---------------------------------------------------------
+   5. KARTU — permukaan solid + hairline, tanpa lift
+--------------------------------------------------------- */
+.hero-card,
+.time-card,
+.now-card,
+.github-card,
+.tech-marquee-card,
+.mini-card,
+.panel,
+.project-card,
+.experience-card,
+.award-card,
+.certification-card,
+.techstack-card,
+.contact-info-card,
+.contact-social-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--r-md);
+}
+
+.hero-card {
+  border-radius: var(--r-lg);
+  padding: 36px;
+}
+
+.time-card,
+.now-card {
+  border-radius: var(--r-md);
+  padding: 20px;
+}
+
+.github-card,
+.tech-marquee-card {
+  border-radius: var(--r-lg);
+}
+
+.project-card,
+.experience-card,
+.award-card,
+.certification-card,
+.techstack-card {
+  transition:
+    border-color 0.2s var(--ease-out),
+    background-color 0.2s var(--ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .project-card:hover,
+  .experience-card:hover,
+  .award-card:hover,
+  .certification-card:hover,
+  .techstack-card:hover,
+  .contact-info-card:hover {
+    transform: none;
+    border-color: var(--hover-border);
+  }
+
+  /* Kartu Social Media = wadah saja; hanya 3 item di dalamnya
+     yang bereaksi saat di-hover. */
+  .contact-social-card:hover {
+    border-color: var(--border-color);
+    transform: none;
+  }
+
+  .contact-social-item:hover {
+    border-color: var(--hover-border);
+    background: var(--bg-page);
+  }
+}
+
+/* Hero */
+.hero-name h1 {
+  font-weight: 800;
+  letter-spacing: -0.055em;
+  line-height: 1;
+  font-size: clamp(36px, 5vw, 56px);
+}
+
+.hero-name span {
+  margin-top: 10px;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.hero-description p {
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--text-muted-2);
+  max-width: 68ch;
+}
+
+.hero-actions {
+  gap: 10px;
+  margin-top: 28px;
+}
+
+/* Tombol */
+.button {
+  border-radius: var(--r-sm);
+  font-weight: 600;
+  font-size: 13.5px;
+  padding: 11px 18px;
+  transition:
+    background-color 0.2s var(--ease-out),
+    border-color 0.2s var(--ease-out),
+    color 0.2s var(--ease-out),
+    opacity 0.2s var(--ease-out);
+}
+
+.button.primary:hover,
+.button.outline:hover {
+  transform: none;
+}
+
+.button.primary:hover {
+  opacity: 0.88;
+}
+
+.button.outline {
+  background: var(--bg-surface);
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+.button.outline:hover {
+  border-color: var(--hover-border);
+  background: var(--bg-page);
+  color: var(--text-primary);
+}
+
+.button:active {
+  transform: scale(0.98);
+}
+
+/* Tag / pill */
+/* Radius seragam dengan tombol & kontrol lain (tidak terlalu bulat) */
+.techstack-tab,
+.project-filter {
+  border-radius: var(--r-sm);
+}
+
+.project-card .tags span,
+.project-card-body .tags span,
+.project-modal-info .tags span,
+.experience-tags span,
+.experience-type,
+.project-category {
+  border-radius: 8px;
+}
+
+.experience-tags span,
+.project-card .tags span {
+  background: var(--bg-page);
+  border: 1px solid var(--border-soft);
+  color: var(--text-muted-2);
+  font-weight: 500;
+}
+
+/* Filter & tab: segmented flat */
+.project-filter,
+.techstack-tab {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  font-weight: 600;
+  transition:
+    background-color 0.2s var(--ease-out),
+    color 0.2s var(--ease-out),
+    border-color 0.2s var(--ease-out);
+}
+
+.project-filter:hover,
+.techstack-tab:hover {
+  border-color: var(--hover-border);
+  color: var(--text-primary);
+}
+
+.project-filter.active,
+.techstack-tab.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-contrast);
+  box-shadow: none;
+}
+
+/* Pencarian */
+.project-search {
+  border-radius: var(--r-md);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+}
+
+.project-search:focus-within {
+  border-color: var(--accent);
+  outline: 2px solid color-mix(in srgb, var(--accent) 22%, transparent);
+  outline-offset: 0;
+}
+
+.project-search input:focus-visible {
+  outline: none;
+}
+
+.projects-github {
+  border-radius: var(--r-sm);
+  background: var(--bg-surface);
+  font-weight: 600;
+}
+
+/* Grid ritme seragam */
+.projects-grid,
+.cards-grid,
+.awards-grid,
+.experience-list {
+  gap: var(--gap);
+}
+
+/* Kartu proyek */
+.project-card {
+  border-radius: var(--r-md);
+  overflow: hidden;
+}
+
+.project-card h3 {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.project-footer {
+  border-top: 1px solid var(--border-soft);
+}
+
+/* Kartu pengalaman */
+.experience-card {
+  padding: 22px;
+  gap: 22px;
+}
+
+.experience-card h3 {
+  letter-spacing: -0.03em;
+}
+
+.experience-toggle {
+  font-weight: 600;
+}
+
+/* Kartu penghargaan */
+.award-card {
+  border-radius: var(--r-md);
+}
+
+.award-card-content {
+  padding: 20px;
+}
+
+.award-card-content b {
+  letter-spacing: -0.02em;
+}
+
+/* Kotak kontribusi/heat */
+.github-card {
+  padding: 24px;
+}
+
+/* Marquee tech */
+.tech-marquee-card {
+  padding: 22px;
+}
+
+/* Chat */
+.chat-button {
+  background: var(--accent);
+  color: var(--accent-contrast);
+  border: 1px solid var(--accent);
+  transition:
+    opacity 0.2s var(--ease-out),
+    transform 0.2s var(--ease-out);
+}
+
+.chat-button:hover {
+  transform: none;
+  opacity: 0.88;
+}
+
+.chat-panel {
+  border-radius: var(--r-lg);
+  border: 1px solid var(--border-color);
+}
+
+/* Footer mobile */
+.mobile-footer {
+  color: var(--text-tertiary);
+}
+
+/* Scrollbar tipis */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-color) transparent;
+}
+
+/* ---------------------------------------------------------
+   6. DASHBOARD — ritme & grid
+--------------------------------------------------------- */
+.dashboard-top,
+.dashboard-side {
+  gap: var(--gap);
+}
+
+@media (min-width: 1101px) {
+  .dashboard-top {
+    grid-template-columns: minmax(0, 1fr) 280px;
+  }
+}
+
+.dashboard {
+  padding-top: 0;
+}
+
+/* ---------------------------------------------------------
+   7. LAYAR BESAR (≥1440)
+--------------------------------------------------------- */
+@media (min-width: 1440px) {
+  .page-section,
+  .dashboard {
+    max-width: 1180px;
+  }
+}
+
+/* ---------------------------------------------------------
+   8. TABLET (761–1100)
+--------------------------------------------------------- */
+@media (min-width: 761px) and (max-width: 1100px) {
+  .sidebar {
+    width: 216px;
+    inset: 12px auto 12px 12px;
+    left: 12px;
+    height: calc(100vh - 24px);
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--r-md);
+  }
+
+  .main {
+    margin-left: 240px;
+  }
+
+  .content {
+    padding: 12px 20px 72px 16px;
+  }
+
+  .avatar-wrap {
+    width: 72px;
+    height: 72px;
+  }
+
+  .profile {
+    padding: 22px 14px 16px;
+  }
+
+  .nav {
+    padding: 0 10px;
+  }
+
+  .theme-toggle,
+  .accent-picker {
+    width: calc(100% - 20px);
+    margin-left: 10px;
+    margin-right: 10px;
+  }
+
+  .hero-card {
+    padding: 28px;
+  }
+
+  .dashboard-top {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .dashboard-side {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .projects-grid,
+  .cards-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .awards-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .experience-card {
+    padding: 18px;
+    gap: 16px;
+  }
+
+  .projects-panel,
+  .experience-panel,
+  .awards-panel,
+  .techstack-panel,
+  .contact-panel,
+  .page-section .projects-panel,
+  .page-section .experience-panel,
+  .page-section .awards-panel,
+  .page-section .techstack-panel,
+  .page-section .contact-panel {
+    padding: 20px;
+  }
+
+  .section-title,
+  .projects-head {
+    top: 12px;
+    margin: -6px -10px 14px;
+    padding: 16px 10px;
+  }
+
+  .section-title::before,
+  .projects-head::before {
+    top: -12px;
+    height: 12px;
+  }
+}
+
+/* Tablet potret: kolom kartu lebih lega */
+@media (min-width: 761px) and (max-width: 900px) {
+  .awards-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .dashboard-side {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Tablet: padding panel 20px → penutup header menyesuaikan */
+@media (min-width: 761px) and (max-width: 1100px) {
+  .section-title::before,
+  .projects-head::before {
+    left: -11px;
+    right: -11px;
+    top: -13px;
+    height: 13px;
+  }
+}
+
+/* ---------------------------------------------------------
+   9. MOBILE (≤760)
+--------------------------------------------------------- */
+@media (max-width: 760px) {
+  :root {
+    --gap: 12px;
+    --r-lg: 16px;
+    --r-md: 14px;
+  }
+
+  .mobile-header {
+    background: var(--bg-surface);
+    border-bottom: 1px solid var(--border-color);
+    min-height: 58px;
+    padding: 8px 16px;
+  }
+
+  .mobile-header-avatar {
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+  }
+
+  .mobile-header-profile strong {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
+  .mobile-header-menu {
+    border: 1px solid var(--border-color);
+    border-radius: var(--r-sm);
+    background: var(--bg-surface);
+    box-shadow: none;
+  }
+
+  /* Drawer flat: garis tepi, tanpa bayangan */
+  .sidebar {
+    width: min(252px, 70vw) !important;
+    max-width: min(252px, 70vw) !important;
+    border: 0;
+    border-right: 1px solid var(--border-color);
+    border-radius: 0;
+    box-shadow: none !important;
+  }
+
+  .sidebar-overlay {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: rgba(9, 9, 11, 0.45);
+  }
+
+  .content {
+    padding: 14px 16px 96px 16px;
+  }
+
+  .page-section,
+  .dashboard {
+    padding-top: 4px;
+  }
+
+  .hero-card {
+    padding: 22px 20px;
+  }
+
+  .hero-name h1 {
+    font-size: clamp(32px, 10vw, 40px);
+    letter-spacing: -0.05em;
+  }
+
+  .hero-description p {
+    font-size: 14.5px;
+  }
+
+  .hero-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .hero-actions .button {
+    width: 100%;
+    min-height: 46px;
+    padding: 11px 12px;
+  }
+
+  .time-card,
+  .now-card {
+    padding: 18px;
+  }
+
+  .projects-panel,
+  .experience-panel,
+  .awards-panel,
+  .techstack-panel,
+  .contact-panel,
+  .page-section .projects-panel,
+  .page-section .experience-panel,
+  .page-section .awards-panel,
+  .page-section .techstack-panel,
+  .page-section .contact-panel {
+    padding: 16px;
+    border-radius: var(--r-lg);
+  }
+
+  .section-title,
+  .projects-head {
+    position: static;
+    margin: 0 0 16px;
+    padding: 0 0 16px;
+    border: 0;
+    border-bottom: 1px solid var(--border-soft);
+    border-radius: 0;
+    gap: 12px;
+  }
+
+  .section-title::before,
+  .projects-head::before {
+    display: none;
+  }
+
+  .projects-head {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .section-title > span {
+    width: 40px;
+    height: 40px;
+    border-radius: 11px;
+  }
+
+  .section-title h2 {
+    font-size: 24px;
+  }
+
+  .experience-card {
+    padding: 16px;
+  }
+
+  .award-card-content {
+    padding: 16px;
+  }
+
+  .github-card,
+  .tech-marquee-card {
+    padding: 18px;
+  }
+
+  .chat-button {
+    right: 16px;
+    bottom: 16px;
+  }
+}
+
+/* HP kecil */
+@media (max-width: 380px) {
+  .content {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .hero-card {
+    padding: 18px 16px;
+  }
+}
+
+/* iOS/Android: kontrol input minimal 16px agar tidak auto-zoom */
+@media (max-width: 760px) {
+  input,
+  textarea,
+  select {
+    font-size: 16px;
+  }
+}
+
+/* Hormati preferensi gerak */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    scroll-behavior: auto !important;
+  }
+}

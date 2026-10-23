@@ -4,6 +4,7 @@ import App from './App'
 import ErrorBoundary from './components/ErrorBoundary'
 import { lazy, Suspense } from 'react'
 import './styles.css'
+import './premium.css'
 
 // Perf: CustomCursor (panah + fisika cipratan ±400 baris) di-lazy —
 // boot awal tidak membayar parse/eksekusinya. CustomCursor sendiri
